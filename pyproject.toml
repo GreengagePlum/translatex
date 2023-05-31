@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "translatex"
+authors = [
+    { name = "Efe ERKEN", email = "efe.erken@math.unistra.fr" },
+]
+description = "Un logiciel pour la traduction automatique de documents scientifiques écrits dans le langage LaTeX."
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = []
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+doc = ["myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild"]
+
+[project.license]
+text = "MIT"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://gitlab.math.unistra.fr/cassandre/translatex"
+
+[project.scripts]
+"translatex" = "translatex.translatex:main"
+
+[tool.setuptools]
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.dynamic.version]
+attr = "translatex.__version__"
