@@ -1,6 +1,10 @@
 from TexSoup import TexSoup
 from TexSoup.data import *
-from typing import Dict
+from TexSoup.data import TexUnNamedEnv, TexExpr
+from typing import Dict, List, Type
+
+MATH_ENVS: List[Type[TexUnNamedEnv]] = [TexMathEnv, TexMathModeEnv, TexDisplayMathEnv, TexDisplayMathModeEnv]
+TEXT_COMMANDS: List[str] = ["text", "textsf", "textrm", "textnormal"]
 
 
 class Marker:
@@ -9,7 +13,7 @@ class Marker:
         self.soup: TexNode = TexSoup(latex)
         self.marker_count: int = 0
         self.marker_format: str = "//{}//"
-        self.marker_store: Dict[int, str] = dict()
+        self.marker_store: Dict[int, str | list] = dict()
 
     def __str__(self) -> str:
         return str(self.soup)
@@ -22,7 +26,7 @@ class Marker:
         # TODO: implement format string check (if it has only a single occurrence of "{}")
         self.marker_format = format_str
 
-    def mark_node(self, node: TexNode) -> None:
+    def __mark_node_name__(self, node: TexNode) -> None:
         previous_name: str = node.name
         if type(node.expr) is TexNamedEnv:
             node.name = self.__next_marker__()
@@ -33,23 +37,67 @@ class Marker:
             node.name = self.__next_marker__()
             self.marker_store.update({self.marker_count: previous_name})
 
+    def __mark_node_contents__(self, node: TexNode, replace_range: range = None) -> None:
+        # TODO: Test if lists need deep copying
+        if replace_range is None:
+            previous_contents: list = node.contents
+            node.contents = [self.__next_marker__()]
+            self.marker_store.update({self.marker_count: previous_contents})
+        else:
+            previous_contents: list = node.contents[replace_range.start:replace_range.stop]
+
+            templs = list(node.contents)
+            del templs[replace_range.start:replace_range.stop]
+
+            # del node.contents[replace_range.start:replace_range.stop]
+
+            # node.contents = node.contents[:replace_range.start] + node.contents[replace_range.stop:]
+
+            # index = replace_range.start
+            # for __ in replace_range:
+            #     node.contents.pop(index)
+
+            # node.contents.insert(replace_range.start, self.__next_marker__())
+
+            templs.insert(replace_range.start, self.__next_marker__())
+            # templs[1] = TexExpr(templs[1].name, (templs[1].args, ))
+            templs[1] = str(templs[1]) # to be continued... (expression stays a string and doesn't get recursed into later)
+            node.contents = templs
+            self.marker_store.update({self.marker_count: previous_contents})
+
     def __traverse_ast_aux__(self, node: TexNode):
         if len(node.children) == 0:
-            self.mark_node(node)
-        elif type(node.expr) in [TexMathEnv, TexMathModeEnv, TexDisplayMathEnv, TexDisplayMathModeEnv]:
-            continue_marking = False
-            for desc in node.descendants:
-                if type(desc) is TexNode:
-                    if desc.name in ["text", "textsf", "textrm", "textnormal"]:
-                        continue_marking = True
-            if continue_marking:
+            self.__mark_node_name__(node)
+        elif type(node.expr) in MATH_ENVS:
+            continue_recursion = False
+            for descendant in node.descendants:
+                if type(descendant) is TexNode and descendant.name in TEXT_COMMANDS:
+                    continue_recursion = True
+                    break
+            if continue_recursion:
+
+                ranges_to_mark: List[range] = list()
+                start: int = -1
+                for i, content in enumerate(node.contents):
+                    if start == -1 and (type(content) is not TexNode or content.name not in TEXT_COMMANDS):
+                        start = i
+                    elif start != -1 and type(content) is TexNode and content.name in TEXT_COMMANDS:
+                        ranges_to_mark.append(range(start, i))
+                        start = -1
+                    # else:
+                    #     start = i
+                for range_to_mark in ranges_to_mark:
+                    self.__mark_node_contents__(node, range_to_mark)
+
                 for current_node in node.children:
                     self.__traverse_ast_aux__(current_node)
-                self.mark_node(node)
+
+            else:
+                self.__mark_node_contents__(node)
         else:
             for current_node in node.children:
                 self.__traverse_ast_aux__(current_node)
-            self.mark_node(node)
+            self.__mark_node_name__(node)
 
     def traverse_ast(self):
         self.__traverse_ast_aux__(self.soup.find("document"))
@@ -112,7 +160,7 @@ m = Marker(r"""
 		Soit Pop un échantillon de population bleue et $\mathcal{P}$ une proposition homogène exprimée universellement par quantification imbriquée. Alors
 		\[
 		\Lambda\,(\mathcal{P}) \geqslant \, \; \sum_{72}^{10} \frac{\int_{-151}^{69} - \frac{3\mu}{2} + 4x - \pi + 2 \, \: \; \mathrm{d}x}{\sum_{10}^{72} - 5\alpha + \frac{x}{7} + 7 - \frac{18}{7\sigma} - \frac{5}{\alpha}} \, \: \;  \mathrm{,}
-		\bla{hello there}
+		\text{hello there}
 		\]
 		avec égalité presque sûrement si, et seulement si, $\mathcal{P}$ est la proposition \og brouillard en matinée, belle et claire journée \fg.
 		\label{theo:label2}
