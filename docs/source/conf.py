@@ -10,6 +10,7 @@ from translatex import __version__
 project = 'translatex'
 copyright = "2023 Efe ERKEN"
 author = 'Efe ERKEN'
+version = __version__
 release = __version__
 
 # -- General configuration ---------------------------------------------------
