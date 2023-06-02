@@ -6,49 +6,51 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![fr](https://img.shields.io/badge/lang-fr-yellow.svg)](README.fr.md)
 
-Vous trouverez ici le projet TransLaTeX qui a comme but de traduire des fichiers source LaTeX (`.tex`) d'une langue à
-une autre à l'aide des traducteurs automatiques.
+You'll find here the TransLaTeX project which aims to translate LaTeX source files (`.tex`) from one human language to
+another using automatic translators.
 
-See [Documentation](https://cassandre.pages.math.unistra.fr/translatex) for details.
+See the [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details.
 
-## Versions Python
+## Python versions
 
-CPython est l'implémentation Python utilisé, et ci-dessous sont les versions les plus utilisées lors du développement.
+CPython is the Python implementation used and below are the most used versions during development.
 
 ```
+Python 3.10.11
+
 Python 3.8.9
 ```
 
-## Commandes d'utilisation
+## Usage manual
 
-### Comment compiler et exécuter ?
+### How to compile and execute?
 
-### Génération de la documentation
+### Documentation generation
 
-### Comment nettoyer ?
+### How to clean up?
 
-## Dépôt Git
+## Git repository
 
-Le dépôt git de [ce projet](https://git.unistra.fr/erken/chess) suit une structure claire et déterminée proposée par
-Vincent Driessen à son
-poste [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
+The git repository of [this project](https://gitlab.math.unistra.fr/cassandre/translatex) follows a clear and determined
+structure put forth by Vincent Driessen in his
+post "[A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/)".
 
-Du coup ne soyez pas surpris par le fait que `branch main` n'a presque pas de commit. Tout le développement se passe sur
-le `branch develop`. Avant chaque version, tout est préparé et assuré fonctionnel pour être inauguré au `branch main`
-qui n'a que des versions stables et complètes.
+So don't be surprised by the fact that the `main branch` has few commits. All the development is happening on
+the `develop branch`. Before each version, everything is prepared and guaranteed functional to be merged
+into `main branch` which only has stable and complete versions.
 
-### Légende emoji
+### Emoji legend
 
-La signification des emojis utilisé dans les descriptions des commits git.
+These are the meanings of the emojis used in the git commit messages.
 
-| Emoji       | Signification                                                         |
-|:------------|:----------------------------------------------------------------------|
-| ✨ NEW       | Nouveau fichier ou fonctionnalité                                     |
-| 🔧 UPDATE   | Mise à jour d'une partie de programme                                 |
-| 🔨 CONFIG   | Manipulation des fichiers de configuration comme makefile ou doxyfile |
-| ♻️ REFACTOR | Réécriture d'une partie du programme                                  |
-| 🐛 BUGFIX   | Une correction de bogue                                               |
-| 🔥 DELETION | Suppression d'un fichier ou d'une fonctionnalité                      |
-| 📝 DOC      | Manipulation de la documentation                                      |
-| 🎉 EPOCH    | Le début du projet                                                    |
-| 🚀 RELEASE  | Une nouvelle version du programme                                     |
+| Emoji       | Meaning                                            |
+|:------------|:---------------------------------------------------|
+| ✨ NEW       | New file or feature                                |
+| 🔧 UPDATE   | Update of a part of the program                    |
+| 🔨 CONFIG   | Changes in config files like makefile and doxyfile |
+| ♻️ REFACTOR | Rewrite of a part of the program                   |
+| 🐛 BUGFIX   | A bug fix                                          |
+| 🔥 DELETION | Removal of a file or a feature                     |
+| 📝 DOC      | Changes in the documentation                       |
+| 🎉 EPOCH    | The beginning of the project                       |
+| 🚀 RELEASE  | A new version of the program                       |

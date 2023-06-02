@@ -9,13 +9,15 @@
 Vous trouverez ici le projet TransLaTeX qui a comme but de traduire des fichiers source LaTeX (`.tex`) d'une langue à
 une autre à l'aide des traducteurs automatiques.
 
-See [Documentation](https://cassandre.pages.math.unistra.fr/translatex) for details.
+Voir la [documentation](https://cassandre.pages.math.unistra.fr/translatex) pour plus de détails.
 
 ## Versions Python
 
 CPython est l'implémentation Python utilisé, et ci-dessous sont les versions les plus utilisées lors du développement.
 
 ```
+Python 3.10.11
+
 Python 3.8.9
 ```
 
@@ -29,9 +31,9 @@ Python 3.8.9
 
 ## Dépôt Git
 
-Le dépôt git de [ce projet](https://git.unistra.fr/erken/chess) suit une structure claire et déterminée proposée par
-Vincent Driessen à son
-poste [A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/).
+Le dépôt git de [ce projet](https://gitlab.math.unistra.fr/cassandre/translatex) suit une structure claire et déterminée
+proposée par Vincent Driessen à son
+poste "[A successful Git branching model](https://nvie.com/posts/a-successful-git-branching-model/)".
 
 Du coup ne soyez pas surpris par le fait que `branch main` n'a presque pas de commit. Tout le développement se passe sur
 le `branch develop`. Avant chaque version, tout est préparé et assuré fonctionnel pour être inauguré au `branch main`
