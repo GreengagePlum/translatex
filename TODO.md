@@ -15,6 +15,6 @@
 
 ## Miscellaneous
 
-- [ ] 
+- [ ] Add `CONTRIBUTING.md`
 
 ## Done
