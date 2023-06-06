@@ -123,9 +123,18 @@ class Marker:
         # Start marking inside and including "\begin{document}" (headers untouched)
         self.__traverse_ast_aux__(self.soup.find("document"))
 
+    def undo_marking(self) -> str:
+        latex: str = str(self)
+        for marker, value in self.marker_store.items():
+            pattern = r"//{}//".format(marker)
+            latex = latex.replace(pattern, value)
+        return latex
 
 
 with open("../../examples/erken.tex") as f:
     m = Marker(f.read())
 m.traverse_ast()
-print(str(m))
+final_string = m.undo_marking()
+with open("../../examples/erken_post.tex", "w+") as f:
+    f.write(final_string)
+# print(str(m))
