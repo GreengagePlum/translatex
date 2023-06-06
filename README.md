@@ -17,8 +17,6 @@ CPython is the Python implementation used and below are the most used versions d
 
 ```
 Python 3.10.11
-
-Python 3.8.9
 ```
 
 ## Usage manual

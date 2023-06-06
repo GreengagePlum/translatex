@@ -17,8 +17,6 @@ CPython est l'implémentation Python utilisé, et ci-dessous sont les versions l
 
 ```
 Python 3.10.11
-
-Python 3.8.9
 ```
 
 ## Commandes d'utilisation
