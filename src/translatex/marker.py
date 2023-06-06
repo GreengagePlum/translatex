@@ -7,7 +7,8 @@ MATH_ENVS: List[str] = ["$", "$$", "math", "displaymath", "equation", "equation*
                         "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"]
 CODE_ENVS: List[str] = ["verbatim", "verbatim*", "lstlisting"]
 TEXT_COMMANDS: List[str] = ["text", "textsf", "textrm", "textnormal"]
-SKIPPED_COMMANDS: List[str] = ["label", "ref", "cite", "href", "inputencoding", "verb", "lstinputlisting"]
+SKIPPED_COMMANDS: List[str] = ["label", "ref", "cite", "href", "hyperlink", "hypertarget", "pageref", "url",
+                               "inputencoding", "verb", "lstinputlisting", "bibliography", "bibliographystyle"]
 
 
 class Marker:
