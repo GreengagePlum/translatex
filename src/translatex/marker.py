@@ -1,3 +1,23 @@
+"""This is the marker module where the LaTeX parse tree operations are made.
+
+This module houses all the logic and information necessary to mark all LaTeX structures to be tokenized in later
+passes except for the skipped commands that are explained later. It is designed for internal use to the program but
+how it can be used standalone is explained in the below example.
+
+This module makes heavy use of the TexSoup module to have a LaTeX parse tree and recurse into substructures. All
+structures that need to be tokenized later are marked recursively so that the tokenization pass can be simpler and
+compatible with many more types of structures.
+
+Example:
+    You can create an instance of the :py:class:`~translatex.marker.Marker` class to see its workings:
+
+    .. code-block:: python
+
+        m = Marker(<stuff>)
+        print(m)
+
+"""
+
 from typing import Dict, List, Optional
 
 from TexSoup import TexSoup
@@ -14,6 +34,9 @@ SKIPPED_COMMANDS: List[str] = ["label", "ref", "cite", "href", "hyperlink", "hyp
 
 
 class Marker:
+    """
+    This is a class.
+    """
 
     def __init__(self, latex: str) -> None:
         self.soup_original: TexNode = TexSoup(latex)
