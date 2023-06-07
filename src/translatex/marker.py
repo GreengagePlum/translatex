@@ -6,9 +6,11 @@ from TexSoup.data import *
 MATH_ENVS: List[str] = ["$", "$$", "math", "displaymath", "equation", "equation*", "cases", "array", "matrix",
                         "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"]
 CODE_ENVS: List[str] = ["verbatim", "verbatim*", "lstlisting"]
-TEXT_COMMANDS: List[str] = ["text", "textsf", "textrm", "textnormal"]
+TEXT_COMMANDS: List[str] = ["text", "texttt", "textsf", "textrm", "textnormal", "mbox"]
 SKIPPED_COMMANDS: List[str] = ["label", "ref", "cite", "href", "hyperlink", "hypertarget", "pageref", "url",
-                               "inputencoding", "verb", "lstinputlisting", "bibliography", "bibliographystyle"]
+                               "inputencoding", "verb", "lstinputlisting", "bibliography", "bibliographystyle",
+                               "includegraphics", "setlength", "color", "pagecolor", "rule", "textcolor", "colorbox",
+                               "draw", "fill", "filldraw", "node"]
 
 
 class Marker:
