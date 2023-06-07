@@ -41,47 +41,44 @@ class Marker:
             node.name = self.__next_marker__()
             self.marker_store.update({self.marker_count: previous_name})
 
-    def __mark_node_contents__(self, node: TexNode, original_contents_size: int = 0,
+    def __mark_node_contents__(self, node: TexNode, original_expression_size: int = 0,
                                replace_range: range = None) -> None:
         # TODO: Test if lists need deep copying
-        if (original_contents_size != 0) ^ (replace_range is not None):
+        if (original_expression_size != 0) ^ (replace_range is not None):
             raise ValueError("Either supply both optional parameters or none of them")
-        if original_contents_size == 0 and replace_range is None:
-            previous_contents: list = node.contents
-            # Sanitize previous contents so that it no longer contains command options within []
+        if original_expression_size == 0 and replace_range is None:
+            previous_expression: list = node.expr.all
+            # Sanitize previous expressions so that it no longer contains command options within []
             args = [y.pop() for y in [x.contents for x in node.args if type(x) is BracketGroup]]
-            previous_contents = [x for x in previous_contents if x not in args]
+            previous_expression = [x for x in previous_expression if x not in args]
             node.contents = [self.__next_marker__()]
-            self.marker_store.update({self.marker_count: "".join([str(x) for x in previous_contents])})
+            self.marker_store.update({self.marker_count: "".join([str(x) for x in previous_expression])})
         else:
-            current_contents_size = len(node.contents)
-            adjustment_difference = original_contents_size - current_contents_size
+            current_expression_size = len(node.expr.all)
+            adjustment_difference = original_expression_size - current_expression_size
             adjusted_replace_range = range(replace_range.start - adjustment_difference,
                                            replace_range.stop - adjustment_difference)
-            previous_contents: list = node.contents[adjusted_replace_range.start:adjusted_replace_range.stop]
-            # Sanitize previous contents so that it no longer contains command options within []
+            previous_expression: list = node.expr.all[adjusted_replace_range.start:adjusted_replace_range.stop]
+            # Sanitize previous expressions so that it no longer contains command options within []
             args = [y.pop() for y in [x.contents for x in node.args if type(x) is BracketGroup]]
-            previous_contents = [x for x in previous_contents if x not in args]
-            new_contents = list(node.contents)
+            previous_expression = [x for x in previous_expression if x not in args]
+            new_contents = list(node.expr.all)
             del new_contents[adjusted_replace_range.start:adjusted_replace_range.stop]
             new_contents.insert(adjusted_replace_range.start, self.__next_marker__())
-            # Turn every TexNode into a TexExpr since TexSoup wants it that way
-            # this also updates the syntax tree and recursion into nodes stays possible
-            new_contents = [x.expr if type(x) is TexNode else x for x in new_contents]
             node.contents = new_contents
-            self.marker_store.update({self.marker_count: "".join([str(x) for x in previous_contents])})
+            self.marker_store.update({self.marker_count: "".join([str(x) for x in previous_expression])})
 
     @staticmethod
     def __marking_range_finder__(node: TexNode, excluded_commands: List[str]) -> List[range]:
         ranges_to_mark: List[range] = list()
         start: int = -1
-        for i, content in enumerate(node.contents):
-            if start == -1 and (type(content) is not TexNode or content.name not in excluded_commands):
+        for i, expr in enumerate(node.expr.all):
+            if start == -1 and (type(expr) is not TexCmd or expr.name not in excluded_commands):
                 start = i
-            elif start != -1 and type(content) is TexNode and content.name in excluded_commands:
+            elif start != -1 and type(expr) is TexCmd and expr.name in excluded_commands:
                 ranges_to_mark.append(range(start, i))
                 start = -1
-            elif len(node.contents) - 1 == i:
+            elif len(node.expr.all) - 1 == i:
                 ranges_to_mark.append(range(start, i + 1))
         return ranges_to_mark
 
@@ -93,9 +90,9 @@ class Marker:
                 break
         if continue_recursion:
             ranges_to_mark: List[range] = self.__marking_range_finder__(node, TEXT_COMMANDS)
-            original_contents_size: int = len(node.contents)
+            original_expression_size: int = len(node.expr.all)
             for range_to_mark in ranges_to_mark:
-                self.__mark_node_contents__(node, original_contents_size, range_to_mark)
+                self.__mark_node_contents__(node, original_expression_size, range_to_mark)
         else:
             self.__mark_node_contents__(node)
             # TODO: implement way to completely mark and replace named math environment (maybe)
@@ -131,10 +128,12 @@ class Marker:
         return latex
 
 
-with open("../../examples/erken.tex") as f:
+with open("../../examples/translatex.tex") as f:
     m = Marker(f.read())
 m.traverse_ast()
+# with open("../../examples/translatex_post.tex", "w+") as f:
+#     f.write(str(m))
 final_string = m.undo_marking()
-with open("../../examples/erken_post.tex", "w+") as f:
+with open("../../examples/translatex_post.tex", "w+") as f:
     f.write(final_string)
 # print(str(m))
