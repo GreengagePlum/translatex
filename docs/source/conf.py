@@ -37,3 +37,5 @@ autodoc_member_order = "groupwise"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
+html_logo = '../../images/logo_small.png'
+html_favicon = '../../images/logo_favicon.png'
