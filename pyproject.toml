@@ -19,7 +19,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
-doc = ["myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild"]
+doc = ["myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "sphinx-prompt", "sphinx-last-updated-by-git"]
 
 [project.license]
 text = "MIT"

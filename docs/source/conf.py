@@ -21,11 +21,16 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
-    'sphinx_copybutton'
+    'sphinx.ext.coverage',
+    'sphinx_copybutton',
+    'sphinx-prompt',
+    'sphinx_last_updated_by_git'
 ]
 
 templates_path = ['_templates']
 exclude_patterns = []
+
+autodoc_member_order = "groupwise"
 
 
 # -- Options for HTML output -------------------------------------------------
