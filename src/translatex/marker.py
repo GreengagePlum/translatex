@@ -8,7 +8,7 @@ This module makes heavy use of the TexSoup module to have a LaTeX parse tree and
 structures that need to be tokenized later are marked recursively so that the tokenization pass can be simpler and
 compatible with many more types of structures.
 """
-
+import re
 from typing import Dict, List, Optional
 
 from TexSoup import TexSoup
@@ -79,8 +79,25 @@ class Marker:
         self.marker_count += 1
         return self.marker_format.format(self.marker_count)
 
-    def set_marker_format(self, format_str: str) -> None:
-        # TODO: implement format string check (if it has only a single occurrence of "{}")
+    @property
+    def marker_format(self) -> str:
+        return self.marker_format
+
+    @marker_format.setter
+    def marker_format(self, format_str: str) -> None:
+        """Set marker format to be used.
+
+        Args:
+            format_str: A string that can be used with ``.format()``
+
+        Raises:
+            ValueError: If the given string doesn't have at least a single occurrence of two empty curly braces "{}"
+
+        """
+        pattern = r'\{\}'
+        match = re.search(pattern, format_str)
+        if not match:
+            raise ValueError("No empty curly braces in the given format string")
         self.marker_format = format_str
 
     def __mark_node_name(self, node: TexNode) -> None:
