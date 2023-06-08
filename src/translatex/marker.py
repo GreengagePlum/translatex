@@ -1,21 +1,12 @@
 """This is the marker module where the LaTeX parse tree operations are made.
 
 This module houses all the logic and information necessary to mark all LaTeX structures to be tokenized in later
-passes except for the skipped commands that are explained later. It is designed for internal use to the program but
-how it can be used standalone is explained in the below example.
+passes except for the skipped commands. It is designed for internal use to the program, but it can be used standalone
+to see its workings.
 
 This module makes heavy use of the TexSoup module to have a LaTeX parse tree and recurse into substructures. All
 structures that need to be tokenized later are marked recursively so that the tokenization pass can be simpler and
 compatible with many more types of structures.
-
-Example:
-    You can create an instance of the :py:class:`~translatex.marker.Marker` class to see its workings:
-
-    .. code-block:: python
-
-        m = Marker(<stuff>)
-        print(m)
-
 """
 
 from typing import Dict, List, Optional
@@ -25,25 +16,61 @@ from TexSoup.data import *
 
 MATH_ENVS: List[str] = ["$", "$$", "math", "displaymath", "equation", "equation*", "cases", "array", "matrix",
                         "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix"]
+"""These are the names of the known LaTeX math environments to the program.
+
+This list is used to determine math environments and stop recursion inside them to be able to mark their whole contents
+once if no text command is found inside. This helps us generate way less marks and thus subsequently, less tokens which
+potentially makes the final output less confusing for the automatic translator.
+"""
 CODE_ENVS: List[str] = ["verbatim", "verbatim*", "lstlisting"]
+"""These are the names of the known LaTeX literal environments to the program.
+
+This list is used to determine environments which contain source code so that their contents don't get recursed into and
+that they get marked with a single marker resulting in none of their contents being prepared for translation.
+"""
+
 TEXT_COMMANDS: List[str] = ["text", "texttt", "textsf", "textrm", "textnormal", "mbox"]
+"""These are the names of the known LaTeX text commands to the program.
+
+This list contains the commands that can be used inside math environments to enter regularly typeset text. The 
+contents of these commands need translation so they shouldn't be removed. This list is used to stop the math 
+environment processor from including these commands in its marking.
+"""
 SKIPPED_COMMANDS: List[str] = ["label", "ref", "cite", "href", "hyperlink", "hypertarget", "pageref", "url",
                                "inputencoding", "verb", "lstinputlisting", "bibliography", "bibliographystyle",
                                "includegraphics", "setlength", "color", "pagecolor", "rule", "textcolor", "colorbox",
                                "draw", "fill", "filldraw", "node"]
+"""These are the names of the known LaTeX commands to the program that require special attention.
+
+These commands are left unmarked so that later passes that use regex can handle them more correctly. Most are commands
+that never contain text to be translated, but some are also highly complicated or conditional so they require more
+intricate regex treatment.
+"""
 
 
 class Marker:
-    """
-    This is a class.
+    """This class traverses the LaTeX syntax tree and recursively marks structures to be tokenized later.
+
+    The parse tree is constructed and traversed using TexSoup and its methods.
     """
 
     def __init__(self, latex: str) -> None:
+        """Creates a Marker with default settings.
+
+        Args:
+            latex: The string that contains LaTeX
+
+        """
         self.soup_original: TexNode = TexSoup(latex)
+        """The starting LaTeX tree. Saved aside so the original source is kept intact."""
         self.soup_current: TexNode = TexSoup(latex)
+        """The current working LaTeX tree. Marking manipulations are done here."""
         self.marker_count: int = 0
+        """Numbering used in the markers. Its value represents -> first marker number - 1."""
         self.marker_format: str = "//{}//"
-        self.marker_store: Dict[int, str | list] = dict()
+        """The format string for markers to be used."""
+        self.marker_store: Dict[int, str] = dict()
+        """The dictionary that associates to each marker the corresponding string it replaces."""
 
     def __str__(self) -> str:
         return str(self.soup_current)
@@ -57,7 +84,7 @@ class Marker:
         self.marker_format = format_str
 
     def __mark_node_name(self, node: TexNode) -> None:
-        previous_name: str = node.name
+        previous_name: str = str(node.name)
         if type(node.expr) is TexNamedEnv:
             node.name = self.__next_marker()
             self.marker_store.update({self.marker_count: previous_name})
@@ -162,6 +189,9 @@ class Marker:
 # \textbf{\color{\text{blue}} Hello world}
 # \end{document}
 # """)
+# m.traverse_ast()
+# for value in m.marker_store.values():
+#     print(type(value))
 
 # m.traverse_ast()
 
