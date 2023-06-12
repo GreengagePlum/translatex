@@ -21,11 +21,7 @@ Python 3.10.11
 
 ## Usage manual
 
-### How to compile and execute?
-
-### Documentation generation
-
-### How to clean up?
+[Instructions](docs/source/index.md#Installation)
 
 ## Git repository
 

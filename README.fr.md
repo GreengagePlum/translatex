@@ -21,11 +21,7 @@ Python 3.10.11
 
 ## Commandes d'utilisation
 
-### Comment compiler et exécuter ?
-
-### Génération de la documentation
-
-### Comment nettoyer ?
+[Instructions](docs/source/index.md#Installation)
 
 ## Dépôt Git
 
