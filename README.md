@@ -21,7 +21,7 @@ Python 3.10.11
 
 ## Usage manual
 
-[Instructions](docs/source/index.md#Installation)
+[Installation instructions](docs/source/index.md#installation)
 
 ## Git repository
 

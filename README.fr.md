@@ -21,7 +21,7 @@ Python 3.10.11
 
 ## Commandes d'utilisation
 
-[Instructions](docs/source/index.md#Installation)
+[Instructions d'installation](docs/source/index.md#installation)
 
 ## Dépôt Git
 
