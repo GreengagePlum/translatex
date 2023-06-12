@@ -57,6 +57,8 @@ class Marker:
 
     The parse tree is constructed and traversed using TexSoup and its methods.
     """
+    # TODO: Replace dictionary store with a fixed size array for optimization
+    # TODO: Find a way to determine the size of the array before parsing
 
     DEFAULT_INITIAL_MARKER_INDEX: int = 0
     DEFAULT_MARKER_FORMAT: str = "//{}//"
@@ -341,32 +343,3 @@ class Marker:
             if before == latex:
                 raise LookupError("Detected missing marker in string to unmark")
         self._unmarked_latex = latex
-
-
-# import sys
-if __name__ == "__main__":
-    with open("../../examples/translatex.tex") as f:
-        m = Marker(f.read())
-
-    # m = Marker(r"""
-    # \begin{document}
-    # \textbf{\color{\text{blue}} Hello world}
-    # \end{document}
-    # """)
-    # m.traverse_ast()
-    # for value in m.marker_store.values():
-    #     print(type(value))
-
-    m.do_marking()
-    # m.undo_marking()
-
-    with open("../../examples/translatex_post.tex", "w+") as f:
-        # f.write(m.unmarked_latex)
-        f.write(m.marked_latex)
-
-    # final_string = m.undo_marking()
-    # with open("../../examples/translatex_post.tex", "w+") as f:
-    #     f.write(final_string)
-
-    # print(str(m))
-    #     sys.exit(0)  # pragma: no cover
