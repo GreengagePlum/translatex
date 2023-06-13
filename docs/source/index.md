@@ -6,7 +6,7 @@
 ## Description
 
 ```{eval-rst}
-.. automodule:: translatex.translatex
+.. automodule:: translatex.main
     :noindex:
 
 ```
