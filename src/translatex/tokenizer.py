@@ -100,10 +100,27 @@ class Tokenizer:
             raise ValueError("Not enough empty curly braces in the given format string")
         self._token_format = format_str
 
-    def _tokenize_named_envs(self, process_string: str) -> str:
-        marker_regex = self._marker_format.format(r"(?:\d+)")
-        pattern = re.compile(r"(?:\\begin|\\end)\{" + marker_regex + r"\}(\[.*\])*")
+    def _tokenize_completely_removed(self, process_string: str) -> str:
         current_string = process_string
+        for e in COMPLETELY_REMOVED_COMMANDS:
+            pattern = re.compile(r"\\" + e + r"(?:\[.*\])*(\{[^{}]+\})+(?:\[.*\])*")
+            all_replaced = False
+            while not all_replaced:
+                current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+                if replace_count == 0:
+                    all_replaced = True
+        return current_string
+
+    def _tokenize_unnamed_math_optimized(self, process_string: str) -> str:
+        marker_regex = self._marker_format.format(r"(?:\d+)")
+        pattern = re.compile(r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
+        current_string = process_string
+        all_replaced = False
+        while not all_replaced:
+            current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+            if replace_count == 0:
+                all_replaced = True
+        pattern = re.compile(r"(?:" + marker_regex + r")*(\\\]|\\\)|\$|\$\$)")
         all_replaced = False
         while not all_replaced:
             current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
@@ -112,8 +129,9 @@ class Tokenizer:
         return current_string
 
     def _tokenize_commands(self, process_string: str) -> str:
+        # TODO: Conflicts with token format when matching all square brackets "[]", correct behaviour if necessary
         marker_regex = self._marker_format.format(r"(?:\d+)")
-        pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(\{.*\})(?:\[.*\])*")
+        pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{.*\}))|(\{.*\})?)(?:\[.*\])*")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -122,22 +140,60 @@ class Tokenizer:
                 all_replaced = True
         return current_string
 
+    def _tokenize_named_envs(self, process_string: str) -> str:
+        marker_regex = self._marker_format.format(r"(?:\d+)")
+        pattern = re.compile(
+            r"\\begin\{" + marker_regex + r"\}(\[.*\])*(?:\s*" + marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
+        current_string = process_string
+        all_replaced = False
+        while not all_replaced:
+            current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+            if replace_count == 0:
+                all_replaced = True
+        pattern = re.compile(
+            r"(?:\s*[^\\]" + marker_regex + r")*(?:\\end\{" + marker_regex + r"\})")
+        all_replaced = False
+        while not all_replaced:
+            current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+            if replace_count == 0:
+                all_replaced = True
+        return current_string
+
+    def _tokenize_markers(self, process_string: str) -> str:
+        marker_regex = self._marker_format.format(r"(?:\d+)")
+        pattern = re.compile(marker_regex)
+        current_string = process_string
+        all_replaced = False
+        while not all_replaced:
+            current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+            if replace_count == 0:
+                all_replaced = True
+        return current_string
+
     def tokenize(self):
-        current_string: str = self._marked_string
-        current_string = self._tokenize_named_envs(current_string)
-        current_string = self._tokenize_commands(current_string)
-        # to be continued...
-        self._tokenized_string = current_string
+        split_strings: List[str] = re.split(r"(^.*//(?:\d+)//.*$)", self._marked_string, 1, re.MULTILINE)
+        header_string: str = split_strings[0]
+        main_string: str = split_strings[1] + split_strings[2]
+        main_string = self._tokenize_completely_removed(main_string)
+        # main_string = self._tokenize_specials(main_string)
+        main_string = self._tokenize_unnamed_math_optimized(main_string)
+        main_string = self._tokenize_commands(main_string)
+        main_string = self._tokenize_named_envs(main_string)
+        main_string = self._tokenize_markers(main_string)
+        # main_string = self._tokenize_comments(main_string)
+        # main_string = self._tokenize_latex_spacers(main_string)
+        self._tokenized_string = header_string + main_string
 
 
-with open("../../examples/translatex.tex") as f:
-    m = Marker(f.read())
+if __name__ == "__main__":
+    with open("../../examples/erken.tex") as f:
+        m = Marker(f.read())
 
-m.do_marking()
-t = Tokenizer(m.marked_latex)
-t.tokenize()
+    m.do_marking()
+    t = Tokenizer(m.marked_latex)
+    t.tokenize()
 
-with open("../../examples/translatex_post.tex", "w+") as f:
-    f.write(m.marked_latex)
-with open("../../examples/translatex_post2.tex", "w+") as f:
-    f.write(t.tokenized_string)
+    with open("../../examples/erken_post.tex", "w+") as f:
+        f.write(m.marked_latex)
+    with open("../../examples/erken_post2.tex", "w+") as f:
+        f.write(t.tokenized_string)
