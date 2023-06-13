@@ -1,7 +1,9 @@
 import re
 from typing import Dict
 
-from marker import Marker
+from translatex.marker import Marker
+
+from translatex.data import *
 
 
 class Tokenizer:

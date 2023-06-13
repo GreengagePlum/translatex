@@ -14,7 +14,7 @@ from typing import Dict, Optional
 from TexSoup import TexSoup
 from TexSoup.data import *
 
-from data import *
+from translatex.data import *
 
 
 class Marker:
