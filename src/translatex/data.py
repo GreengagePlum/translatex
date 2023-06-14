@@ -22,7 +22,7 @@ This list contains the commands that can be used inside math environments to ent
 contents of these commands need translation so they shouldn't be removed. This list is used to stop the math 
 environment processor from including these commands in its marking.
 """
-SPECIAL_COMMANDS: List[str] = ["draw", "fill", "filldraw", "node", "verb"]
+SPECIAL_COMMANDS: List[str] = ["draw", "fill", "filldraw", "node", "verb", "item"]
 """These are commands that need a special regex treatment to extract their text."""
 COMPLETELY_REMOVED_COMMANDS: List[str] = ["label", "ref", "cite", "pageref", "url", "lstinputlisting",
                                           "inputencoding", "bibliography", "bibliographystyle", "setlength", "color",

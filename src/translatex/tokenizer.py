@@ -111,6 +111,12 @@ class Tokenizer:
                     all_replaced = True
         return current_string
 
+    def _tokenize_specials(self, process_string: str) -> str:
+        # TODO: Manage all special cases listed in data module
+        current_string = process_string
+        current_string = re.sub(r"\\item", self._next_token(), current_string)
+        return current_string
+
     def _tokenize_unnamed_math_optimized(self, process_string: str) -> str:
         marker_regex = self._marker_format.format(r"(?:\d+)")
         pattern = re.compile(r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
@@ -175,7 +181,7 @@ class Tokenizer:
         header_string: str = split_strings[0]
         main_string: str = split_strings[1] + split_strings[2]
         main_string = self._tokenize_completely_removed(main_string)
-        # main_string = self._tokenize_specials(main_string)
+        main_string = self._tokenize_specials(main_string)
         main_string = self._tokenize_unnamed_math_optimized(main_string)
         main_string = self._tokenize_commands(main_string)
         main_string = self._tokenize_named_envs(main_string)
@@ -186,14 +192,15 @@ class Tokenizer:
 
 
 if __name__ == "__main__":
-    with open("../../examples/erken.tex") as f:
+    base_file = "erken"
+    with open(f"../../examples/{base_file}.tex") as f:
         m = Marker(f.read())
 
     m.do_marking()
     t = Tokenizer(m.marked_latex)
     t.tokenize()
 
-    with open("../../examples/erken_post.tex", "w+") as f:
+    with open(f"../../examples/{base_file}_post.tex", "w+") as f:
         f.write(m.marked_latex)
-    with open("../../examples/erken_post2.tex", "w+") as f:
+    with open(f"../../examples/{base_file}_post2.tex", "w+") as f:
         f.write(t.tokenized_string)
