@@ -21,7 +21,7 @@ class Tokenizer:
         self._token_sublimit: int = Tokenizer.DEFAULT_TOKEN_SUBLIMIT
         self.token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT
         self._marker_format: str = marker_format
-        self._token_store: Dict[int, str] = dict()
+        self._token_store: Dict[str, str] = dict()
 
     def __str__(self) -> str:
         return "The tokenizer format is {} and tokenizer count is at {}.".format(self._token_format,
@@ -176,6 +176,23 @@ class Tokenizer:
                 all_replaced = True
         return current_string
 
+    def _tokenize_comments(self, process_string: str) -> str:
+        pattern = re.compile(r"(?<!\\)(?:\\\\)*%.*$", re.MULTILINE)
+        current_string = process_string
+        all_replaced = False
+        while not all_replaced:
+            current_string, replace_count = pattern.subn(self._next_token(), current_string, 1)
+            if replace_count == 0:
+                all_replaced = True
+        return current_string
+
+    def _tokenize_latex_spacers(self, process_string: str) -> str:
+        LATEX_SPACERS: List[str] = [r"\\", r"\;", r"\:", r"\,", r"\ "]
+        current_string = process_string
+        for e in LATEX_SPACERS:
+            current_string = re.sub(re.escape(e), self._next_token(), current_string)
+        return current_string
+
     def tokenize(self):
         split_strings: List[str] = re.split(r"(^.*//(?:\d+)//.*$)", self._marked_string, 1, re.MULTILINE)
         header_string: str = split_strings[0]
@@ -186,9 +203,17 @@ class Tokenizer:
         main_string = self._tokenize_commands(main_string)
         main_string = self._tokenize_named_envs(main_string)
         main_string = self._tokenize_markers(main_string)
-        # main_string = self._tokenize_comments(main_string)
-        # main_string = self._tokenize_latex_spacers(main_string)
+        main_string = self._tokenize_comments(main_string)
+        main_string = self._tokenize_latex_spacers(main_string)
         self._tokenized_string = header_string + main_string
+
+    def detokenize(self):
+        main_string: str = self._tokenized_string
+        for token in self._token_store.keys():
+            if main_string.find(token) == -1:
+                raise LookupError("Detected missing token in string to detokenize")
+        # To finish later...
+        self._marked_string = main_string
 
 
 if __name__ == "__main__":
