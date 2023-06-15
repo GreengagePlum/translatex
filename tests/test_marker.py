@@ -122,7 +122,7 @@ def test_marker_format(small_marker):
 def test_mark_node_name1(small_marker):
     """Ensure Marker marks LaTeX commands correctly"""
     m = small_marker
-    m.do_marking()
+    m.mark()
     pattern = r"\\//(\d+)//{.*Hello.*}"
     res = re.search(pattern, m.marked_latex)
     assert res
@@ -133,7 +133,7 @@ def test_mark_node_name1(small_marker):
 def test_mark_node_name2(small_marker):
     """Ensure Marker marks LaTeX named environments correctly"""
     m = small_marker
-    m.do_marking()
+    m.mark()
     pattern = r"\\begin{//(\d+)//}"
     res = re.search(pattern, m.marked_latex)
     assert res
@@ -144,7 +144,7 @@ def test_mark_node_name2(small_marker):
 def test_mark_node_contents1(math_marker):
     """Ensure Marker marks LaTeX unnamed environments (displaymath) correctly"""
     m = math_marker
-    m.do_marking()
+    m.mark()
     pattern = r"\\\[//(\d+)//\\\]"
     res = re.search(pattern, m.marked_latex)
     assert res
@@ -155,7 +155,7 @@ def test_mark_node_contents1(math_marker):
 def test_mark_node_contents2(math_text_marker):
     """Ensure Marker marks LaTeX unnamed environments (displaymath) including text correctly"""
     m = math_text_marker
-    m.do_marking()
+    m.mark()
     pattern = r"\\\[.*\\//(\d+)//{foo bar baz}.*\\\]"
     res = re.search(pattern, m.marked_latex, re.DOTALL)
     assert res
@@ -185,7 +185,7 @@ def test_mark_node_contents3(math_marker):
 def test_mark_node_contents4(code_marker):
     """Ensure Marker marks LaTeX literal code environments correctly"""
     m = code_marker
-    m.do_marking()
+    m.mark()
     pattern = r"\\begin.*\[language=Python\]//(\d+)//\\end"
     res = re.search(pattern, m.marked_latex)
     assert res
@@ -196,6 +196,6 @@ def test_mark_node_contents4(code_marker):
 def test_undo_marking(small_marker):
     """Ensure Marker preserves all details of the original string when unmarking operation is done"""
     m = small_marker
-    m.do_marking()
-    m.undo_marking()
+    m.mark()
+    m.unmark()
     assert m.base_latex == m.unmarked_latex

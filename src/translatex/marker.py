@@ -276,7 +276,7 @@ class Marker:
                 self._traverse_ast_aux(current_node)
             self._mark_node_name(node)
 
-    def do_marking(self) -> None:
+    def mark(self) -> None:
         r"""This produces the marked LaTeX string from the unmarked string if available.
 
         The unmarked LaTeX has to have a \\begin{document} and an \\end{document} statement at least. Also, it is
@@ -290,7 +290,7 @@ class Marker:
             self._traverse_ast_aux(soup_current.find("document"))
             self._marked_latex = str(soup_current)
 
-    def undo_marking(self) -> None:
+    def unmark(self) -> None:
         """This uses the marker store to rebuild the unmarked string.
 
         The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end the
