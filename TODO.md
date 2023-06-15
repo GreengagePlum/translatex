@@ -13,7 +13,7 @@
     - [ ] Implement token store for each regex substitution method
     - [ ] Finish detokenizer
       - [ ] Add complex regex reconstruction for curly brace tokens
-      - [ ] Lastly, add simple search and replace with all the rest
+      - [x] Lastly, add simple search and replace with all the rest
 - [ ] Finish Translator
 - [ ] Finish CLI
 - [ ] Create a web interface
