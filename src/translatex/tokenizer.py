@@ -268,8 +268,9 @@ class Tokenizer:
 
     def detokenize(self):
         main_string: str = self._tokenized_string
+        # TODO: The following for loop for checking errors might need a change (tokens might be tokenized and not
+        #  directly visible during a first iteration)
         # for token in self._token_store.keys():
-        #     print(token, self._token_store[token])
         #     if main_string.find(token) == -1:
         #         raise LookupError("Detected missing token in string to detokenize")
         token_regex = self._token_regex()

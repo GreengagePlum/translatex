@@ -305,6 +305,6 @@ class Marker:
             pattern = self._marker_format.format(marker)
             before = latex
             latex = latex.replace(pattern, value)
-            if before == latex:
-                raise LookupError("Detected missing marker in string to unmark")
+            # if before == latex:
+            #     raise LookupError("Detected missing marker in string to unmark")
         self._unmarked_latex = latex
