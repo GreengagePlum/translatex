@@ -266,7 +266,7 @@ class Marker:
             if marked_node:
                 for current_node in marked_node.children:
                     self._traverse_ast_aux(current_node)
-        elif node.name in CODE_ENVS:
+        elif node.name in COMPLETELY_REMOVED_ENVS:
             self._mark_node_contents(node)
             self._mark_node_name(node)
         elif len(node.children) == 0:

@@ -8,11 +8,12 @@ This list is used to determine math environments and stop recursion inside them 
 once if no text command is found inside. This helps us generate way less marks and thus subsequently, less tokens which
 potentially makes the final output less confusing for the automatic translator.
 """
-CODE_ENVS: List[str] = ["verbatim", "verbatim*", "lstlisting"]
-"""These are the names of the known LaTeX literal environments to the program.
+COMPLETELY_REMOVED_ENVS: List[str] = ["verbatim", "verbatim*", "lstlisting", "tikzpicture"]
+"""These are the names of the known named environments to the program to be completely marked and tokenized.
 
-This list is used to determine environments which contain source code so that their contents don't get recursed into and
-that they get marked with a single marker resulting in none of their contents being prepared for translation.
+This list is used to determine environments which contain literal text or are unsupported so that their contents 
+don't get recursed into and that they get marked with a single marker resulting in none of their contents being 
+prepared for translation.
 """
 
 TEXT_COMMANDS: List[str] = ["text", "texttt", "textsf", "textrm", "textnormal", "mbox"]
