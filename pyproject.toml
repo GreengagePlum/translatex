@@ -14,7 +14,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 requires-python = ">=3.9"
-dependencies = ["TexSoup @ git+https://github.com/alvinwan/TexSoup@19451a322a51e12fd30a9a391301aa31b937e9e2"]
+dependencies = ["TexSoup @ git+https://github.com/alvinwan/TexSoup@19451a322a51e12fd30a9a391301aa31b937e9e2", "regex"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -32,7 +32,7 @@ content-type = "text/markdown"
 Homepage = "https://gitlab.math.unistra.fr/cassandre/translatex"
 
 [project.scripts]
-"translatex" = "translatex.translatex:main"
+"translatex" = "translatex.main:main"
 
 [tool.setuptools]
 include-package-data = true
