@@ -169,11 +169,8 @@ class Tokenizer:
         # TODO: Improve square bracket handling in regex so that it recursively matches the outer first ones
         # TODO: Make it not match square brackets with the same format as the default token format
         marker_regex = self._marker_format.format(r"(?:\d+)")
-        # pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{.*\})?)(?:\[.*\])*")
         pattern = re.compile(
-            r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{.*\})?)")
-        # pattern = re.compile(
-        #     r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+\})?)")
+            r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+\})?)")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
