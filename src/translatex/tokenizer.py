@@ -24,6 +24,10 @@ class Tokenizer:
         self._marker_format: str = marker_format
         self._token_store: Dict[str, str] = dict()
 
+    @classmethod
+    def from_marker(cls, marker: Marker):
+        return cls(marker.marked_latex, marker.marker_format)
+
     def __str__(self) -> str:
         return "The tokenizer format is {} and tokenizer count is at {}.".format(self._token_format,
                                                                                  self.total_token_count())
@@ -125,7 +129,7 @@ class Tokenizer:
         return current_string
 
     def _tokenize_specials(self, process_string: str) -> str:
-        # TODO: Manage all special cases listed in data module
+        # TODO: Manage all special cases listed in data module (verb and especially tikz)
         current_string = process_string
         pattern = r"\\item"
         next_token = self._next_token()
@@ -162,11 +166,14 @@ class Tokenizer:
 
     def _tokenize_commands(self, process_string: str) -> str:
         # TODO: Conflicts with token format when matching all square brackets "[]", correct behaviour if necessary
+        # TODO: Improve square bracket handling in regex so that it recursively matches the outer first ones
+        # TODO: Make it not match square brackets with the same format as the default token format
         marker_regex = self._marker_format.format(r"(?:\d+)")
-        # pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{.*\}))|(\{.*\})?)(?:\[.*\])*")
-        # pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))+\}))|(\{.*\})?)(?:\[.*\])*")
-        pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{.*\})?)(?:\[.*\])*")
-        # pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+)+\}))|(\{.*\})?)(?:\[.*\])*")
+        # pattern = re.compile(r"\\" + marker_regex + r"(?:\[.*\])*(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{.*\})?)(?:\[.*\])*")
+        pattern = re.compile(
+            r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{.*\})?)")
+        # pattern = re.compile(
+        #     r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\}))|(\{(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+\})?)")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -187,7 +194,7 @@ class Tokenizer:
     def _tokenize_named_envs(self, process_string: str) -> str:
         marker_regex = self._marker_format.format(r"(?:\d+)")
         pattern = re.compile(
-            r"\\begin\{" + marker_regex + r"\}(\[.*\])*(?:\s*" + marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
+            r"\\begin\{" + marker_regex + r"\}(?:\{.*\})*(\[.*\])*(?:\s*" + marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -252,17 +259,17 @@ class Tokenizer:
         return current_string
 
     def tokenize(self):
-        # TODO: Make marker regex dynamic in the line below since it can be variable
-        split_strings: List[str] = re.split(r"(^.*//(?:\d+)//.*$)", self._marked_string, 1, re.MULTILINE)
+        marker_regex = self._marker_format.format(r"(?:\d+)")
+        split_strings: List[str] = re.split(r"(^.*" + marker_regex + r".*$)", self._marked_string, 1, re.MULTILINE)
         header_string: str = split_strings[0]
         main_string: str = split_strings[1] + split_strings[2]
+        main_string = self._tokenize_comments(main_string)
         main_string = self._tokenize_completely_removed(main_string)
         main_string = self._tokenize_specials(main_string)
         main_string = self._tokenize_unnamed_math_optimized(main_string)
         main_string = self._tokenize_commands(main_string)
         main_string = self._tokenize_named_envs(main_string)
         main_string = self._tokenize_markers(main_string)
-        main_string = self._tokenize_comments(main_string)
         main_string = self._tokenize_latex_spacers(main_string)
         self._tokenized_string = header_string + main_string
 
@@ -274,9 +281,8 @@ class Tokenizer:
         #     if main_string.find(token) == -1:
         #         raise LookupError("Detected missing token in string to detokenize")
         token_regex = self._token_regex()
-        # pattern = re.compile(r"(" + token_regex + r")(\{(?:(?<!\\)(?:\\\\)*[^{}]+|(?R))+\})")
         pattern = re.compile(
-            r"(" + token_regex + r")(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))+\})")
+            r"(" + token_regex + r")(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\})")
         all_commands_replaced = False
         while not all_commands_replaced:
             match = pattern.search(main_string)
@@ -302,8 +308,9 @@ if __name__ == "__main__":
 
     t = Tokenizer(m.marked_latex)
     t.tokenize()
-    print("wow")
     t.detokenize()
+    for e in t._token_store.items():
+        print(e)
     with open(f"../../examples/{base_file}_post2.tex", "w+") as f:
         # f.write(t.tokenized_string)
         f.write(t.marked_string)
