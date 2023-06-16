@@ -1,5 +1,5 @@
 import pytest
-from translatex import translatex
+from translatex import main
 
 
 @pytest.fixture

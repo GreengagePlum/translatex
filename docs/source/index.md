@@ -6,7 +6,7 @@
 ## Description
 
 ```{eval-rst}
-.. automodule:: translatex.translatex
+.. automodule:: translatex.main
     :noindex:
 
 ```
@@ -81,10 +81,10 @@ pip install -e .[doc]
 #### Build and serve the documentation locally
 
 ```bash
-sphinx-autobuild docs/source/ docs/_build/html
+sphinx-autobuild docs/source/ docs/_build/html --watch src/
 ```
 
-Go to <http://localhost:8000> and see the changes in `docs/source/` directory take effect immediately.
+Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
 
 ## Indices and tables
 
