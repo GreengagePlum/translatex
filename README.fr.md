@@ -11,18 +11,6 @@ une autre à l'aide des traducteurs automatiques.
 
 Voir la [documentation](https://cassandre.pages.math.unistra.fr/translatex) pour plus de détails.
 
-## Versions Python
-
-CPython est l'implémentation Python utilisé, et ci-dessous sont les versions les plus utilisées lors du développement.
-
-```
-Python 3.10.11
-```
-
-## Commandes d'utilisation
-
-[Instructions d'installation](docs/source/index.md#installation)
-
 ## Dépôt Git
 
 Le dépôt git de [ce projet](https://gitlab.math.unistra.fr/cassandre/translatex) suit une structure claire et déterminée

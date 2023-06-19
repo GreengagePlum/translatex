@@ -11,18 +11,6 @@ another using automatic translators.
 
 See the [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details.
 
-## Python versions
-
-CPython is the Python implementation used and below are the most used versions during development.
-
-```
-Python 3.10.11
-```
-
-## Usage manual
-
-[Installation instructions](docs/source/index.md#installation)
-
 ## Git repository
 
 The git repository of [this project](https://gitlab.math.unistra.fr/cassandre/translatex) follows a clear and determined
