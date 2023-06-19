@@ -53,13 +53,15 @@ class Marker:
 
     @property
     def unmarked_latex(self) -> str:
-        """This property contains currently unmarked, correct LaTeX string"""
+        """Unmarked, correct LaTeX string
+
+        If this property is set, marked string, and all marker related stuff gets reset so that everything is in
+        sync
+        """
         return self._unmarked_latex
 
     @unmarked_latex.setter
     def unmarked_latex(self, latex: str) -> None:
-        """If this property is set, marked string, and all marker related stuff gets reset so that everything is in
-        sync"""
         self._unmarked_latex = latex
         self._marked_latex = str()
         self.marker_count = Marker.DEFAULT_INITIAL_MARKER_INDEX
@@ -67,23 +69,27 @@ class Marker:
 
     @property
     def marked_latex(self) -> str:
-        """This property contains the marked, ready to tokenize string after marking operations."""
+        """Marked, ready to tokenize string after marking operations.
+
+        If this property is set, unmarked string gets reset so that everything is in sync
+        """
         return self._marked_latex
 
     @marked_latex.setter
     def marked_latex(self, latex: str) -> None:
-        """If this property is set, unmarked string gets reset so that everything is in sync"""
         self._marked_latex = latex
         self._unmarked_latex = str()
 
     @property
     def base_latex(self) -> str:
-        """The starting LaTeX string. Saved aside so the original source is kept intact and accessible if need be."""
+        """The starting LaTeX string. Saved aside so the original source is kept intact and accessible if need be.
+
+        If the base changes, almost everything is reset and readied for the new base so that everything is in sync
+        """
         return self._base_latex
 
     @base_latex.setter
     def base_latex(self, latex: str) -> None:
-        """If the base changes, almost everything is reset and readied for the new base so that everything is in sync"""
         self._base_latex = self._unmarked_latex = latex
         self._marked_latex = str()
         self.marker_count = Marker.DEFAULT_INITIAL_MARKER_INDEX
@@ -91,20 +97,17 @@ class Marker:
 
     @property
     def marker_format(self) -> str:
-        """The format string for markers to be used."""
+        """The format string for markers to be used.
+
+        Raises:
+            ValueError: If the given string doesn't have at least a single occurrence of a pair of empty curly
+                braces "{}". Since we're looking for a string that can be used with ``str.format()``
+
+        """
         return self._marker_format
 
     @marker_format.setter
     def marker_format(self, format_str: str) -> None:
-        """Set marker format to be used.
-
-        Args:
-            format_str: A string that can be used with ``.format()``
-
-        Raises:
-            ValueError: If the given string doesn't have at least a single occurrence of two empty curly braces "{}"
-
-        """
         pattern = r'\{\}'
         match = re.search(pattern, format_str)
         if not match:
