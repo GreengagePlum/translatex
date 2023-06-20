@@ -33,13 +33,15 @@ The following is an overview on the inner processing stages of TransLaTeX.
             subgraph {
                 label=""; // Set an empty label for the inner subgraph
 
+                Preprocessor; // Add the "Preprocessor" node to the inner subgraph
                 Marker; // Add the "Marker" node to the inner subgraph
                 Tokenizer; // Add the "Tokenizer" node to the inner subgraph
                 Translator; // Add the "Translator" node to the inner subgraph
             }
         }
 
-        Input_Output -> Marker [contraint=false]; // Arrow from input to Marker
+        Input_Output -> Preprocessor [contraint=false]; // Arrow from input to Marker
+        Preprocessor -> Marker [tailport=n, headport=n, contraint=false]; // Arrow from Marker to Tokenizer
         Marker -> Tokenizer [tailport=n, headport=n, contraint=false]; // Arrow from Marker to Tokenizer
         Tokenizer -> Translator [tailport=n, headport=n, contraint=false]; // Arrow from Tokenizer to Translator
         Translator -> Cloud [contraint=false]; // Arrow from Translator to Cloud
@@ -47,7 +49,8 @@ The following is an overview on the inner processing stages of TransLaTeX.
         Cloud -> Translator [contraint=false]; // Arrow from Cloud to Translator
         Translator -> Tokenizer [tailport=s, headport=s, contraint=false]; // Arrow from Translator to Tokenizer
         Tokenizer -> Marker [tailport=s, headport=s, contraint=false]; // Arrow from Tokenizer to Marker
-        Marker -> Input_Output [contraint=false]; // Arrow from Marker to input
+        Marker -> Preprocessor [tailport=s, headport=s, contraint=false]; // Arrow from Tokenizer to Marker
+        Preprocessor -> Input_Output [contraint=false]; // Arrow from Marker to input
     }
 
 ```
