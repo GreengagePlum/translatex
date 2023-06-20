@@ -10,4 +10,4 @@ Apart from the main use case, the marking, tokenization and text extraction can 
 manual translation by a professional human translator or parsing.
 """
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
