@@ -25,10 +25,10 @@
 ## Miscellaneous
 
 - [ ] Add `CONTRIBUTING.md`
-- [ ] Add use case/functioning schema to doc (UML)
 
 ## Done
 
+- [x] Add use case/functioning schema to doc (UML)
 - [x] Digitize unmanaged list of features
 - [x] Finish Tokenizer
     - [x] Implement token store for each regex substitution method
