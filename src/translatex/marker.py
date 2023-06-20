@@ -9,12 +9,16 @@ structures that need to be tokenized later are marked recursively so that the to
 compatible with many more types of structures.
 """
 import re
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 from TexSoup import TexSoup
 from TexSoup.data import *
 
 from translatex.data import *
+from translatex.preprocessor import Preprocessor
+
+if TYPE_CHECKING:
+    from translatex.tokenizer import Tokenizer
 
 
 class Marker:
@@ -43,6 +47,15 @@ class Marker:
         self.marker_format: str = Marker.DEFAULT_MARKER_FORMAT
         self._marker_store: Dict[int, str] = dict()
         """The dictionary that associates to each marker the corresponding string it replaces."""
+
+    @classmethod
+    def from_preprocessor(cls, preprocessor: Preprocessor) -> "Marker":
+        """Another constructor that creates a Marker from a given Preprocessor. For convenience."""
+        return cls(preprocessor.processed_latex)
+
+    def update_from_tokenizer(self, tokenizer: "Tokenizer") -> None:
+        """A convenience method to update the marked LaTeX from a Tokenizer."""
+        self.marked_latex = tokenizer.marked_string
 
     def __str__(self) -> str:
         return "The marker format is {} and marker count is at {}.".format(self._marker_format, self.marker_count)
@@ -253,10 +266,10 @@ class Marker:
             self._mark_node_name(node)
         return node if continue_recursion else None
 
-    def _traverse_ast_aux(self, node: TexNode) -> None:
+    def _traverse_ast(self, node: TexNode) -> None:
         """This is where the recursive, depth first tree traversal takes place.
 
-        Every node and their children is treated in a depths first manner. If there is a math environment, it is sent
+        Every node and their children are treated in a depths first manner. If there is a math environment, it is sent
         for special treatment. If it's a code environment, its contents are completely marked and recursion inside it is
         stopped. Otherwise, it is sent for normal marking.
 
@@ -268,7 +281,7 @@ class Marker:
             marked_node: Optional[TexNode] = self._math_processor(node)
             if marked_node:
                 for current_node in marked_node.children:
-                    self._traverse_ast_aux(current_node)
+                    self._traverse_ast(current_node)
         elif node.name in COMPLETELY_REMOVED_ENVS:
             self._mark_node_contents(node)
             self._mark_node_name(node)
@@ -276,7 +289,7 @@ class Marker:
             self._mark_node_name(node)
         else:
             for current_node in node.children:
-                self._traverse_ast_aux(current_node)
+                self._traverse_ast(current_node)
             self._mark_node_name(node)
 
     def mark(self) -> None:
@@ -290,7 +303,7 @@ class Marker:
         if self._unmarked_latex:
             soup_current: TexNode = TexSoup(self._unmarked_latex)
             # Start marking inside and including "\begin{document}" (headers untouched)
-            self._traverse_ast_aux(soup_current.find("document"))
+            self._traverse_ast(soup_current.find("document"))
             self._marked_latex = str(soup_current)
 
     def unmark(self) -> None:
@@ -306,7 +319,7 @@ class Marker:
         latex: str = self._marked_latex
         for marker, value in self._marker_store.items():
             pattern = self._marker_format.format(marker)
-            before = latex
+            # before = latex
             latex = latex.replace(pattern, value)
             # if before == latex:
             #     raise LookupError("Detected missing marker in string to unmark")
