@@ -1,3 +1,4 @@
+"""This is where all the preparations are made before anything. TransLaTeX preprocessor syntax is handled here."""
 import re
 from typing import Dict, TYPE_CHECKING
 
@@ -6,11 +7,29 @@ if TYPE_CHECKING:
 
 
 class Preprocessor:
+    """This class processes the preprocessor statements in the given LaTeX string.
+
+    For the time being, the only statement is the manual substitution to avoid certain lines from getting tokenized and
+    sent to translation. It offers a way to override the program's default behavior.
+
+    In the future, the preprocessor statements can be extended further with new features to enable more fine-tuned
+    control of the program's behavior by end users without them having to delve into source code.
+    """
     DEFAULT_INITIAL_INDICATOR_INDEX: int = 0
     DEFAULT_INDICATOR_FORMAT: str = "%@=TRANSLATEX_MANUAL_REPLACEMENT_{}"
+    """This indicator is used as a placeholder for manual replacement blocks, to keep track of its location."""
+    DEFAULT_OPERATION_STAMP: str = "%@=Manual intervention by TransLaTeX"
+    """This indicator is used to annotate the final LaTeX string with the operation made at that location
+    (for end users to have more information)."""
     DEFAULT_REPLACEMENT_BLOCK_BEGIN: str = "%@{"
+    """Default preprocessor syntax to indicate the start of a TransLaTeX replacement block."""
     DEFAULT_REPLACEMENT_BLOCK_END: str = "%@}"
+    """Default preprocessor syntax to indicate the end of a TransLaTeX replacement block."""
     DEFAULT_REPLACEMENT_BLOCK_SEPERATOR: str = "%@--"
+    """Default preprocessor syntax to indicate the separation of original LaTeX and replacement suggestion
+    of a TransLaTeX replacement block."""
+    ENABLE_SUBSTITUTION: bool = True
+    DISABLE_SUBSTITUTION: bool = False
 
     def __init__(self, latex: str) -> None:
         """Creates a Preprocessor with default settings.
@@ -105,10 +124,50 @@ class Preprocessor:
         self._indicator_format = format_str
 
     def process(self) -> None:
+        r"""This operation makes the Preprocessor replace all manual substitution blocks with indicators.
+
+        The replaced string gets saved into a dictionary to be used in rebuilding later. The whole block,
+        meaning complete lines are taken into account. Any other text located after the "begin/end" statements on the
+        same line as them aren't taken into account. This can be used by end users to personally annotate these blocks
+        with custom text.
+
+        Any number of dashes can follow the delimiter of the manual replacement block. This can be useful for
+        end users to increase readability in their LaTeX files.
+
+        And lastly, LaTeX comment delimiters are ignored during substitution. They are removed from the replacement
+        suggestion. This can be helpful when you want to comment out these parts so that they don't affect the original
+        work's rendering.
+
+        For example:
+
+        -> Before
+
+        .. code-block:: latex
+
+            %@{ This is my manual replacement block
+            \textbf{Welcome to France!}
+            %@-------------------------------------
+            \textit{Bienvenue en France !}
+            % $x < 3$
+            %@} Here is the end of the block
+
+        -> After substitution
+
+        .. code-block:: latex
+
+            %@=Manual intervention by TransLaTeX
+            \textit{Bienvenue en France !}
+            $x < 3$
+
+        After the rebuild, the place where a manual substitution took place gets annotated by TransLaTeX for end users to
+        locate them easier when proofreading.
+
+        The resulting string is stored in an instance variable for processed LaTeX.
+        """
         current_string = self._unprocessed_latex
-        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_BEGIN) + r".*" + re.escape(
-            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r".*" + re.escape(
-            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END), re.DOTALL)
+        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_BEGIN) + r"[\s\S]*" + re.escape(
+            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r"[\s\S]*" + re.escape(
+            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END) + r".*")
         all_replaced = False
         while not all_replaced:
             match = pattern.search(current_string)
@@ -119,27 +178,25 @@ class Preprocessor:
                 all_replaced = True
         self._processed_latex = current_string
 
-    def rebuild(self, enable_substitution: bool = True) -> None:
+    def rebuild(self, substitution_setting: bool = ENABLE_SUBSTITUTION) -> None:
+        """Actual substitution is performed here during the rebuild. It can be disabled with the optional parameter
+        indicating this setting.
+
+        When disabled, the manual replacement blocks are reintroduced back into the string as is and no substitution
+        occurs. Otherwise, by default, the second half of the block indicated by the delimiter is extracted, rid of
+        any preceding LaTeX line comment or space characters and put where the corresponding indicator is standing in
+        the string prepended with an annotation on a new line. See docstring for :py:meth:`process`.
+
+        The resulting string is stored in an instance variable for unprocessed LaTeX.
+        """
         current_string = self._processed_latex
-        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r".*\n([\s\S]*)\n" +
+        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r".*\n([\s\S]*)\n\s*" +
                              re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END))
+        pattern2 = re.compile(r"^(\s*)[%\s]*", re.MULTILINE)  # To filter out any line comment characters and spaces
         for indicator, value in self._indicator_store.items():
             replacement_string = value
-            if enable_substitution:
-                replacement_string = pattern.match(replacement_string).group(1)
+            if substitution_setting:
+                replacement_string = Preprocessor.DEFAULT_OPERATION_STAMP + "\n" + \
+                                     pattern2.sub(r"\1", pattern.search(replacement_string)[1])
             current_string = current_string.replace(self._indicator_format.format(indicator), replacement_string)
         self._unprocessed_latex = current_string
-
-
-if __name__ == "__main__":
-    base_file = "translatex"
-    with open(f"../../examples/{base_file}.tex") as f:
-        p = Preprocessor(f.read())
-
-    p.process()
-    with open(f"../../examples/{base_file}_post.tex", "w+") as f:
-        f.write(p.processed_latex)
-
-    p.rebuild()
-    with open(f"../../examples/{base_file}_post2.tex", "w+") as f:
-        f.write(p.unprocessed_latex)
