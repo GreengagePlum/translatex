@@ -23,7 +23,7 @@ test:
 pages:
   stage: deploy
   before_script:
-    - apt -q update && apt -q install graphviz
+    - apt -y -qq update && apt -y -qq install graphviz
     - pip install -e .[doc]
   script:
     - sphinx-build -b html docs/source/ public/
