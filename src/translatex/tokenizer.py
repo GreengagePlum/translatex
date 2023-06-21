@@ -1,9 +1,9 @@
 """Here is where all the marked LaTeX structures from the previous stage get tokenized.
 
-This module houses all the logic to replace all the marked parts of a given former LaTeX string with the specified token
-format. The string is finalized for transmission to an automatic translator where there is only actual text and tokens
-left. The tokens are to be chosen in a way that won't disturb the translation nor get modified or removed during said
-process.
+This module houses all the logic to replace all the marked parts of a given former LaTeX string with the specified
+token format. The string is finalized for transmission to an automatic translator where there is only the actual text
+and the tokens left. The tokens are to be chosen in a way that won't disturb the translation nor get modified or removed
+during the said process.
 """
 import regex as re
 from typing import Dict
@@ -21,7 +21,7 @@ class Tokenizer:
     during detokenization. Structures with text to keep for translation are stored in a special way in the dictionary
     which is explained more in detail later.
 
-    Default token format is inspired by another similar but more primitive project called
+    The Default token format is inspired by another similar but more primitive project called
     `gtexfix <https://github.com/drgulevich/gtexfix>`_.
     """
     DEFAULT_INITIAL_TOKEN_INDEX: int = 0
@@ -78,7 +78,7 @@ class Tokenizer:
     def marked_string(self) -> str:
         """This property contains currently marked string that was once correct LaTeX.
 
-        If this property is set, tokenized string, and all tokenizer related stuff gets reset so that everything is
+        If this property is set, tokenized string, and all tokenizer-related stuff gets reset so that everything is
         in sync.
         """
         return self._marked_string
@@ -185,9 +185,9 @@ class Tokenizer:
         """Tokenizes all unnamed math environments with slight optimizations allowing for a lesser number of tokens
         generated.
 
-        If there is no text for translation all is replaced with a single token. Otherwise, all from the beginning until
-        the text to keep uses one token, all that is between text to keep uses one token and everything at the end uses
-        one token.
+        If there is no text for translation, all is replaced with a single token. Otherwise, all from the beginning
+        until the text to keep uses one token, all that is between the text to keep uses one token and everything at the
+        end uses one token.
         """
         marker_regex = self._marker_format.format(r"(?:\d+)")
         pattern = re.compile(r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
@@ -256,12 +256,12 @@ class Tokenizer:
 
         The same small optimization as the unnamed math processor takes place here. If there is only a single marker
         inside a marked environment, all is replaced by a single token. Otherwise, tokens are used one by one for each
-        range to be replaced without text: from the start until some text, from that text until some other text and
+        range to be replaced without the text: from the start until some text, from that text until some other text and
         finally from that text until the very end.
         """
         marker_regex = self._marker_format.format(r"(?:\d+)")
-        pattern = re.compile(
-            r"\\begin\{" + marker_regex + r"\}(?:\{.*\})*(\[.*\])*(?:\s*" + marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
+        pattern = re.compile(r"\\begin\{" + marker_regex + r"\}(?:\{.*\})*(\[.*\])*(?:\s*" +
+                             marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -288,7 +288,7 @@ class Tokenizer:
     def _tokenize_markers(self, process_string: str) -> str:
         r"""Here, only single markers are tokenized.
 
-        This means only markers that indicate contents of environments which are not preceded by backslashes (those
+        This means only markers that indicate the contents of environments which are not preceded by backslashes (those
         would be command markers) or inside ``\begin{}...\end{}`` statements (these are named environment markers) are
         tokenized.
         """
@@ -349,7 +349,7 @@ class Tokenizer:
         interference), various subroutines that make heavy use of regular expressions are called to tokenize the marked
         string layer by layer. The result is then stored in the tokenized string instance variable.
 
-        During this stage, thanks to the subroutines, all strings replaced by tokens are stored in the dictionary, thus
+        During this stage, thanks to the subroutines, all strings replaced by tokens are stored in the dictionary; thus
         it is populated after a call to this method (a first tokenization run).
         """
         marker_regex = self._marker_format.format(r"(?:\d+)")

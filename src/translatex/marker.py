@@ -158,7 +158,7 @@ class Marker:
         If no optional parameters are passed, all the contents get marked with a single marker. If both optional
         parameters are specified, only the given ranges are marked and the rest is left as is for further treatment and
         recursion. All the parts that the marker replaces are turned into strings and stored in the dictionary.
-        Any LaTeX bracket arguments are removed from marking process so that they can be processed with
+        Any LaTeX bracket arguments are removed from the marking process so that they can be processed with
         regex during tokenization run.
 
         .. note::
@@ -205,8 +205,9 @@ class Marker:
         method and doesn't modify any of its arguments (read-only), it's just a calculation method.
 
         .. warning::
-            For now, the excluded commands are searched only one level deep in the children of the node leaving excluded
-            commands appearing in nested structures ignored, thus them getting included in the ranges produced.
+
+            For now, the excluded commands are searched only one level deep in the children of the node, leaving
+            excluded commands appearing in nested structures ignored, thus them getting included in the ranges produced.
 
         Args:
             node: A node in the TexSoup syntax tree
@@ -236,10 +237,11 @@ class Marker:
         The special treatment here is as follows. If a text command inside the math environment is found, the contents
         of this environment is marked by calculating the ranges where there are no text commands so that they are marked
         with a single marker optimizing the produced number of markers which may be substantially high otherwise for no
-        good reason potentially making tokenization harder and confusing the automatic translater at the end. If no text
+        good reason, potentially making tokenization harder and confusing the automatic translater at the end. If no text
         command is found, all contents are marked with a single marker and recursion is stopped.
 
         .. note::
+
             If the given node is a named environment, its name is also marked at the end.
 
         Args:
@@ -267,9 +269,9 @@ class Marker:
         return node if continue_recursion else None
 
     def _traverse_ast(self, node: TexNode) -> None:
-        """This is where the recursive, depth first tree traversal takes place.
+        """This is where the recursive, depth-first tree traversal takes place.
 
-        Every node and their children are treated in a depths first manner. If there is a math environment, it is sent
+        Every node and their children are treated in a depth-first manner. If there is a math environment, it is sent
         for special treatment. If it's a code environment, its contents are completely marked and recursion inside it is
         stopped. Otherwise, it is sent for normal marking.
 
@@ -309,7 +311,7 @@ class Marker:
     def unmark(self) -> None:
         """This uses the marker store to rebuild the unmarked string.
 
-        The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end the
+        The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
         Raises:

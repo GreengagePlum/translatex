@@ -8,7 +8,7 @@
 
 - [ ] Add verifications on token and marker presence
 - [ ] Improve Marker
-    - [ ] Add manual substitution/ignore syntax
+    - [x] Add manual substitution/ignore syntax
     - [ ] Manage displaymath ending with a dot
 - [ ] Finish Translator
 - [ ] Finish CLI
@@ -29,7 +29,7 @@
 ## Done
 
 - [x] Add use case/functioning schema to doc (UML)
-- [x] Digitize unmanaged list of features
+- [x] Digitize the unmanaged list of features
 - [x] Finish Tokenizer
     - [x] Implement token store for each regex substitution method
     - [x] Finish detokenizer

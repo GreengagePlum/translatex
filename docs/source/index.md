@@ -62,7 +62,7 @@ The following is an overview on the inner processing stages of TransLaTeX.
 
 ### Unsupported and unmanaged so far
 
-- LaTeX escape inside literal blocks aren't handled and don't get recursed into. They get tokenized as a whole. For
+- LaTeX escape inside literal blocks isn't handled and doesn't get recursed into. They get tokenized as a whole. For
   example: `\begin{lstlisting}[escapeinside={\%*}{*)}]` which lets you escape actual LaTeX tags and commands inside
   a literal `lstlisting` block.
 - Document header is kept untouched. Nothing in the header (before `\begin{document}`) gets tokenized or translated.
@@ -70,8 +70,8 @@ The following is an overview on the inner processing stages of TransLaTeX.
   translated.
 - Any commands and metadata that can be put before `\begin{document}` should be put before and thus in the header.
   Otherwise, they will get tokenized and translated. More concisely, given file must be correct and conform LaTeX.
-- Text inside math environments is kept intact for translation only if they are located one level deep. For example
-  (albeit not the best example) the `textsf` command's contents won't be translated since it is more than one level deep
+- Text inside math environments are kept intact for translation only if they are located one level deep. For example
+  (albeit not the best example), the `textsf` command's contents won't be translated since it is more than one level deep
   in a math environment in the following code block.
 
 ```latex
@@ -88,14 +88,17 @@ The following is an overview on the inner processing stages of TransLaTeX.
 \end{document}
 ```
 
-- Text inside math environments is recognized thanks to a list of valid text commands inside the `data` module
-  named `TEXT_COMMANDS`. If there are others that we've missed add them to this list so that they also get recognized.
+- Text inside math environments are recognized thanks to a list of valid text commands inside the `data` module
+  named `TEXT_COMMANDS`. If there are others that we've missed, add them to this list so that they also get recognized.
 - This program is built for LaTeX only. Use LaTeX commands almost exclusively and not pure TeX.
 - Here is a list of known unsupported commands and environments:
     - `picture`
     - `tikzpicture`
-- For now only single file documents are supported. No `\input`.
+- For now, only single file documents are supported. No `\input`.
 - Macros are unsupported.
+- The final full stop at the end of block math environments gets put into tokens instead of being left out. These dots
+  should be kept alongside the text to be translated for it to form a logical sentence giving more consistent results
+  with an automatic translator.
 
 ## Modules
 
