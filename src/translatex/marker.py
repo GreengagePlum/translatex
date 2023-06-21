@@ -9,12 +9,16 @@ structures that need to be tokenized later are marked recursively so that the to
 compatible with many more types of structures.
 """
 import re
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 
 from TexSoup import TexSoup
 from TexSoup.data import *
 
 from translatex.data import *
+from translatex.preprocessor import Preprocessor
+
+if TYPE_CHECKING:
+    from translatex.tokenizer import Tokenizer
 
 
 class Marker:
@@ -44,6 +48,15 @@ class Marker:
         self._marker_store: Dict[int, str] = dict()
         """The dictionary that associates to each marker the corresponding string it replaces."""
 
+    @classmethod
+    def from_preprocessor(cls, preprocessor: Preprocessor) -> "Marker":
+        """Another constructor that creates a Marker from a given Preprocessor. For convenience."""
+        return cls(preprocessor.processed_latex)
+
+    def update_from_tokenizer(self, tokenizer: "Tokenizer") -> None:
+        """A convenience method to update the marked LaTeX from a Tokenizer."""
+        self.marked_latex = tokenizer.marked_string
+
     def __str__(self) -> str:
         return "The marker format is {} and marker count is at {}.".format(self._marker_format, self.marker_count)
 
@@ -53,13 +66,15 @@ class Marker:
 
     @property
     def unmarked_latex(self) -> str:
-        """This property contains currently unmarked, correct LaTeX string"""
+        """Unmarked, correct LaTeX string
+
+        If this property is set, marked string, and all marker related stuff gets reset so that everything is in
+        sync
+        """
         return self._unmarked_latex
 
     @unmarked_latex.setter
     def unmarked_latex(self, latex: str) -> None:
-        """If this property is set, marked string, and all marker related stuff gets reset so that everything is in
-        sync"""
         self._unmarked_latex = latex
         self._marked_latex = str()
         self.marker_count = Marker.DEFAULT_INITIAL_MARKER_INDEX
@@ -67,23 +82,27 @@ class Marker:
 
     @property
     def marked_latex(self) -> str:
-        """This property contains the marked, ready to tokenize string after marking operations."""
+        """Marked, ready to tokenize string after marking operations.
+
+        If this property is set, unmarked string gets reset so that everything is in sync
+        """
         return self._marked_latex
 
     @marked_latex.setter
     def marked_latex(self, latex: str) -> None:
-        """If this property is set, unmarked string gets reset so that everything is in sync"""
         self._marked_latex = latex
         self._unmarked_latex = str()
 
     @property
     def base_latex(self) -> str:
-        """The starting LaTeX string. Saved aside so the original source is kept intact and accessible if need be."""
+        """The starting LaTeX string. Saved aside so the original source is kept intact and accessible if need be.
+
+        If the base changes, almost everything is reset and readied for the new base so that everything is in sync
+        """
         return self._base_latex
 
     @base_latex.setter
     def base_latex(self, latex: str) -> None:
-        """If the base changes, almost everything is reset and readied for the new base so that everything is in sync"""
         self._base_latex = self._unmarked_latex = latex
         self._marked_latex = str()
         self.marker_count = Marker.DEFAULT_INITIAL_MARKER_INDEX
@@ -91,20 +110,17 @@ class Marker:
 
     @property
     def marker_format(self) -> str:
-        """The format string for markers to be used."""
+        """The format string for markers to be used.
+
+        Raises:
+            ValueError: If the given string doesn't have at least a single occurrence of a pair of empty curly
+                braces "{}". Since we're looking for a string that can be used with ``str.format()``
+
+        """
         return self._marker_format
 
     @marker_format.setter
     def marker_format(self, format_str: str) -> None:
-        """Set marker format to be used.
-
-        Args:
-            format_str: A string that can be used with ``.format()``
-
-        Raises:
-            ValueError: If the given string doesn't have at least a single occurrence of two empty curly braces "{}"
-
-        """
         pattern = r'\{\}'
         match = re.search(pattern, format_str)
         if not match:
@@ -142,7 +158,7 @@ class Marker:
         If no optional parameters are passed, all the contents get marked with a single marker. If both optional
         parameters are specified, only the given ranges are marked and the rest is left as is for further treatment and
         recursion. All the parts that the marker replaces are turned into strings and stored in the dictionary.
-        Any LaTeX bracket arguments are removed from marking process so that they can be processed with
+        Any LaTeX bracket arguments are removed from the marking process so that they can be processed with
         regex during tokenization run.
 
         .. note::
@@ -189,8 +205,9 @@ class Marker:
         method and doesn't modify any of its arguments (read-only), it's just a calculation method.
 
         .. warning::
-            For now, the excluded commands are searched only one level deep in the children of the node leaving excluded
-            commands appearing in nested structures ignored, thus them getting included in the ranges produced.
+
+            For now, the excluded commands are searched only one level deep in the children of the node, leaving
+            excluded commands appearing in nested structures ignored, thus them getting included in the ranges produced.
 
         Args:
             node: A node in the TexSoup syntax tree
@@ -220,10 +237,11 @@ class Marker:
         The special treatment here is as follows. If a text command inside the math environment is found, the contents
         of this environment is marked by calculating the ranges where there are no text commands so that they are marked
         with a single marker optimizing the produced number of markers which may be substantially high otherwise for no
-        good reason potentially making tokenization harder and confusing the automatic translater at the end. If no text
+        good reason, potentially making tokenization harder and confusing the automatic translater at the end. If no text
         command is found, all contents are marked with a single marker and recursion is stopped.
 
         .. note::
+
             If the given node is a named environment, its name is also marked at the end.
 
         Args:
@@ -250,10 +268,10 @@ class Marker:
             self._mark_node_name(node)
         return node if continue_recursion else None
 
-    def _traverse_ast_aux(self, node: TexNode) -> None:
-        """This is where the recursive, depth first tree traversal takes place.
+    def _traverse_ast(self, node: TexNode) -> None:
+        """This is where the recursive, depth-first tree traversal takes place.
 
-        Every node and their children is treated in a depths first manner. If there is a math environment, it is sent
+        Every node and their children are treated in a depth-first manner. If there is a math environment, it is sent
         for special treatment. If it's a code environment, its contents are completely marked and recursion inside it is
         stopped. Otherwise, it is sent for normal marking.
 
@@ -265,7 +283,7 @@ class Marker:
             marked_node: Optional[TexNode] = self._math_processor(node)
             if marked_node:
                 for current_node in marked_node.children:
-                    self._traverse_ast_aux(current_node)
+                    self._traverse_ast(current_node)
         elif node.name in COMPLETELY_REMOVED_ENVS:
             self._mark_node_contents(node)
             self._mark_node_name(node)
@@ -273,7 +291,7 @@ class Marker:
             self._mark_node_name(node)
         else:
             for current_node in node.children:
-                self._traverse_ast_aux(current_node)
+                self._traverse_ast(current_node)
             self._mark_node_name(node)
 
     def mark(self) -> None:
@@ -287,13 +305,13 @@ class Marker:
         if self._unmarked_latex:
             soup_current: TexNode = TexSoup(self._unmarked_latex)
             # Start marking inside and including "\begin{document}" (headers untouched)
-            self._traverse_ast_aux(soup_current.find("document"))
+            self._traverse_ast(soup_current.find("document"))
             self._marked_latex = str(soup_current)
 
     def unmark(self) -> None:
         """This uses the marker store to rebuild the unmarked string.
 
-        The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end the
+        The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
         Raises:
@@ -303,7 +321,7 @@ class Marker:
         latex: str = self._marked_latex
         for marker, value in self._marker_store.items():
             pattern = self._marker_format.format(marker)
-            before = latex
+            # before = latex
             latex = latex.replace(pattern, value)
             # if before == latex:
             #     raise LookupError("Detected missing marker in string to unmark")

@@ -22,6 +22,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.coverage',
+    'sphinx.ext.graphviz',
     'sphinx_copybutton',
     'sphinx-prompt',
     'sphinx_last_updated_by_git'
@@ -37,6 +38,8 @@ autodoc_default_options = {
     'private-members': False,
     'special-members': '__init__'
 }
+
+graphviz_output_format = "svg"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

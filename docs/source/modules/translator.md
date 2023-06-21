@@ -1,7 +1,7 @@
-# init
+# translator
 
 ```{eval-rst}
-.. automodule:: translatex
+.. automodule:: translatex.translator
     :show-inheritance:
     :members:
 ```
