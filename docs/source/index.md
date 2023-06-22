@@ -71,8 +71,8 @@ The following is an overview on the inner processing stages of TransLaTeX.
 - Any commands and metadata that can be put before `\begin{document}` should be put before and thus in the header.
   Otherwise, they will get tokenized and translated. More concisely, given file must be correct and conform LaTeX.
 - Text inside math environments are kept intact for translation only if they are located one level deep. For example
-  (albeit not the best example), the `textsf` command's contents won't be translated since it is more than one level deep
-  in a math environment in the following code block.
+  (albeit not the best example), the `textsf` command's contents won't be translated since it is more than one level
+  deep in a math environment in the following code block.
 
 ```latex
 \begin{document}
@@ -147,7 +147,7 @@ code and have the changes take effect immediately.
 
 ### Run the unitary tests
 
-#### Install the development dependencies
+#### Install the development dependencies[*](#shell-disclaimer)
 
 ```bash
 pip install -e .[test]
@@ -165,7 +165,7 @@ See [.gitlab-ci.yml](https://gitlab.math.unistra.fr/cassandre/translatex/blob/ma
 
 ### Build the documentation
 
-#### Install the documentation dependencies
+#### Install the documentation dependencies[*](#shell-disclaimer)
 
 ```bash
 pip install -e .[doc]
@@ -181,6 +181,16 @@ sphinx-autobuild docs/source/ docs/_build/html --watch src/
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
+
+### Shell disclaimer
+
+```{eval-rst}
+.. note::
+
+    Pay attention to using ``bash`` to execute any of the commands with a square bracket (``[]``) syntax since ``zsh``
+    has issues parsing these commands and produces errors.
+
+```
 
 ## Usage
 

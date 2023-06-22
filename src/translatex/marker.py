@@ -25,6 +25,7 @@ class Marker:
     """This class traverses the LaTeX syntax tree and recursively marks structures to be tokenized later.
 
     The parse tree is constructed and traversed using TexSoup and its methods.
+    TexSoup's best effort fault tolerance mode for parsing LaTeX is not used.
     """
     # TODO: Replace dictionary store with a fixed size array for optimization
     # TODO: Find a way to determine the size of the array before parsing
@@ -297,7 +298,7 @@ class Marker:
     def mark(self) -> None:
         r"""This produces the marked LaTeX string from the unmarked string if available.
 
-        The unmarked LaTeX has to have a \\begin{document} and an \\end{document} statement at least. Also, it is
+        The unmarked LaTeX has to have a ``\begin{document}...\end{document}`` statement at least. Also, it is
         assumed correct LaTeX that can be compiled without issues. Otherwise, TexSoup parsing will produce errors.
 
         The marked string is stored in an instance variable at the end.
