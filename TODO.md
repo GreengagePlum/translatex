@@ -2,7 +2,8 @@
 
 ## Bugs & Fixes
 
-- [ ]
+- [ ] Fix math environment preserving of any text that is located deep caused by earlier optimization
+- [ ] Add guardrails to keep from operating on empty strings in all stages
 
 ## Features
 
@@ -16,6 +17,10 @@
     - [ ] Debug/verbose mode (?)
 - [ ] Create a web interface
 - [ ] Let the user enter regex or similar extra logic
+- [ ] Make `__str__()` methods actually useful
+- [ ] Optimizations
+    - [ ] Generate as few tokens as possible (possibly multiple runs regrouping adjacent tokens)
+    - [ ] Don't send any split sequences that solely contain tokens.
 
 ## Configuration
 
