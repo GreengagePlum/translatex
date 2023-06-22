@@ -36,5 +36,3 @@ These commands are left unmarked so that later passes that use regex can handle 
 that never contain text to be translated, but some are also highly complicated or conditional so they require more
 intricate regex treatment.
 """
-LATEX_SPACERS: List[str] = [r"\\", r"\;", r"\:", r"\,", r"\ "]
-"""These are sequences used to add spacing in LaTeX. They are used by tokenizer for removal."""
