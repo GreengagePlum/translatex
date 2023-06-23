@@ -169,7 +169,9 @@ class Tokenizer:
         """Tokenizes all structures listed as to be completely removed in the data module."""
         current_string = process_string
         for command in COMPLETELY_REMOVED_COMMANDS:
-            pattern = re.compile(r"\\" + command + r"(?:\[.*\])*(\{[^{}]+\})+(?:\[.*\])*")
+            # TODO: Fix bug in regex !!!
+            # pattern = re.compile(r"\\" + command + r"(?:\[.*\])*(\{[^{}]+\})+(?:\[.*\])*")
+            pattern = re.compile(r"\\" + command + r"(?:\[.*\])*(\{(?:[^{}]|(?R))*\})+(?:\[.*\])*")
             all_replaced = False
             while not all_replaced:
                 match = pattern.search(current_string)
