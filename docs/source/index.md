@@ -120,6 +120,16 @@ Python 3.10.11
 
 ## Installation
 
+(shell_disclaimer)=
+
+```{eval-rst}
+.. note::
+
+    Pay attention to using ``bash`` to execute any of the commands with a square bracket (``[]``) syntax since ``zsh``
+    has issues parsing these commands and produces errors.
+
+```
+
 ### Install python package
 
 #### Using pip
@@ -147,7 +157,7 @@ code and have the changes take effect immediately.
 
 ### Run the unitary tests
 
-#### Install the development dependencies[*](#shell-disclaimer)
+#### Install the development dependencies[*](shell_disclaimer)
 
 ```bash
 pip install -e .[test]
@@ -165,7 +175,7 @@ See [.gitlab-ci.yml](https://gitlab.math.unistra.fr/cassandre/translatex/blob/ma
 
 ### Build the documentation
 
-#### Install the documentation dependencies[*](#shell-disclaimer)
+#### Install the documentation dependencies[*](shell_disclaimer)
 
 ```bash
 pip install -e .[doc]
@@ -181,16 +191,6 @@ sphinx-autobuild docs/source/ docs/_build/html --watch src/
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
-
-### Shell disclaimer
-
-```{eval-rst}
-.. note::
-
-    Pay attention to using ``bash`` to execute any of the commands with a square bracket (``[]``) syntax since ``zsh``
-    has issues parsing these commands and produces errors.
-
-```
 
 ## Usage
 
