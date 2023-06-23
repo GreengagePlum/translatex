@@ -4,6 +4,7 @@
 
 - [ ] Fix math environment preserving of any text that is located deep caused by earlier optimization
 - [ ] Add guardrails to keep from operating on empty strings in all stages
+- [ ] Fix tokenization issue (regex) caused by nested curly braces
 
 ## Features
 
@@ -12,12 +13,15 @@
     - [x] Add manual substitution/ignore syntax
     - [ ] Manage displaymath ending with a dot
 - [ ] Finish Translator
+    - [ ] Additional APIs
+    - [ ] Doc and test
 - [ ] Finish CLI
-    - [ ] Add options to stop at certain stages (marking, tokenization...)
-    - [ ] Debug/verbose mode (?)
+    - [x] Add options to stop at certain stages (marking, tokenization...)
+    - [x] Debug/verbose mode (?)
+    - [ ] Doc and test
 - [ ] Create a web interface
 - [ ] Let the user enter regex or similar extra logic
-- [ ] Make `__str__()` methods actually useful
+- [ ] Make `__str__()` methods more useful
 - [ ] Optimizations
     - [ ] Generate as few tokens as possible (possibly multiple runs regrouping adjacent tokens)
     - [ ] Don't send any split sequences that solely contain tokens.
@@ -30,6 +34,9 @@
 ## Miscellaneous
 
 - [ ] Add `CONTRIBUTING.md`
+- [ ] Finish Sphinx main page
+    - [ ] Document interface and features for the end user
+- [ ] Fill `CHANGELOG.md`
 
 ## Done
 
