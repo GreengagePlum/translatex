@@ -1,6 +1,8 @@
-"""Main module."""
+"""Translatex: A LaTeX translator."""
+
 import argparse
 import sys
+from pathlib import Path
 
 from translatex import __version__
 from translatex.preprocessor import Preprocessor
@@ -12,25 +14,9 @@ DEFAULT_INTER_FILE_PRE: str = "~"
 DEFAULT_INTER_FILE_EXT: str = "txt"
 
 
-def main():
-    """Console script for translatex."""
-    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
-    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}", help="Version number")
-    parser.add_argument("-d", "--debug", action="store_true", help="Debug option to generate intermediary files")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Print additional info on <stderr>")
-    mutually_exclusive_group = parser.add_mutually_exclusive_group()
-    mutually_exclusive_group.add_argument("--dry-run", action="store_true",
-                                          help="Don't translate (no API call), just run the chain of operations")
-    mutually_exclusive_group.add_argument("-s", "--stop", choices=["Preprocessor", "Marker", "Tokenizer", "Translator"],
-                                          help="Stop at specified stage and write its result to output")
-    parser.add_argument("--no-pre", action="store_false",
-                        help="Don't do manual substitution during preprocessing stage")
-    parser.add_argument("-mf", "--marker-format", help="Marker format to use during marking stage")
-    parser.add_argument("-tf", "--token-format", help="Token format to use during tokenization stage")
-    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
-    parser.add_argument('outfile', nargs='?', type=argparse.FileType('w+'), default=sys.stdout)
-    args = parser.parse_args()
-    base_file: str = DEFAULT_INTER_FILE_PRE + args.infile.name.split("/")[-1].split(".")[0]
+def translatex(args: argparse.Namespace) -> None:
+    """Run the translatex pipeline on a LaTeX source file."""
+    base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
     p.process()
     if args.verbose:
@@ -85,6 +71,27 @@ def main():
     p.update_from_marker(m)
     p.rebuild(args.no_pre)
     args.outfile.write(p.unprocessed_latex)
+
+
+def main():
+    """Console script for translatex."""
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}", help="Version number")
+    parser.add_argument("-d", "--debug", action="store_true", help="Debug option to generate intermediary files")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print additional info on <stderr>")
+    mutually_exclusive_group = parser.add_mutually_exclusive_group()
+    mutually_exclusive_group.add_argument("--dry-run", action="store_true",
+                                          help="Don't translate (no API call), just run the chain of operations")
+    mutually_exclusive_group.add_argument("-s", "--stop", choices=["Preprocessor", "Marker", "Tokenizer", "Translator"],
+                                          help="Stop at specified stage and write its result to output")
+    parser.add_argument("--no-pre", action="store_false",
+                        help="Don't do manual substitution during preprocessing stage")
+    parser.add_argument("-mf", "--marker-format", help="Marker format to use during marking stage")
+    parser.add_argument("-tf", "--token-format", help="Token format to use during tokenization stage")
+    parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
+    parser.add_argument('outfile', nargs='?', type=argparse.FileType('w+'), default=sys.stdout)
+    args = parser.parse_args()
+    translatex(args)
 
 
 if __name__ == "__main__":
