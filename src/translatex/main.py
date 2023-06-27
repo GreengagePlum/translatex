@@ -10,7 +10,7 @@ from translatex.marker import Marker
 from translatex.tokenizer import Tokenizer
 from translatex.translator import Translator
 
-DEFAULT_INTER_FILE_PRE: str = "~"
+DEFAULT_INTER_FILE_PRE: str = "_"
 DEFAULT_INTER_FILE_EXT: str = "txt"
 
 

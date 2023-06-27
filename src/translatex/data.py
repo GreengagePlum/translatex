@@ -27,7 +27,7 @@ SPECIAL_COMMANDS: List[str] = ["draw", "fill", "filldraw", "node", "verb", "item
 """These are commands that need a special regex treatment to extract their text."""
 COMPLETELY_REMOVED_COMMANDS: List[str] = ["label", "ref", "cite", "pageref", "url", "lstinputlisting",
                                           "inputencoding", "bibliography", "bibliographystyle", "setlength", "color",
-                                          "pagecolor", "includegraphics", "rule"]
+                                          "pagecolor", "input", "includegraphics", "rule"]
 """These are commands that need to be completely tokenized and that never have text to be translated inside."""
 SKIPPED_COMMANDS: List[str] = SPECIAL_COMMANDS + COMPLETELY_REMOVED_COMMANDS
 """These are the names of the known LaTeX commands to the program that require special attention.
