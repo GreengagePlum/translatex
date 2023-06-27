@@ -5,6 +5,8 @@ token format. The string is finalized for transmission to an automatic translato
 and the tokens left. The tokens are to be chosen in a way that won't disturb the translation nor get modified or removed
 during the said process.
 """
+import sys
+
 import regex as re
 from typing import Dict, TYPE_CHECKING
 
@@ -161,6 +163,10 @@ class Tokenizer:
             format_str[second_curly_start + 2:])
         return escaped_token_format.format(r"(?:\d+)", r"(?:\d+)")
 
+    def dump_store(self) -> str:
+        string_transformed = [str(item) + "\n" for item in self._token_store.items()]
+        return "".join(string_transformed)
+
     def _token_regex(self) -> str:
         """Construct a regex corresponding to the current instance token format."""
         return Tokenizer.token_regex(self._token_format)
@@ -222,7 +228,7 @@ class Tokenizer:
         until the text to keep uses one token, all that is between the text to keep uses one token and everything at the
         end uses one token.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
         pattern = re.compile(r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
         current_string = process_string
         all_replaced = False
@@ -260,7 +266,7 @@ class Tokenizer:
             commands can have options inside square braces which need to also be replaced by the token used.
 
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
         # @formatter:off
         pattern = re.compile(
             r"\\" + marker_regex + r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?1))*\])*"
@@ -326,7 +332,7 @@ class Tokenizer:
         would be command markers) or inside ``\begin{}...\end{}`` statements (these are named environment markers) are
         tokenized.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
         pattern = re.compile(marker_regex)
         current_string = process_string
         all_replaced = False
@@ -389,8 +395,12 @@ class Tokenizer:
         During this stage, thanks to the subroutines, all strings replaced by tokens are stored in the dictionary; thus
         it is populated after a call to this method (a first tokenization run).
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
+        if not self._marked_string:
+            raise ValueError("Marked string is empty, nothing to tokenize")
         split_strings: List[str] = re.split(r"(^.*" + marker_regex + r".*$)", self._marked_string, 1, re.MULTILINE)
+        if len(split_strings) == 1:
+            raise ValueError("No markers found, tokenization halted")
         header_string: str = split_strings[0]
         main_string: str = split_strings[1] + split_strings[2]
         main_string = self._tokenize_comments(main_string)
@@ -413,11 +423,12 @@ class Tokenizer:
         Later, a simple string replace is performed for all the rest of the "normal/simple" tokens.
         """
         main_string: str = self._tokenized_string
-        # TODO: The following for loop for checking errors might need a change (tokens could be getting tokenized and
-        #  not directly visible during a first iteration)
-        # for token in self._token_store.keys():
-        #     if main_string.find(token) == -1:
-        #         raise LookupError("Detected missing token in string to detokenize")
+        if not main_string:
+            raise ValueError("Tokenized string is empty, nothing to detokenize")
+        for token in self._token_store.keys():
+            if main_string.count(token) == 0:
+                print("Found missing or altered TOKEN: {} --> during stage TOKENIZER".format(token),
+                      file=sys.stderr)
         token_regex = self._token_regex()
         pattern = re.compile(
             r"(" + token_regex + r")\s?(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\})")

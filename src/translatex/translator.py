@@ -52,7 +52,7 @@ class Translator:
         return cls(tokenizer.tokenized_string, tokenizer.token_format)
 
     def __str__(self) -> str:
-        return "The translator has a base string of length {}".format(len(self._base_string))
+        return "The translator has a base string of length {} characters.".format(len(self._base_string))
 
     @property
     def tokenized_string(self) -> str:
@@ -111,8 +111,12 @@ class Translator:
 
     def translate(self) -> None:
         automatic_translator = gTrans()
+        if not self._token_format:
+            raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(r"(" + Tokenizer.token_regex(self._token_format) + r")",
                                                  self._tokenized_string, 1)
+        if len(tokenized_rest) == 0:
+            raise ValueError("No tokens found, translation halted")
         result_string = latex_header
         chunks = Translator.split_string_by_length("".join(tokenized_rest), self.service["properties"]["char-limit"])
         for chunk in chunks:
