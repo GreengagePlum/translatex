@@ -299,9 +299,15 @@ class Tokenizer:
         range to be replaced without the text: from the start until some text, from that text until some other text and
         finally from that text until the very end.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
-        pattern = re.compile(r"\\begin\{" + marker_regex + r"\}(?:\{.*\})*(\[.*\])*(?:\s*" +
-                             marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
+        marker_regex = Marker.marker_regex(self._marker_format)
+        # @formatter:off
+        pattern = re.compile(
+            r"\\begin\{" + marker_regex + r"\}"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?1))*\})*"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?2))*\])*"
+            r"(?:\s*" + marker_regex + r"\s*)*"
+            r"(?:\\end\{" + marker_regex + r"\})?")
+        # @formatter:on
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -431,7 +437,7 @@ class Tokenizer:
                       file=sys.stderr)
         token_regex = self._token_regex()
         pattern = re.compile(
-            r"(" + token_regex + r")\s?(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\})")
+            r"(" + token_regex + r")(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})")
         all_commands_replaced = False
         while not all_commands_replaced:
             match = pattern.search(main_string)
