@@ -169,8 +169,23 @@ class Tokenizer:
         """Tokenizes all structures listed as to be completely removed in the data module."""
         current_string = process_string
         for command in COMPLETELY_REMOVED_COMMANDS:
+            # Explanation for the following regex: The command has to have at least a single pair of curly braces
+            # following it. This can be located directly after the command or optionally be preceded by a set of
+            # square brackets. It can also optionally be followed by a set of square brackets. If there is a pair
+            # mismatch, regex fails (due to missing compliment, or backslash escaped opening and closing characters
+            # respectively). Each group is recursive to be able to match the outermost pair and its complete
+            # contents, which is why a pair mismatch is intolerable. Additionally, some tolerance is built-in. The
+            # regex is hardened against backslash escaped opening characters which fail on an odd number of preceding
+            # backslashes. All outermost pairs can have up to a single space between them since they don't have a
+            # meaning in LaTeX in this case and can be coming across frequently with non-formatted/linted LaTeX files.
+            # The regex stops on the encounter of the token format while matching curly braces and square brackets to
+            # avoid tokenizing tokens.
+            # @formatter:off
             pattern = re.compile(
-                r"\\" + command + r"(\[(?:[^\[\]]+|(?1))*\])*(\{(?:[^{}]+|(?2))*\})+(\[(?:[^\[\]]+|(?3))*\])*")
+                r"\\" + command + r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?1))*\])*"
+                                  r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})+"
+                                  r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?3))*\])*")
+            # @formatter:on
             all_replaced = False
             while not all_replaced:
                 match = pattern.search(current_string)
@@ -189,7 +204,7 @@ class Tokenizer:
             Not all special cases are processed so far.
 
         """
-        # TODO: Manage all special cases listed in data module (verb and especially tikz)
+        # TODO: Manage all special cases listed in data module ("verb" and especially "tikz")
         current_string = process_string
         pattern = r"\\item"
         match = re.search(pattern, current_string)
@@ -245,26 +260,27 @@ class Tokenizer:
             commands can have options inside square braces which need to also be replaced by the token used.
 
         """
-        # TODO: Conflicts with token format when matching all square brackets "[]", correct behaviour if necessary
-        # TODO: Improve square bracket handling in regex so that it recursively matches the outer first ones
-        # TODO: Make it not match square brackets with the same format as the default token format
         marker_regex = self._marker_format.format(r"(?:\d+)")
+        # @formatter:off
         pattern = re.compile(
-            r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{"
-                                   r"}]*})+|(?R))*\}))|(\{(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+\})?)")
+            r"\\" + marker_regex + r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?1))*\])*"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})*?"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?3))*\})?"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?4))*\])*")
+        # @formatter:on
         current_string = process_string
         all_replaced = False
         while not all_replaced:
             match = pattern.search(current_string)
             if match:
                 next_token = self._next_token()
-                if match[1]:
-                    stored_string = match[0][:match.start(1) - match.start(
-                        0)] + Tokenizer.DEFAULT_DETOKENIZER_CONTENT_INDICATOR + match[0][match.end(1) - match.start(0):]
+                if match[3]:
+                    stored_string = match[0][:match.start(3) - match.start(
+                        0)] + Tokenizer.DEFAULT_DETOKENIZER_CONTENT_INDICATOR + match[0][match.end(3) - match.start(0):]
                     self._token_store.update({next_token: stored_string})
                 else:
                     self._token_store.update({next_token: match[0]})
-                current_string, _ = pattern.subn(next_token + r"\1", current_string, 1)
+                current_string, _ = pattern.subn(next_token + r"\3", current_string, 1)
             else:
                 all_replaced = True
         return current_string
@@ -340,7 +356,7 @@ class Tokenizer:
         return current_string
 
     def _tokenize_latex_escapes(self, process_string: str) -> str:
-        r"""All LaTeX backslash escapes are tokenized here such as ``\; \,``.
+        r"""All LaTeX backslash escapes are tokenized here such as ``\; \, \{``.
 
         This is done so that the string is further freed from potentially confusing sequences to the automatic
         translator.
