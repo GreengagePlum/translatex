@@ -79,3 +79,31 @@ def test_undo_tokenization(small_tokenizer):
     t.tokenize()
     t.detokenize()
     assert t.base_string == t.marked_string
+
+
+def test_empty_tokenization(small_tokenizer):
+    """Ensure Tokenizer raises an error when trying to tokenize an empty string"""
+    t = small_tokenizer
+    t.marked_string = ""
+    with pytest.raises(ValueError):
+        t.tokenize()
+
+
+def test_empty_detokenization(small_tokenizer):
+    """Ensure Tokenizer raises an error when trying to detokenize an empty string"""
+    t = small_tokenizer
+    with pytest.raises(ValueError):
+        t.detokenize()
+
+
+def test_warning_detokenization(small_tokenizer, capsys):
+    """Ensure Tokenizer warns about missing or altered tokens on ``stderr``"""
+    t = small_tokenizer
+    t.tokenize()
+    t.detokenize()
+    _, captured = capsys.readouterr()
+    assert len(captured) == 0
+    t.tokenized_string = "foo"
+    t.detokenize()
+    _, captured = capsys.readouterr()
+    assert len(captured) > 0

@@ -3,7 +3,7 @@ from translatex.preprocessor import Preprocessor
 
 
 @pytest.fixture
-def small_preprocessor(small_marker) -> Preprocessor:
+def small_preprocessor() -> Preprocessor:
     return Preprocessor(r"""
     %@{ This is my manual replacement block
     \textbf{Welcome to France!}
