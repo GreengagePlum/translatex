@@ -71,7 +71,7 @@ The following is an overview on the inner processing stages of TransLaTeX.
 - Any commands and metadata that can be put before `\begin{document}` should be put before and thus in the header.
   Otherwise, they will get tokenized and translated. More concisely, given file must be correct and conform LaTeX.
 - Text inside math environments are kept intact for translation only if they are located one level deep. For example
-  (albeit not the best example), the `textsf` command's contents won't be translated since it is more than one level
+  (albeit not the best example), the `\textsf` command's contents won't be translated since it is more than one level
   deep in a math environment in the following code block.
 
 ```latex
