@@ -19,6 +19,8 @@
 - [ ] Optimizations
     - [ ] Generate as few tokens as possible (possibly multiple runs regrouping adjacent tokens)
     - [ ] Don't send any split sequences that solely contain tokens.
+    - [ ] Replace dictionary store with a fixed size array for optimization
+        - [ ] Find a way to determine the size of the array before parsing
 - [ ] Add option to "flatten" multi-file LaTeX projects into a single file
 - [ ] Create a LaTeX object to store the string to operate on (dissected into preamble, document, etc.)
 
