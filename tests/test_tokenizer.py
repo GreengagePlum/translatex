@@ -17,7 +17,7 @@ def test_token_count(small_tokenizer):
     """Verify number of tokens generated for a simple LaTeX snippet."""
     t = small_tokenizer
     t.tokenize()
-    assert t.total_token_count() == 4
+    assert t.total_token_count() == 5
 
 
 def test_modification1(small_tokenizer):

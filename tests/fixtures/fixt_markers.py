@@ -8,6 +8,7 @@ def small_marker() -> Marker:
     return Marker(r"""
     \begin{document}
     \textbf{\color{\text{blue}} Hello world}
+    \verb+hello+
     \end{document}
     """)
 

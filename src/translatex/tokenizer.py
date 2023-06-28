@@ -210,7 +210,6 @@ class Tokenizer:
             Not all special cases are processed so far.
 
         """
-        # TODO: Manage all special cases listed in data module ("verb" and especially "tikz")
         current_string = process_string
         pattern = r"\\item"
         match = re.search(pattern, current_string)
@@ -218,6 +217,16 @@ class Tokenizer:
             next_token = self._next_token()
             self._token_store.update({next_token: match[0]})
             current_string = re.sub(pattern, next_token, current_string)
+        pattern = re.compile(r"\\verb(\S).*\1")
+        all_replaced = False
+        while not all_replaced:
+            match = pattern.search(current_string)
+            if match:
+                next_token = self._next_token()
+                self._token_store.update({next_token: match[0]})
+                current_string, _ = pattern.subn(next_token, current_string, 1)
+            else:
+                all_replaced = True
         return current_string
 
     def _tokenize_unnamed_math_optimized(self, process_string: str) -> str:
