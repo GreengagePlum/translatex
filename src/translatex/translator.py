@@ -1,29 +1,31 @@
-"""bla"""
-from dataclasses import dataclass
+"""The translation module is where all the logic for the last stage of TransLaTeX resides.
+
+Abstractions for different translation services and APIs as well as methods to resize strings to optimize the number of
+API calls.
+"""
 import os
 import re
-import requests
-import sys
-from typing import List, Dict, Any
+from dataclasses import dataclass
+from typing import Dict
 
-from googletrans import Translator as gTrans
+import requests
 import googletrans
-from translatex.marker import Marker  # temporary
-from translatex.preprocessor import Preprocessor  # temporary
+from googletrans import Translator as gTrans
+
 from translatex.tokenizer import Tokenizer
 
 
 @dataclass
 class TranslationService:
     """An abstract class that represents a translation service."""
-    name = str()
-    overall_char_limit = int()
-    char_limit = int()
-    array_support = bool()
-    array_item_limit = int()
-    array_item_char_limit = int()
-    array_overall_char_limit = int()
-    url = str()
+    name: str = str()
+    overall_char_limit: int = int()
+    char_limit: int = int()
+    array_support: bool = bool()
+    array_item_limit: int = int()
+    array_item_char_limit: int = int()
+    array_overall_char_limit: int = int()
+    url: str = str()
     languages = Dict[str, str]
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -45,7 +47,6 @@ class GoogleTranslate(TranslationService):
                  for code, lang in googletrans.LANGUAGES.items()}
 
     def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        """Return a translated string from source language to destination language."""
         try:
             google_api_key = os.environ['GOOGLE_API_KEY']
         except KeyError:
@@ -68,6 +69,7 @@ class GoogleTranslate(TranslationService):
 
 
 class IRMA(GoogleTranslate):
+    """Translate using Unistra IRMA DLMDS."""
     name = "IRMA - M2M100"
     url = 'https://dlmds.math.unistra.fr/translation'
 
@@ -84,8 +86,8 @@ class IRMA(GoogleTranslate):
 
 
 class GoogleTranslateNoKey(GoogleTranslate):
-    """
-    Use googletrans without an API key.
+    """Use googletrans without an API key.
+
     This is not recommended, as it is against Google's TOS.
     """
     name = "Google Translate (no key)"
@@ -94,7 +96,7 @@ class GoogleTranslateNoKey(GoogleTranslate):
         return gTrans().translate(text, src=source_lang, dest=target_lang).text
 
 
-TRANSLATION_SERVICES: Dict[str, TranslationService | GoogleTranslate | IRMA] = {
+TRANSLATION_SERVICES: Dict[str, TranslationService] = {
     GoogleTranslate.name: GoogleTranslate(),
     GoogleTranslateNoKey.name: GoogleTranslateNoKey(),
     IRMA.name: IRMA()
@@ -104,7 +106,12 @@ TRANSLATION_SERVICES: Dict[str, TranslationService | GoogleTranslate | IRMA] = {
 class Translator:
     """Translator for tokenized LaTeX depending on the chosen languages and service.
 
-    bla
+    Splits the source string into reasonable chunks using a full stop as a seperator while trying to approach the used
+    service's limit per request as closely as possible to make the least number of API calls.
+
+    The operation is one way only. Once an instance is created, the tokenized source string is translated to the given
+    language in the related instance variable. You can change the source string and languages and launch another
+    translation.
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
@@ -114,10 +121,12 @@ class Translator:
                  service_name=DEFAULT_SERVICE_NAME) -> None:
         """Creates a Tokenizer with default settings.
 
-        bla
+        Default settings are taken from the class variables.
 
         Args:
             tokenized_string: The string that contains tokenized LaTeX
+            token_format: The format string used for tokens
+            service_name: Name of the translation service to use
 
         """
         self._base_string: str = tokenized_string
@@ -125,7 +134,7 @@ class Translator:
         self._translated_string: str = str()
         self.source_lang = Translator.DEFAULT_SOURCE_LANG
         self.destination_lang = Translator.DEFAULT_DEST_LANG
-        self.service: dict = TRANSLATION_SERVICES[service_name]
+        self.service: TranslationService = TRANSLATION_SERVICES[service_name]
         self._token_format: str = token_format
 
     @classmethod
@@ -192,7 +201,15 @@ class Translator:
         return chunks
 
     def translate(self) -> None:
-        automatic_translator = gTrans()
+        """Translation is performed with the set source and destination languages and the chosen service.
+
+        The Result is stored in an instance variable.
+
+        Raises:
+            ValueError: If the source string is empty
+            ValueError: If the source string contains no tokens
+
+        """
         if not self._token_format:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(r"(" + Tokenizer.token_regex(self._token_format) + r")",
@@ -200,40 +217,7 @@ class Translator:
         if len(tokenized_rest) == 0:
             raise ValueError("No tokens found, translation halted")
         result_string = latex_header
-        chunks = Translator.split_string_by_length(
-            "".join(tokenized_rest), self.service["char-limit"])
+        chunks = Translator.split_string_by_length("".join(tokenized_rest), self.service.char_limit)
         for chunk in chunks:
-            result_string += self.service.translate(chunk,
-                                                    src=self.source_lang,
-                                                    dest=self.destination_lang)
+            result_string += self.service.translate(chunk, self.source_lang, self.destination_lang)
         self._translated_string = result_string
-
-
-if __name__ == "__main__":
-    base_file = "translatex"
-    with open(f"../../examples/{base_file}.tex") as f:
-        p = Preprocessor(f.read())
-
-    p.process()
-    m = Marker.from_preprocessor(p)
-    m.mark()
-    t = Tokenizer.from_marker(m)
-    t.tokenize()
-
-    with open(f"../../examples/{base_file}_post.tex", "w+") as f:
-        f.write(t.tokenized_string)
-
-    a = Translator.from_tokenizer(t)
-    a.translate()
-
-    with open(f"../../examples/{base_file}_post2.tex", "w+") as f:
-        f.write(a.translated_string)
-
-    t.update_from_translator(a)
-    t.detokenize()
-    m.update_from_tokenizer(t)
-    m.unmark()
-    p.update_from_marker(m)
-    p.rebuild()
-    with open(f"../../examples/{base_file}_post3.tex", "w+") as f:
-        f.write(p.unprocessed_latex)
