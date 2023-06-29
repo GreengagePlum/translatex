@@ -5,12 +5,17 @@ token format. The string is finalized for transmission to an automatic translato
 and the tokens left. The tokens are to be chosen in a way that won't disturb the translation nor get modified or removed
 during the said process.
 """
+import sys
+
 import regex as re
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
 
 from translatex.marker import Marker
 
 from translatex.data import *
+
+if TYPE_CHECKING:
+    from translatex.translator import Translator
 
 
 class Tokenizer:
@@ -57,6 +62,10 @@ class Tokenizer:
     def from_marker(cls, marker: Marker) -> "Tokenizer":
         """Another constructor that creates a Tokenizer from a given Marker. For convenience."""
         return cls(marker.marked_latex, marker.marker_format)
+
+    def update_from_translator(self, translator: "Translator") -> None:
+        """A convenience method to update the tokenized string from a Translator."""
+        self.tokenized_string = translator.translated_string
 
     def __str__(self) -> str:
         return "The tokenizer format is {} and tokenizer count is at {}.".format(self._token_format,
@@ -133,26 +142,56 @@ class Tokenizer:
 
     @token_format.setter
     def token_format(self, format_str: str) -> None:
+        Tokenizer.token_format_check(format_str)
+        self._token_format = format_str
+
+    @staticmethod
+    def token_format_check(format_str: str) -> None:
         pattern = r'\{\}'
         matches = re.findall(pattern, format_str, re.DOTALL)
         if len(matches) < 2:
             raise ValueError("Not enough empty curly braces in the given format string")
-        self._token_format = format_str
+
+    @staticmethod
+    def token_regex(format_str: str) -> str:
+        """Construct a regex corresponding to the given token format."""
+        Tokenizer.token_format_check(format_str)
+        first_curly_start = format_str.find(r"{}")
+        second_curly_start = format_str.find(r"{}", first_curly_start + 2)
+        escaped_token_format = re.escape(format_str[:first_curly_start]) + "{}" + re.escape(
+            format_str[first_curly_start + 2:second_curly_start]) + "{}" + re.escape(
+            format_str[second_curly_start + 2:])
+        return escaped_token_format.format(r"(?:\d+)", r"(?:\d+)")
+
+    def dump_store(self) -> str:
+        string_transformed = [str(item) + "\n" for item in self._token_store.items()]
+        return "".join(string_transformed)
 
     def _token_regex(self) -> str:
-        """Construct a regex corresponding to the current token format."""
-        first_curly_start = self._token_format.find(r"{}")
-        second_curly_start = self._token_format.find(r"{}", first_curly_start + 2)
-        escaped_token_format = re.escape(self._token_format[:first_curly_start]) + "{}" + re.escape(
-            self._token_format[first_curly_start + 2:second_curly_start]) + "{}" + re.escape(
-            self._token_format[second_curly_start + 2:])
-        return escaped_token_format.format(r"(?:\d+)", r"(?:\d+)")
+        """Construct a regex corresponding to the current instance token format."""
+        return Tokenizer.token_regex(self._token_format)
 
     def _tokenize_completely_removed(self, process_string: str) -> str:
         """Tokenizes all structures listed as to be completely removed in the data module."""
         current_string = process_string
         for command in COMPLETELY_REMOVED_COMMANDS:
-            pattern = re.compile(r"\\" + command + r"(?:\[.*\])*(\{[^{}]+\})+(?:\[.*\])*")
+            # Explanation for the following regex: The command has to have at least a single pair of curly braces
+            # following it. This can be located directly after the command or optionally be preceded by a set of
+            # square brackets. It can also optionally be followed by a set of square brackets. If there is a pair
+            # mismatch, regex fails (due to missing compliment, or backslash escaped opening and closing characters
+            # respectively). Each group is recursive to be able to match the outermost pair and its complete
+            # contents, which is why a pair mismatch is intolerable. Additionally, some tolerance is built-in. The
+            # regex is hardened against backslash escaped opening characters which fail on an odd number of preceding
+            # backslashes. All outermost pairs can have up to a single space between them since they don't have a
+            # meaning in LaTeX in this case and can be coming across frequently with non-formatted/linted LaTeX files.
+            # The regex stops on the encounter of the token format while matching curly braces and square brackets to
+            # avoid tokenizing tokens.
+            # @formatter:off
+            pattern = re.compile(
+                r"\\" + command + r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?1))*\])*"
+                                  r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})+"
+                                  r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?3))*\])*")
+            # @formatter:on
             all_replaced = False
             while not all_replaced:
                 match = pattern.search(current_string)
@@ -171,7 +210,6 @@ class Tokenizer:
             Not all special cases are processed so far.
 
         """
-        # TODO: Manage all special cases listed in data module (verb and especially tikz)
         current_string = process_string
         pattern = r"\\item"
         match = re.search(pattern, current_string)
@@ -179,6 +217,16 @@ class Tokenizer:
             next_token = self._next_token()
             self._token_store.update({next_token: match[0]})
             current_string = re.sub(pattern, next_token, current_string)
+        pattern = re.compile(r"\\verb(\S).*\1")
+        all_replaced = False
+        while not all_replaced:
+            match = pattern.search(current_string)
+            if match:
+                next_token = self._next_token()
+                self._token_store.update({next_token: match[0]})
+                current_string, _ = pattern.subn(next_token, current_string, 1)
+            else:
+                all_replaced = True
         return current_string
 
     def _tokenize_unnamed_math_optimized(self, process_string: str) -> str:
@@ -189,7 +237,7 @@ class Tokenizer:
         until the text to keep uses one token, all that is between the text to keep uses one token and everything at the
         end uses one token.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
         pattern = re.compile(r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
         current_string = process_string
         all_replaced = False
@@ -224,29 +272,30 @@ class Tokenizer:
 
         .. warning::
             Doesn't include square braces in the regex for the time being but must be included some time later since
-            commands can have options inside square braces which need to be also replaced by the token used.
+            commands can have options inside square braces which need to also be replaced by the token used.
 
         """
-        # TODO: Conflicts with token format when matching all square brackets "[]", correct behaviour if necessary
-        # TODO: Improve square bracket handling in regex so that it recursively matches the outer first ones
-        # TODO: Make it not match square brackets with the same format as the default token format
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
+        # @formatter:off
         pattern = re.compile(
-            r"\\" + marker_regex + r"(?:(?:(?:\{[^{}]+\})*(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{"
-                                   r"}]*})+|(?R))*\}))|(\{(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+\})?)")
+            r"\\" + marker_regex + r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?1))*\])*"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})*?"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?3))*\})?"
+                                   r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?4))*\])*")
+        # @formatter:on
         current_string = process_string
         all_replaced = False
         while not all_replaced:
             match = pattern.search(current_string)
             if match:
                 next_token = self._next_token()
-                if match[1]:
-                    stored_string = match[0][:match.start(1) - match.start(
-                        0)] + Tokenizer.DEFAULT_DETOKENIZER_CONTENT_INDICATOR + match[0][match.end(1) - match.start(0):]
+                if match[3]:
+                    stored_string = match[0][:match.start(3) - match.start(
+                        0)] + Tokenizer.DEFAULT_DETOKENIZER_CONTENT_INDICATOR + match[0][match.end(3) - match.start(0):]
                     self._token_store.update({next_token: stored_string})
                 else:
                     self._token_store.update({next_token: match[0]})
-                current_string, _ = pattern.subn(next_token + r"\1", current_string, 1)
+                current_string, _ = pattern.subn(next_token + r"\3", current_string, 1)
             else:
                 all_replaced = True
         return current_string
@@ -259,9 +308,16 @@ class Tokenizer:
         range to be replaced without the text: from the start until some text, from that text until some other text and
         finally from that text until the very end.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
-        pattern = re.compile(r"\\begin\{" + marker_regex + r"\}(?:\{.*\})*(\[.*\])*(?:\s*" +
-                             marker_regex + r"\s*)*(?:\\end\{" + marker_regex + r"\})?")
+        marker_regex = Marker.marker_regex(self._marker_format)
+        # @formatter:off
+        pattern = re.compile(
+            r"\\begin\{" + marker_regex + r"\}"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?1))*\})*"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?2))*\])*"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?3))*\})*"
+            r"(?:\s*" + marker_regex + r"\s*)*"
+            r"(?:\\end\{" + marker_regex + r"\})?")
+        # @formatter:on
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -292,7 +348,7 @@ class Tokenizer:
         would be command markers) or inside ``\begin{}...\end{}`` statements (these are named environment markers) are
         tokenized.
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
         pattern = re.compile(marker_regex)
         current_string = process_string
         all_replaced = False
@@ -321,20 +377,23 @@ class Tokenizer:
                 all_replaced = True
         return current_string
 
-    def _tokenize_latex_spacers(self, process_string: str) -> str:
-        r"""All LaTeX backslash spacers are tokenized here such as ``\; \,``.
+    def _tokenize_latex_escapes(self, process_string: str) -> str:
+        r"""All LaTeX backslash escapes are tokenized here such as ``\; \, \{``.
 
         This is done so that the string is further freed from potentially confusing sequences to the automatic
         translator.
         """
         current_string = process_string
-        for spacer in LATEX_SPACERS:
-            pattern = re.escape(spacer)
+        pattern = re.compile(r"(?:\\\S|\\)")
+        all_replaced = False
+        while not all_replaced:
             match = re.search(pattern, current_string)
             if match:
                 next_token = self._next_token()
                 self._token_store.update({next_token: match[0]})
-                current_string = re.sub(pattern, next_token, current_string)
+                current_string = re.sub(pattern, next_token, current_string, 1)
+            else:
+                all_replaced = True
         return current_string
 
     def tokenize(self) -> None:
@@ -351,9 +410,18 @@ class Tokenizer:
 
         During this stage, thanks to the subroutines, all strings replaced by tokens are stored in the dictionary; thus
         it is populated after a call to this method (a first tokenization run).
+
+        Raises:
+            ValueError: If string to tokenize is empty.
+            ValueError: If string to tokenize doesn't contain any markers.
+
         """
-        marker_regex = self._marker_format.format(r"(?:\d+)")
+        marker_regex = Marker.marker_regex(self._marker_format)
+        if not self._marked_string:
+            raise ValueError("Marked string is empty, nothing to tokenize")
         split_strings: List[str] = re.split(r"(^.*" + marker_regex + r".*$)", self._marked_string, 1, re.MULTILINE)
+        if len(split_strings) == 1:
+            raise ValueError("No markers found, tokenization halted")
         header_string: str = split_strings[0]
         main_string: str = split_strings[1] + split_strings[2]
         main_string = self._tokenize_comments(main_string)
@@ -363,7 +431,7 @@ class Tokenizer:
         main_string = self._tokenize_commands(main_string)
         main_string = self._tokenize_named_envs(main_string)
         main_string = self._tokenize_markers(main_string)
-        main_string = self._tokenize_latex_spacers(main_string)
+        main_string = self._tokenize_latex_escapes(main_string)
         self._tokenized_string = header_string + main_string
 
     def detokenize(self) -> None:
@@ -374,16 +442,23 @@ class Tokenizer:
         the dictionary and then the whole token-curly brace should be replaced with the modified dictionary value.
 
         Later, a simple string replace is performed for all the rest of the "normal/simple" tokens.
+
+        Write messages to ``stderr`` on encounter of any missing or altered tokens in the string to detokenize.
+
+        Raises:
+            ValueError: If string to detokenize is empty.
+
         """
         main_string: str = self._tokenized_string
-        # TODO: The following for loop for checking errors might need a change (tokens might be tokenized and not
-        #  directly visible during a first iteration)
-        # for token in self._token_store.keys():
-        #     if main_string.find(token) == -1:
-        #         raise LookupError("Detected missing token in string to detokenize")
+        if not main_string:
+            raise ValueError("Tokenized string is empty, nothing to detokenize")
+        for token in self._token_store.keys():
+            if main_string.count(token) == 0:
+                print("Found missing or altered TOKEN: {} --> during stage TOKENIZER".format(token),
+                      file=sys.stderr)
         token_regex = self._token_regex()
         pattern = re.compile(
-            r"(" + token_regex + r")(\{(?:(?:[^{}]|(?<=(?<!\\)(?:\\\\)*(?:\\{2})*\\){[^{}]*})+|(?R))*\})")
+            r"(" + token_regex + r")(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})")
         all_commands_replaced = False
         while not all_commands_replaced:
             match = pattern.search(main_string)

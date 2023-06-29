@@ -139,3 +139,31 @@ def test_undo_marking(small_marker):
     m.mark()
     m.unmark()
     assert m.base_latex == m.unmarked_latex
+
+
+def test_empty_marking(small_marker):
+    """Ensure Marker raises an error when trying to mark an empty string"""
+    m = small_marker
+    m.unmarked_latex = ""
+    with pytest.raises(ValueError):
+        m.mark()
+
+
+def test_empty_unmarking(small_marker):
+    """Ensure Marker raises an error when trying to unmark an empty string"""
+    m = small_marker
+    with pytest.raises(ValueError):
+        m.unmark()
+
+
+def test_warning_unmarking(small_marker, capsys):
+    """Ensure Marker warns about missing or altered markers on ``stderr``"""
+    m = small_marker
+    m.mark()
+    m.unmark()
+    _, captured = capsys.readouterr()
+    assert len(captured) == 0
+    m.marked_latex = "foo"
+    m.unmark()
+    _, captured = capsys.readouterr()
+    assert len(captured) > 0

@@ -30,3 +30,31 @@ def test_preserving(small_preprocessor):
     p.rebuild(Preprocessor.DISABLE_SUBSTITUTION)
     after = p.unprocessed_latex
     assert base == after
+
+
+def test_empty_processing(small_preprocessor):
+    """Ensure Preprocessor raises an error when trying to process an empty string"""
+    p = small_preprocessor
+    p.unprocessed_latex = ""
+    with pytest.raises(ValueError):
+        p.process()
+
+
+def test_empty_rebuild(small_preprocessor):
+    """Ensure Preprocessor raises an error when trying to rebuild an empty string"""
+    p = small_preprocessor
+    with pytest.raises(ValueError):
+        p.rebuild()
+
+
+def test_warning_rebuild(small_preprocessor, capsys):
+    """Ensure Preprocessor warns about missing or altered indicators on ``stderr``"""
+    p = small_preprocessor
+    p.process()
+    p.rebuild()
+    _, captured = capsys.readouterr()
+    assert len(captured) == 0
+    p.processed_latex = "foo"
+    p.rebuild()
+    _, captured = capsys.readouterr()
+    assert len(captured) > 0

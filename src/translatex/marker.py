@@ -9,6 +9,7 @@ structures that need to be tokenized later are marked recursively so that the to
 compatible with many more types of structures.
 """
 import re
+import sys
 from typing import Dict, Optional, TYPE_CHECKING
 
 from TexSoup import TexSoup
@@ -25,9 +26,8 @@ class Marker:
     """This class traverses the LaTeX syntax tree and recursively marks structures to be tokenized later.
 
     The parse tree is constructed and traversed using TexSoup and its methods.
+    TexSoup's best effort fault tolerance mode for parsing LaTeX is not used.
     """
-    # TODO: Replace dictionary store with a fixed size array for optimization
-    # TODO: Find a way to determine the size of the array before parsing
 
     DEFAULT_INITIAL_MARKER_INDEX: int = 0
     DEFAULT_MARKER_FORMAT: str = "//{}//"
@@ -121,11 +121,31 @@ class Marker:
 
     @marker_format.setter
     def marker_format(self, format_str: str) -> None:
+        Marker.marker_format_check(format_str)
+        self._marker_format = format_str
+
+    @staticmethod
+    def marker_format_check(format_str: str) -> None:
         pattern = r'\{\}'
         match = re.search(pattern, format_str)
         if not match:
             raise ValueError("No empty curly braces in the given format string")
-        self._marker_format = format_str
+
+    @staticmethod
+    def marker_regex(format_str: str) -> str:
+        """Construct a regex corresponding to the given marker format."""
+        Marker.marker_format_check(format_str)
+        curly_start = format_str.find(r"{}")
+        escaped_marker_format = re.escape(format_str[:curly_start]) + "{}" + re.escape(format_str[curly_start + 2:])
+        return escaped_marker_format.format(r"(?:\d+)")
+
+    def dump_store(self) -> str:
+        string_transformed = [str(item) + "\n" for item in self._marker_store.items()]
+        return "".join(string_transformed)
+
+    def _marker_regex(self) -> str:
+        """Construct a regex corresponding to the current instance marker format."""
+        return Marker.marker_regex(self._marker_format)
 
     def _mark_node_name(self, node: TexNode) -> None:
         """This method replaces a TexNode's name attribute with a marker and saves the replaced string in the
@@ -171,7 +191,6 @@ class Marker:
             replace_range: A range in the list of expressions to mark
 
         """
-        # TODO: Test if lists need deep copying
         if (original_expression_size != 0) ^ (replace_range is not None):
             raise ValueError("Either supply both optional parameters or none of them")
         if original_expression_size == 0 and replace_range is None:
@@ -297,16 +316,22 @@ class Marker:
     def mark(self) -> None:
         r"""This produces the marked LaTeX string from the unmarked string if available.
 
-        The unmarked LaTeX has to have a \\begin{document} and an \\end{document} statement at least. Also, it is
+        The unmarked LaTeX has to have a ``\begin{document}...\end{document}`` statement at least. Also, it is
         assumed correct LaTeX that can be compiled without issues. Otherwise, TexSoup parsing will produce errors.
 
         The marked string is stored in an instance variable at the end.
+
+        Raises:
+            ValueError: If string to mark is empty.
+
         """
         if self._unmarked_latex:
             soup_current: TexNode = TexSoup(self._unmarked_latex)
             # Start marking inside and including "\begin{document}" (headers untouched)
             self._traverse_ast(soup_current.find("document"))
             self._marked_latex = str(soup_current)
+        else:
+            raise ValueError("Unmarked string is empty, nothing to mark")
 
     def unmark(self) -> None:
         """This uses the marker store to rebuild the unmarked string.
@@ -314,15 +339,21 @@ class Marker:
         The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
+        Write messages to ``stderr`` on encounter of any missing or altered markers in the string to unmark.
+
         Raises:
             LookupError: If a marker is found to be missing in the processed string.
+            ValueError: If string to unmark is empty.
 
         """
-        latex: str = self._marked_latex
+        current_string: str = self._marked_latex
+        if not current_string:
+            raise ValueError("Marked string is empty, nothing to unmark")
         for marker, value in self._marker_store.items():
-            pattern = self._marker_format.format(marker)
-            # before = latex
-            latex = latex.replace(pattern, value)
-            # if before == latex:
-            #     raise LookupError("Detected missing marker in string to unmark")
-        self._unmarked_latex = latex
+            formatted_marker = self._marker_format.format(marker)
+            if current_string.count(formatted_marker) == 0:
+                print("Found missing or altered MARKER: {} --> during stage MARKER".format(formatted_marker),
+                      file=sys.stderr)
+            else:
+                current_string = current_string.replace(formatted_marker, value)
+        self._unmarked_latex = current_string
