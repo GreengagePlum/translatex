@@ -57,11 +57,23 @@ The following is an overview on the inner processing stages of TransLaTeX.
 
 ## Features
 
-- everything has
-- to be done
+- Automatic translation for LaTeX
+- Use a popular translation API of your choice
+- Translate to and from a number of languages according to the translator you picked
+- Replace all LaTeX constructs with tokens to be able to restore them later and still have a correct LaTeX file after
+- Math environments and equations are kept intact while translating any text inside
+- User customizable marker and token formats
+- Provided syntax in your source LaTeX file to manually handle certain parts at your will
+- Straight forward design, easy to tinker with the program's source code to customize its behavior
+- Easy to install and run with simple instructions and CLI
+- Debug option to have a peek at inner workings after the operation
+- The core program apart from the API call is idempotent and preserves the original text from a LaTeX stand point after
+  any manipulation
+- Correct resulting LaTeX, which compiles and has working references
 
 ### Unsupported and unmanaged so far
 
+- Supports only a subset of LaTeX, doesn't recognize all constructs.
 - LaTeX escape inside literal blocks isn't handled and doesn't get recursed into. They get tokenized as a whole. For
   example: `\begin{lstlisting}[escapeinside={\%*}{*)}]` which lets you escape actual LaTeX tags and commands inside
   a literal `lstlisting` block.
@@ -126,7 +138,8 @@ Python 3.10.11
 .. note::
 
     Pay attention to using ``bash`` to execute any of the commands with a square bracket (``[]``) syntax since ``zsh``
-    has issues parsing these commands and produces errors.
+    has issues parsing these commands and produces errors. Or, alternatively you can wrap the arguments inside double
+    quotes.
 
 ```
 
@@ -194,8 +207,12 @@ Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` d
 
 ## Usage
 
-- everything has
-- to be done
+TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments specifying
+the paths to the input and output files. It also writes warnings about missing or altered indicators (generally due to
+the automatic translation) and extra information (when verbose) to `stderr`. Don't forget to redirect these via
+`2> /dev/null` or equivalent if you only want the LaTeX output.
+
+To be continued...
 
 ## Indices and tables
 
