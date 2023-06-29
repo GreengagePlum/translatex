@@ -44,7 +44,7 @@ class GoogleTranslate(TranslationService):
     languages = {code: lang.capitalize()
                  for code, lang in googletrans.LANGUAGES.items()}
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """Return a translated string from source language to destination language."""
         try:
             google_api_key = os.environ['GOOGLE_API_KEY']
@@ -54,7 +54,7 @@ class GoogleTranslate(TranslationService):
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
-                   'target': target_lang,
+                   'target': dest_lang,
                    'format': 'text'}
         print(payload)
 
@@ -71,10 +71,10 @@ class IRMA(GoogleTranslate):
     name = "IRMA - M2M100"
     url = 'https://dlmds.math.unistra.fr/translation'
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         payload = {'text': text,
                    'source_lang': source_lang,
-                   'target_lang': target_lang}
+                   'target_lang': dest_lang}
         r = requests.post(self.url, json=payload)
         try:
             return r.json()["translations"][0]["text"]
@@ -90,8 +90,8 @@ class GoogleTranslateNoKey(GoogleTranslate):
     """
     name = "Google Translate (no key)"
 
-    def translate(self, text: str, source_lang: str, target_lang: str) -> str:
-        return gTrans().translate(text, src=source_lang, dest=target_lang).text
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+        return gTrans().translate(text, src=source_lang, dest=dest_lang).text
 
 
 TRANSLATION_SERVICES: Dict[str, TranslationService | GoogleTranslate | IRMA] = {
@@ -111,7 +111,9 @@ class Translator:
     DEFAULT_SERVICE_NAME: str = GoogleTranslate.name
 
     def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT,
-                 service_name=DEFAULT_SERVICE_NAME) -> None:
+                 service_name: str = DEFAULT_SERVICE_NAME,
+                 source_lang: str = DEFAULT_SOURCE_LANG,
+                 destination_lang: str = DEFAULT_DEST_LANG) -> None:
         """Creates a Tokenizer with default settings.
 
         bla
@@ -123,15 +125,18 @@ class Translator:
         self._base_string: str = tokenized_string
         self._tokenized_string: str = tokenized_string
         self._translated_string: str = str()
-        self.source_lang = Translator.DEFAULT_SOURCE_LANG
-        self.destination_lang = Translator.DEFAULT_DEST_LANG
-        self.service: dict = TRANSLATION_SERVICES[service_name]
+        self.source_lang = source_lang
+        self.destination_lang = destination_lang
+        self.service: TranslationService = TRANSLATION_SERVICES[service_name]
         self._token_format: str = token_format
 
     @classmethod
-    def from_tokenizer(cls, tokenizer: Tokenizer, service_name=DEFAULT_SERVICE_NAME) -> "Translator":
+    def from_tokenizer(cls, tokenizer: Tokenizer, service_name=DEFAULT_SERVICE_NAME,
+                       source_lang: str = DEFAULT_SOURCE_LANG,
+                       destination_lang: str = DEFAULT_DEST_LANG) -> "Translator":
         """Another constructor that creates a Translator from a given Tokenizer. For convenience."""
-        return cls(tokenizer.tokenized_string, tokenizer.token_format, service_name=service_name)
+        return cls(tokenizer.tokenized_string, tokenizer.token_format, service_name=service_name,
+                   source_lang=source_lang, destination_lang=destination_lang)
 
     def __str__(self) -> str:
         return "The translator has a base string of length {} characters.".format(len(self._base_string))
@@ -201,11 +206,11 @@ class Translator:
             raise ValueError("No tokens found, translation halted")
         result_string = latex_header
         chunks = Translator.split_string_by_length(
-            "".join(tokenized_rest), self.service["char-limit"])
+            "".join(tokenized_rest), self.service.char_limit)
         for chunk in chunks:
             result_string += self.service.translate(chunk,
-                                                    src=self.source_lang,
-                                                    dest=self.destination_lang)
+                                                    source_lang=self.source_lang,
+                                                    dest_lang=self.destination_lang)
         self._translated_string = result_string
 
 
