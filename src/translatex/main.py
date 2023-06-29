@@ -64,6 +64,10 @@ def translatex(args: argparse.Namespace) -> None:
         with open(f"{base_file}_token_store" + DEFAULT_INTER_FILE_EXT, "w+") as f:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
+    if args.src_lang:
+        a.source_lang = args.src_lang
+    if args.dest_lang:
+        a.destination_lang = args.dest_lang
     if not args.dry_run:
         a.translate()
         if args.stop == "Translator":
@@ -100,6 +104,8 @@ def main() -> None:
                         help="Don't do manual substitution during preprocessing stage")
     parser.add_argument("-mf", "--marker-format", help="Marker format to use during marking stage")
     parser.add_argument("-tf", "--token-format", help="Token format to use during tokenization stage")
+    parser.add_argument("-sl", "--src-lang", help="Input's language")
+    parser.add_argument("-dl", "--dest-lang", help="Output's language")
     parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
     parser.add_argument('outfile', nargs='?', type=argparse.FileType('w+'), default=sys.stdout)
     args = parser.parse_args()
