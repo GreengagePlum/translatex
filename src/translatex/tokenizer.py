@@ -210,7 +210,6 @@ class Tokenizer:
             Not all special cases are processed so far.
 
         """
-        # TODO: Manage all special cases listed in data module ("verb" and especially "tikz")
         current_string = process_string
         pattern = r"\\item"
         match = re.search(pattern, current_string)
@@ -218,6 +217,16 @@ class Tokenizer:
             next_token = self._next_token()
             self._token_store.update({next_token: match[0]})
             current_string = re.sub(pattern, next_token, current_string)
+        pattern = re.compile(r"\\verb(\S).*\1")
+        all_replaced = False
+        while not all_replaced:
+            match = pattern.search(current_string)
+            if match:
+                next_token = self._next_token()
+                self._token_store.update({next_token: match[0]})
+                current_string, _ = pattern.subn(next_token, current_string, 1)
+            else:
+                all_replaced = True
         return current_string
 
     def _tokenize_unnamed_math_optimized(self, process_string: str) -> str:
@@ -400,6 +409,11 @@ class Tokenizer:
 
         During this stage, thanks to the subroutines, all strings replaced by tokens are stored in the dictionary; thus
         it is populated after a call to this method (a first tokenization run).
+
+        Raises:
+            ValueError: If string to tokenize is empty.
+            ValueError: If string to tokenize doesn't contain any markers.
+
         """
         marker_regex = Marker.marker_regex(self._marker_format)
         if not self._marked_string:
@@ -427,6 +441,12 @@ class Tokenizer:
         the dictionary and then the whole token-curly brace should be replaced with the modified dictionary value.
 
         Later, a simple string replace is performed for all the rest of the "normal/simple" tokens.
+
+        Write messages to ``stderr`` on encounter of any missing or altered tokens in the string to detokenize.
+
+        Raises:
+            ValueError: If string to detokenize is empty.
+
         """
         main_string: str = self._tokenized_string
         if not main_string:

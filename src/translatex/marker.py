@@ -28,8 +28,6 @@ class Marker:
     The parse tree is constructed and traversed using TexSoup and its methods.
     TexSoup's best effort fault tolerance mode for parsing LaTeX is not used.
     """
-    # TODO: Replace dictionary store with a fixed size array for optimization
-    # TODO: Find a way to determine the size of the array before parsing
 
     DEFAULT_INITIAL_MARKER_INDEX: int = 0
     DEFAULT_MARKER_FORMAT: str = "//{}//"
@@ -193,7 +191,6 @@ class Marker:
             replace_range: A range in the list of expressions to mark
 
         """
-        # TODO: Test if lists need deep copying
         if (original_expression_size != 0) ^ (replace_range is not None):
             raise ValueError("Either supply both optional parameters or none of them")
         if original_expression_size == 0 and replace_range is None:
@@ -323,6 +320,10 @@ class Marker:
         assumed correct LaTeX that can be compiled without issues. Otherwise, TexSoup parsing will produce errors.
 
         The marked string is stored in an instance variable at the end.
+
+        Raises:
+            ValueError: If string to mark is empty.
+
         """
         if self._unmarked_latex:
             soup_current: TexNode = TexSoup(self._unmarked_latex)
@@ -338,8 +339,11 @@ class Marker:
         The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
+        Write messages to ``stderr`` on encounter of any missing or altered markers in the string to unmark.
+
         Raises:
             LookupError: If a marker is found to be missing in the processed string.
+            ValueError: If string to unmark is empty.
 
         """
         current_string: str = self._marked_latex

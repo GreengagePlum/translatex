@@ -168,6 +168,10 @@ class Preprocessor:
         locate them easier when proofreading.
 
         The resulting string is stored in an instance variable for processed LaTeX.
+
+        Raises:
+            ValueError: If string to process is empty.
+
         """
         current_string = self._unprocessed_latex
         if not current_string:
@@ -195,6 +199,12 @@ class Preprocessor:
         the string prepended with an annotation on a new line. See docstring for :py:meth:`process`.
 
         The resulting string is stored in an instance variable for unprocessed LaTeX.
+
+        Write messages to ``stderr`` on encounter of any missing or altered indicators in the string to rebuild from.
+
+        Raises:
+            ValueError: If string to rebuild from is empty.
+
         """
         current_string = self._processed_latex
         if not current_string:
