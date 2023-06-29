@@ -5,7 +5,6 @@ API calls.
 """
 import os
 import re
-from dataclasses import dataclass
 from typing import Dict
 
 import requests
@@ -15,7 +14,6 @@ from googletrans import Translator as gTrans
 from translatex.tokenizer import Tokenizer
 
 
-@dataclass
 class TranslationService:
     """An abstract class that represents a translation service."""
     name: str = str()
@@ -97,7 +95,7 @@ class GoogleTranslateNoKey(GoogleTranslate):
         return gTrans().translate(text, src=source_lang, dest=dest_lang).text
 
 
-TRANSLATION_SERVICES: Dict[str, TranslationService] = {
+TRANSLATION_SERVICES: Dict[str, GoogleTranslate | GoogleTranslateNoKey | IRMA] = {
     GoogleTranslate.name: GoogleTranslate(),
     GoogleTranslateNoKey.name: GoogleTranslateNoKey(),
     IRMA.name: IRMA()
@@ -118,10 +116,7 @@ class Translator:
     DEFAULT_DEST_LANG: str = "en"
     DEFAULT_SERVICE_NAME: str = GoogleTranslate.name
 
-    def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT,
-                 service_name: str = DEFAULT_SERVICE_NAME,
-                 source_lang: str = DEFAULT_SOURCE_LANG,
-                 destination_lang: str = DEFAULT_DEST_LANG) -> None:
+    def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
         """Creates a Tokenizer with default settings.
 
         Default settings are taken from the class variables.
@@ -135,18 +130,12 @@ class Translator:
         self._base_string: str = tokenized_string
         self._tokenized_string: str = tokenized_string
         self._translated_string: str = str()
-        self.source_lang = source_lang
-        self.destination_lang = destination_lang
-        self.service: TranslationService = TRANSLATION_SERVICES[service_name]
         self._token_format: str = token_format
 
     @classmethod
-    def from_tokenizer(cls, tokenizer: Tokenizer, service_name=DEFAULT_SERVICE_NAME,
-                       source_lang: str = DEFAULT_SOURCE_LANG,
-                       destination_lang: str = DEFAULT_DEST_LANG) -> "Translator":
+    def from_tokenizer(cls, tokenizer: Tokenizer) -> "Translator":
         """Another constructor that creates a Translator from a given Tokenizer. For convenience."""
-        return cls(tokenizer.tokenized_string, tokenizer.token_format, service_name=service_name,
-                   source_lang=source_lang, destination_lang=destination_lang)
+        return cls(tokenizer.tokenized_string, tokenizer.token_format)
 
     def __str__(self) -> str:
         return "The translator has a base string of length {} characters.".format(len(self._base_string))
@@ -206,7 +195,10 @@ class Translator:
             chunks.append(current_chunk.strip())
         return chunks
 
-    def translate(self) -> None:
+    def translate(self,
+                  service_name: str = DEFAULT_SERVICE_NAME,
+                  source_lang: str = DEFAULT_SOURCE_LANG,
+                  destination_lang: str = DEFAULT_DEST_LANG) -> None:
         """Translation is performed with the set source and destination languages and the chosen service.
 
         The Result is stored in an instance variable.
@@ -216,6 +208,7 @@ class Translator:
             ValueError: If the source string contains no tokens
 
         """
+        service = TRANSLATION_SERVICES[service_name]
         if not self._token_format:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(r"(" + Tokenizer.token_regex(self._token_format) + r")",
@@ -224,9 +217,9 @@ class Translator:
             raise ValueError("No tokens found, translation halted")
         result_string = latex_header
         chunks = Translator.split_string_by_length(
-            "".join(tokenized_rest), self.service.char_limit)
+            "".join(tokenized_rest), service.char_limit)
         for chunk in chunks:
-            result_string += self.service.translate(chunk,
-                                                    source_lang=self.source_lang,
-                                                    dest_lang=self.destination_lang)
+            result_string += service.translate(chunk,
+                                               source_lang=source_lang,
+                                               dest_lang=destination_lang)
         self._translated_string = result_string
