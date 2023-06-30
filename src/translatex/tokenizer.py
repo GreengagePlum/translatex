@@ -5,8 +5,7 @@ token format. The string is finalized for transmission to an automatic translato
 and the tokens left. The tokens are to be chosen in a way that won't disturb the translation nor get modified or removed
 during the said process.
 """
-import sys
-
+import logging
 import regex as re
 from typing import Dict, TYPE_CHECKING
 
@@ -15,6 +14,8 @@ from .data import *
 
 if TYPE_CHECKING:
     from .translator import Translator
+
+log = logging.getLogger(__name__)
 
 
 class Tokenizer:
@@ -471,8 +472,8 @@ class Tokenizer:
                 "Tokenized string is empty, nothing to detokenize")
         for token in self._token_store.keys():
             if main_string.count(token) == 0:
-                print(f"Found missing or altered TOKEN: {token} --> during stage TOKENIZER",
-                      file=sys.stderr)
+                log.error(
+                    f"Found missing or altered TOKEN: {token} --> during stage TOKENIZER",)
         token_regex = self._token_regex()
         pattern = re.compile(
             r"(" + token_regex + r")(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})")

@@ -21,6 +21,8 @@ from .preprocessor import Preprocessor
 if TYPE_CHECKING:
     from .tokenizer import Tokenizer
 
+log = logging.getLogger(__name__)
+
 
 class Marker:
     """This class traverses the LaTeX syntax tree and recursively marks structures to be tokenized later.
@@ -365,7 +367,7 @@ class Marker:
         for marker, value in self._marker_store.items():
             formatted_marker = self._marker_format.format(marker)
             if current_string.count(formatted_marker) == 0:
-                logging.error(
+                log.error(
                     f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER".format())
             else:
                 current_string = current_string.replace(

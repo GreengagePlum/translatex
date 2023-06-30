@@ -3,6 +3,7 @@
 Abstractions for different translation services and APIs as well as methods to resize strings to optimize the number of
 API calls.
 """
+import logging
 import os
 import re
 from typing import Dict
@@ -12,6 +13,7 @@ import googletrans
 
 from .tokenizer import Tokenizer
 
+log = logging.getLogger(__name__)
 
 class TranslationService:
     """An abstract class that represents a translation service."""
@@ -55,14 +57,13 @@ class GoogleTranslate(TranslationService):
                    'source': source_lang,
                    'target': dest_lang,
                    'format': 'text'}
-        print(payload)
 
         r = requests.post(self.url, headers=headers, data=payload)
         try:
             return r.json()['data']['translations'][0]['translatedText']
         except Exception as e:
-            print(e)
-            print(str(r))
+            log.error(e)
+            log.error(str(r))
             exit()
 
 
@@ -80,7 +81,7 @@ class IRMA(GoogleTranslate):
         try:
             return r.json()["translations"][0]["text"]
         except Exception as e:
-            print(e)
+            log.error(e)
             return str(r.json())
 
 

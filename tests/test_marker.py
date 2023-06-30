@@ -1,6 +1,5 @@
 """marker module test suite"""
 import pytest
-import logging
 import re
 from translatex.marker import Marker
 from TexSoup import TexSoup
@@ -163,10 +162,10 @@ def test_warning_unmarking(small_marker, caplog):
     m = small_marker
     m.mark()
     m.unmark()
-    with caplog.at_level(logging.ERROR):
+    with caplog.at_level("ERROR"):
         m.unmark()
     assert len(caplog.text) == 0
     m.marked_latex = "foo"
-    with caplog.at_level(logging.ERROR):
+    with caplog.at_level("ERROR"):
         m.unmark()
     assert caplog.text
