@@ -15,11 +15,11 @@ from typing import Dict, Optional, TYPE_CHECKING
 from TexSoup import TexSoup
 from TexSoup.data import *
 
-from translatex.data import *
-from translatex.preprocessor import Preprocessor
+from .data import *
+from .preprocessor import Preprocessor
 
 if TYPE_CHECKING:
-    from translatex.tokenizer import Tokenizer
+    from .tokenizer import Tokenizer
 
 
 class Marker:
@@ -58,7 +58,7 @@ class Marker:
         self.marked_latex = tokenizer.marked_string
 
     def __str__(self) -> str:
-        return "The marker format is {} and marker count is at {}.".format(self._marker_format, self.marker_count)
+        return f"The marker format is {self._marker_format} and marker count is at {self.marker_count}."
 
     def _next_marker(self) -> str:
         self.marker_count += 1
@@ -129,18 +129,21 @@ class Marker:
         pattern = r'\{\}'
         match = re.search(pattern, format_str)
         if not match:
-            raise ValueError("No empty curly braces in the given format string")
+            raise ValueError(
+                "No empty curly braces in the given format string")
 
     @staticmethod
     def marker_regex(format_str: str) -> str:
         """Construct a regex corresponding to the given marker format."""
         Marker.marker_format_check(format_str)
         curly_start = format_str.find(r"{}")
-        escaped_marker_format = re.escape(format_str[:curly_start]) + "{}" + re.escape(format_str[curly_start + 2:])
+        escaped_marker_format = re.escape(
+            format_str[:curly_start]) + "{}" + re.escape(format_str[curly_start + 2:])
         return escaped_marker_format.format(r"(?:\d+)")
 
     def dump_store(self) -> str:
-        string_transformed = [str(item) + "\n" for item in self._marker_store.items()]
+        string_transformed = [
+            str(item) + "\n" for item in self._marker_store.items()]
         return "".join(string_transformed)
 
     def _marker_regex(self) -> str:
@@ -192,14 +195,18 @@ class Marker:
 
         """
         if (original_expression_size != 0) ^ (replace_range is not None):
-            raise ValueError("Either supply both optional parameters or none of them")
+            raise ValueError(
+                "Either supply both optional parameters or none of them")
         if original_expression_size == 0 and replace_range is None:
             previous_expression: list = node.expr.all
             # Sanitize previous expressions so that it no longer contains command options within []
-            args = [y.pop() for y in [x.contents for x in node.args if type(x) is BracketGroup]]
-            previous_expression = [x for x in previous_expression if x not in args]
+            args = [y.pop() for y in [
+                x.contents for x in node.args if type(x) is BracketGroup]]
+            previous_expression = [
+                x for x in previous_expression if x not in args]
             node.contents = [self._next_marker()]
-            self._marker_store.update({self.marker_count: "".join([str(x) for x in previous_expression])})
+            self._marker_store.update(
+                {self.marker_count: "".join([str(x) for x in previous_expression])})
         else:
             current_expression_size = len(node.expr.all)
             adjustment_difference = original_expression_size - current_expression_size
@@ -207,13 +214,17 @@ class Marker:
                                            replace_range.stop - adjustment_difference)
             previous_expression: list = node.expr.all[adjusted_replace_range.start:adjusted_replace_range.stop]
             # Sanitize previous expressions so that it no longer contains command options within []
-            args = [y.pop() for y in [x.contents for x in node.args if type(x) is BracketGroup]]
-            previous_expression = [x for x in previous_expression if x not in args]
+            args = [y.pop() for y in [
+                x.contents for x in node.args if type(x) is BracketGroup]]
+            previous_expression = [
+                x for x in previous_expression if x not in args]
             new_contents = list(node.expr.all)
             del new_contents[adjusted_replace_range.start:adjusted_replace_range.stop]
-            new_contents.insert(adjusted_replace_range.start, self._next_marker())
+            new_contents.insert(
+                adjusted_replace_range.start, self._next_marker())
             node.contents = new_contents
-            self._marker_store.update({self.marker_count: "".join([str(x) for x in previous_expression])})
+            self._marker_store.update(
+                {self.marker_count: "".join([str(x) for x in previous_expression])})
 
     @staticmethod
     def _marking_range_finder(node: TexNode, excluded_commands: List[str]) -> List[range]:
@@ -276,10 +287,12 @@ class Marker:
                 continue_recursion = True
                 break
         if continue_recursion:
-            ranges_to_mark: List[range] = self._marking_range_finder(node, TEXT_COMMANDS)
+            ranges_to_mark: List[range] = self._marking_range_finder(
+                node, TEXT_COMMANDS)
             original_expression_size: int = len(node.expr.all)
             for range_to_mark in ranges_to_mark:
-                self._mark_node_contents(node, original_expression_size, range_to_mark)
+                self._mark_node_contents(
+                    node, original_expression_size, range_to_mark)
         else:
             self._mark_node_contents(node)
             # TODO: implement way to completely mark and replace named math environment (maybe)
@@ -355,5 +368,6 @@ class Marker:
                 print("Found missing or altered MARKER: {} --> during stage MARKER".format(formatted_marker),
                       file=sys.stderr)
             else:
-                current_string = current_string.replace(formatted_marker, value)
+                current_string = current_string.replace(
+                    formatted_marker, value)
         self._unmarked_latex = current_string

@@ -9,9 +9,8 @@ from typing import Dict
 
 import requests
 import googletrans
-from googletrans import Translator as gTrans
 
-from translatex.tokenizer import Tokenizer
+from .tokenizer import Tokenizer
 
 
 class TranslationService:
@@ -92,14 +91,12 @@ class GoogleTranslateNoKey(GoogleTranslate):
     name = "Google Translate (no key)"
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        return gTrans().translate(text, src=source_lang, dest=dest_lang).text
+        return googletrans.Translator().translate(text, src=source_lang, dest=dest_lang).text
 
 
-TRANSLATION_SERVICES: Dict[str, GoogleTranslate | GoogleTranslateNoKey | IRMA] = {
-    GoogleTranslate.name: GoogleTranslate(),
-    GoogleTranslateNoKey.name: GoogleTranslateNoKey(),
-    IRMA.name: IRMA()
-}
+TRANSLATION_SERVICES = (GoogleTranslate(),
+                        GoogleTranslateNoKey(),
+                        IRMA())
 
 
 class Translator:
@@ -114,7 +111,7 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE_NAME: str = GoogleTranslate.name
+    DEFAULT_SERVICE = TRANSLATION_SERVICES[0]
 
     def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
         """Creates a Tokenizer with default settings.
@@ -138,7 +135,7 @@ class Translator:
         return cls(tokenizer.tokenized_string, tokenizer.token_format)
 
     def __str__(self) -> str:
-        return "The translator has a base string of length {} characters.".format(len(self._base_string))
+        return f"The translator has a base string of length {len(self._base_string)} characters."
 
     @property
     def tokenized_string(self) -> str:
@@ -196,7 +193,7 @@ class Translator:
         return chunks
 
     def translate(self,
-                  service_name: str = DEFAULT_SERVICE_NAME,
+                  service = DEFAULT_SERVICE,
                   source_lang: str = DEFAULT_SOURCE_LANG,
                   destination_lang: str = DEFAULT_DEST_LANG) -> None:
         """Translation is performed with the set source and destination languages and the chosen service.
@@ -208,7 +205,6 @@ class Translator:
             ValueError: If the source string contains no tokens
 
         """
-        service = TRANSLATION_SERVICES[service_name]
         if not self._token_format:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(r"(" + Tokenizer.token_regex(self._token_format) + r")",
