@@ -69,6 +69,7 @@ class GoogleTranslate(TranslationService):
 class IRMA(GoogleTranslate):
     """Translate using Unistra IRMA DLMDS."""
     name = "IRMA - M2M100"
+    char_limit = 1000
     url = 'https://dlmds.math.unistra.fr/translation'
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -97,6 +98,8 @@ class GoogleTranslateNoKey(GoogleTranslate):
 TRANSLATION_SERVICES = (GoogleTranslate(),
                         GoogleTranslateNoKey(),
                         IRMA())
+TRANSLATION_SERVICES_BY_NAME = {service.name: service
+                                for service in TRANSLATION_SERVICES}
 
 
 class Translator:
@@ -193,7 +196,7 @@ class Translator:
         return chunks
 
     def translate(self,
-                  service = DEFAULT_SERVICE,
+                  service=DEFAULT_SERVICE,
                   source_lang: str = DEFAULT_SOURCE_LANG,
                   destination_lang: str = DEFAULT_DEST_LANG) -> None:
         """Translation is performed with the set source and destination languages and the chosen service.
