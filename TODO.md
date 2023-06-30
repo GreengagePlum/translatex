@@ -34,11 +34,11 @@
 - [ ] Add `CONTRIBUTING.md`
 - [ ] Finish Sphinx main page
     - [ ] Document interface and features for the end user
-- [ ] Fill `CHANGELOG.md`
 - [ ] Add `argcomplete` for shell option completions
 
 ## Done
 
+- [x] Fill `CHANGELOG.md`
 - [x] Add verifications on token and marker presence
 - [x] Finish CLI
     - [x] Add options to stop at certain stages (marking, tokenization...)

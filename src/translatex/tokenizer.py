@@ -314,6 +314,7 @@ class Tokenizer:
             r"\\begin\{" + marker_regex + r"\}"
             r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?1))*\})*"
             r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\[(?:[^\[\]]+|(?2))*\])*"
+            r"(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?3))*\})*"
             r"(?:\s*" + marker_regex + r"\s*)*"
             r"(?:\\end\{" + marker_regex + r"\})?")
         # @formatter:on
