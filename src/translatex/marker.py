@@ -9,8 +9,8 @@ structures that need to be tokenized later are marked recursively so that the to
 compatible with many more types of structures.
 """
 import re
-import sys
 from typing import Dict, Optional, TYPE_CHECKING
+import logging
 
 from TexSoup import TexSoup
 from TexSoup.data import *
@@ -365,8 +365,8 @@ class Marker:
         for marker, value in self._marker_store.items():
             formatted_marker = self._marker_format.format(marker)
             if current_string.count(formatted_marker) == 0:
-                print("Found missing or altered MARKER: {} --> during stage MARKER".format(formatted_marker),
-                      file=sys.stderr)
+                logging.error(
+                    f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER".format())
             else:
                 current_string = current_string.replace(
                     formatted_marker, value)

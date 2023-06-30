@@ -1,8 +1,10 @@
 """marker module test suite"""
 import pytest
+import logging
 import re
 from translatex.marker import Marker
 from TexSoup import TexSoup
+
 
 
 def test_creation(small_marker):
@@ -156,14 +158,15 @@ def test_empty_unmarking(small_marker):
         m.unmark()
 
 
-def test_warning_unmarking(small_marker, capsys):
+def test_warning_unmarking(small_marker, caplog):
     """Ensure Marker warns about missing or altered markers on ``stderr``"""
     m = small_marker
     m.mark()
     m.unmark()
-    _, captured = capsys.readouterr()
-    assert len(captured) == 0
+    with caplog.at_level(logging.ERROR):
+        m.unmark()
+    assert len(caplog.text) == 0
     m.marked_latex = "foo"
-    m.unmark()
-    _, captured = capsys.readouterr()
-    assert len(captured) > 0
+    with caplog.at_level(logging.ERROR):
+        m.unmark()
+    assert caplog.text

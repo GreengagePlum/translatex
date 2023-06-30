@@ -13,5 +13,8 @@ from .preprocessor import Preprocessor
 from .marker import Marker
 from .tokenizer import Tokenizer
 from .translator import Translator
+import logging
+
+logging.getLogger('translatex').addHandler(logging.NullHandler())
 
 __version__ = '0.1.0'
