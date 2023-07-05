@@ -64,7 +64,7 @@ class GoogleTranslate(TranslationService):
         except Exception as e:
             log.error(e)
             log.error(str(r))
-            exit()
+            return str(r)
 
 
 class IRMA(GoogleTranslate):
