@@ -50,18 +50,13 @@ Bonjour le monde
 
 def test_main(tmp_path):
     source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
-    destination_file_path = TEXFILES_DIR_PATH / "helloworld_out.tex"
+    destination_file_path = tmp_path / "helloworld_out.tex"
     args = parse_args(['-sl', 'en', '-dl', 'fr',
                        source_file_path.as_posix(),
                        destination_file_path.as_posix()])
     translatex(args)
-    print(f"{destination_file_path=}")
-    import os
-    print(f"cat {destination_file_path}")
-    os.system(f"cat {destination_file_path}")
     with open(destination_file_path, 'r') as f:
         translation_string = f.read()
-        print(f"{translation_string=}")
         assert translation_string == r"""\documentclass{article}
 \begin{document}
 Bonjour le monde
