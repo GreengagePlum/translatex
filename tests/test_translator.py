@@ -1,10 +1,13 @@
 from translatex.translator import Translator, TRANSLATION_SERVICES
 
+TEST_SERVICE = TRANSLATION_SERVICES[1]
+
+
 def test_translate(small_tokenizer):
     tok = small_tokenizer
     tok.tokenize()
     trans = Translator.from_tokenizer(tok)
-    trans.translate(service=TRANSLATION_SERVICES[1])
+    trans.translate(service=TEST_SERVICE)
     print(trans.translated_string)
     assert trans.translated_string == """
     [0.4]
