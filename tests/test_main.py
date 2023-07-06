@@ -34,23 +34,37 @@ def translate(source: str, source_lang_code: str = 'en',
 
 
 def test_full_translation():
-    source = r"""
-\documentclass{article}
+    source = r"""\documentclass{article}
 \begin{document}
 Hello World
 \end{document}
 """
     translated = translate(source)
-    assert translated == r"""
-\documentclass{article}
+    print(translated)
+    assert translated == r"""\documentclass{article}
 \begin{document}
 Bonjour le monde
 \end{document}
 """
 
 
-def test_main():
-    source_path = TEXFILES_DIR_PATH / "helloworld.tex"
+def test_main(tmp_path):
+    source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
+    destination_file_path = TEXFILES_DIR_PATH / "helloworld_out.tex"
     args = parse_args(['-sl', 'en', '-dl', 'fr',
-                       source_path.as_posix()])
+                       source_file_path.as_posix(),
+                       destination_file_path.as_posix()])
     translatex(args)
+    print(f"{destination_file_path=}")
+    import os
+    print(f"cat {destination_file_path}")
+    os.system(f"cat {destination_file_path}")
+    with open(destination_file_path, 'r') as f:
+        translation_string = f.read()
+        print(f"{translation_string=}")
+        assert translation_string == r"""\documentclass{article}
+\begin{document}
+Bonjour le monde
+\end{document}
+"""
+    

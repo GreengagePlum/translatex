@@ -84,6 +84,7 @@ def translatex(args: argparse.Namespace) -> None:
     p.update_from_marker(m)
     p.rebuild(args.no_pre)
     args.outfile.write(p.unprocessed_latex)
+    args.outfile.close()
     if args.outfile != sys.stdout:
         log.info("Translated LaTeX file written to %s", args.outfile.name)
 
