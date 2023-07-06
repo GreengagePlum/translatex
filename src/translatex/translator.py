@@ -116,7 +116,7 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE = TRANSLATION_SERVICES[0]
+    DEFAULT_SERVICE = TRANSLATION_SERVICES[1]
 
     def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
         """Creates a Tokenizer with default settings.
