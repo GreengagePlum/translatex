@@ -15,6 +15,7 @@ from .tokenizer import Tokenizer
 
 log = logging.getLogger(__name__)
 
+
 class TranslationService:
     """An abstract class that represents a translation service."""
     name: str = str()
@@ -52,7 +53,8 @@ class GoogleTranslate(TranslationService):
         except KeyError:
             error_message = "Please set the environment variable GOOGLE_API_KEY to your Google API key."
             log.error(error_message)
-            return f"% {error_message}"  # Return a LaTeX comment with the error message
+            # Return a LaTeX comment with the error message
+            return f"% {error_message}"
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
