@@ -368,7 +368,8 @@ class Marker:
             formatted_marker = self._marker_format.format(marker)
             if current_string.count(formatted_marker) == 0:
                 log.error(
-                    f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER".format())
+                    "Found missing or altered MARKER: %s --> during stage MARKER",
+                    formatted_marker)
             else:
                 current_string = current_string.replace(
                     formatted_marker, value)
