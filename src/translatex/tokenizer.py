@@ -473,7 +473,8 @@ class Tokenizer:
         for token in self._token_store.keys():
             if main_string.count(token) == 0:
                 log.error(
-                    f"Found missing or altered TOKEN: {token} --> during stage TOKENIZER",)
+                    "Found missing or altered TOKEN: %s --> during stage TOKENIZER",
+                    token)
         token_regex = self._token_regex()
         pattern = re.compile(
             r"(" + token_regex + r")(?<!\\)(?:\\\\)*(\s?(?!" + self._token_regex() + r")\{(?:[^{}]+|(?2))*\})")

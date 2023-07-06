@@ -84,12 +84,12 @@ def translatex(args: argparse.Namespace) -> None:
     p.update_from_marker(m)
     p.rebuild(args.no_pre)
     args.outfile.write(p.unprocessed_latex)
-    if args.outfile.name != "<stdout>":
+    if args.outfile != sys.stdout:
         log.info("Translated LaTeX file written to %s", args.outfile.name)
 
 
-def main() -> None:
-    """Console script for translatex."""
+def parse_args(args) -> argparse.Namespace:
+    """Argument parser for translatex."""
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--version", action="version",
                         version=f"%(prog)s {__version__}",
@@ -126,7 +126,12 @@ def main() -> None:
                         type=argparse.FileType('r'), default=sys.stdin)
     parser.add_argument('outfile', nargs='?',
                         type=argparse.FileType('w+'), default=sys.stdout)
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+
+def main():
+    """Console script for translatex."""
+    args = parse_args(sys.argv[1:])
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
