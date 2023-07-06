@@ -50,8 +50,9 @@ class GoogleTranslate(TranslationService):
         try:
             google_api_key = os.environ['GOOGLE_API_KEY']
         except KeyError:
-            exit(
-                "Please set the environment variable GOOGLE_API_KEY to your Google API key.")
+            error_message = "Please set the environment variable GOOGLE_API_KEY to your Google API key."
+            log.error(error_message)
+            return f"% {error_message}"  # Return a LaTeX comment with the error message
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
