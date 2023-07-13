@@ -17,6 +17,7 @@ dependencies = [
     "regex",
     "googletrans==4.0.0rc1",
     "requests",
+    "nltk"
 ]
 dynamic = ["version"]
 
