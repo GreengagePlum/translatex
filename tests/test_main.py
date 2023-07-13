@@ -62,4 +62,3 @@ def test_main(tmp_path):
 Bonjour le monde
 \end{document}
 """
-    
