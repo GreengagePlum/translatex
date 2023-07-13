@@ -1,13 +1,12 @@
 import pathlib
-from translatex.translator import Translator, TRANSLATION_SERVICES
+from conftest import TEST_SERVICE
+from translatex.translator import Translator
 from translatex.tokenizer import Tokenizer
 from translatex.marker import Marker
 from translatex.preprocessor import Preprocessor
 from translatex.main import parse_args, translatex
 
 TEXFILES_DIR_PATH = pathlib.Path(__file__).parent.resolve() / "texfiles"
-
-TEST_SERVICE = TRANSLATION_SERVICES[1]
 
 
 def translate(source: str, source_lang_code: str = 'en',
@@ -18,16 +17,22 @@ def translate(source: str, source_lang_code: str = 'en',
     """
     p = Preprocessor(source)
     p.process()
+    # print(f"Preprocessed LaTeX: {p._processed_latex}")
     m = Marker.from_preprocessor(p)
     m.mark()
+    # print(f"Marked LaTeX: {m._marked_latex}")
     t = Tokenizer.from_marker(m)
     t.tokenize()
+    # print(f"Tokenized LaTeX: {t._tokenized_string}")
     a = Translator.from_tokenizer(t)
     a.translate(TEST_SERVICE, source_lang_code, destination_lang_code)
+    # print(f"Translated LaTeX: {a.translated_string}")
     t.update_from_translator(a)
     t.detokenize()
+    # print(f"Detokenized LaTeX: {t._marked_string}")
     m.update_from_tokenizer(t)
     m.unmark()
+    # print(f"Unmarked LaTeX: {m.unmarked_latex}")
     p.update_from_marker(m)
     p.rebuild()
     return p.unprocessed_latex
@@ -40,12 +45,17 @@ Hello World
 \end{document}
 """
     translated = translate(source)
-    print(translated)
     assert translated == r"""\documentclass{article}
 \begin{document}
 Bonjour le monde
 \end{document}
 """
+
+
+def test_translation_with_no_document_env():
+    source = r"\section{Hello World}"
+    translated = translate(source)
+    assert translated == r"\section{Bonjour le monde}"
 
 
 def test_main(tmp_path):

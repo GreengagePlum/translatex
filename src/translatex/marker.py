@@ -329,10 +329,11 @@ class Marker:
             self._mark_node_name(node)
 
     def mark(self) -> None:
-        r"""This produces the marked LaTeX string from the unmarked string if available.
+        """This produces the marked LaTeX string from the unmarked string if
+        available.
 
-        The unmarked LaTeX has to have a ``\begin{document}...\end{document}`` statement at least. Also, it is
-        assumed correct LaTeX that can be compiled without issues. Otherwise, TexSoup parsing will produce errors.
+        It is assumed correct LaTeX that can be compiled without issues
+        otherwise TexSoup parsing will produce errors.
 
         The marked string is stored in an instance variable at the end.
 
@@ -342,9 +343,17 @@ class Marker:
         """
         if self._unmarked_latex:
             soup_current: TexNode = TexSoup(self._unmarked_latex)
-            # Start marking inside and including "\begin{document}" (headers untouched)
-            self._traverse_ast(soup_current.find("document"))
+            # Start marking inside and including "\begin{document}"
+            # (headers untouched)
+            document = soup_current.find("document")
+            if document is None:
+                # there is no document environment,
+                # so we assume the whole text is the body
+                self._traverse_ast(soup_current)
+            else:
+                self._traverse_ast(document)
             self._marked_latex = str(soup_current)
+
         else:
             raise ValueError("Unmarked string is empty, nothing to mark")
 

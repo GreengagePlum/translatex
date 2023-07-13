@@ -32,7 +32,7 @@ class Tokenizer:
     DEFAULT_INITIAL_TOKEN_INDEX: int = 0
     DEFAULT_INITIAL_TOKEN_SUBINDEX: int = 0
     DEFAULT_TOKEN_SUBLIMIT: int = 16
-    DEFAULT_TOKEN_FORMAT: str = "[{}.{}]"
+    DEFAULT_TOKEN_FORMAT: str = "[{}-{}]"
     DEFAULT_DETOKENIZER_CONTENT_INDICATOR: str = "%%"
 
     def __init__(self, marked_string: str, marker_format: str = Marker.DEFAULT_MARKER_FORMAT) -> None:
