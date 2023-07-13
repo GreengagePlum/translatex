@@ -30,4 +30,5 @@ def test_translate(trans):
     [0-4]
     [0-3]{[0-1] Hello world}
     [0-2]
-    [0-5]""")
+    [0-5]
+    """)

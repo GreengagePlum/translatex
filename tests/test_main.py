@@ -1,5 +1,6 @@
 import pathlib
 from conftest import TEST_SERVICE
+from textwrap import dedent
 from translatex.translator import Translator
 from translatex.tokenizer import Tokenizer
 from translatex.marker import Marker
@@ -32,24 +33,24 @@ def translate(source: str, source_lang_code: str = 'en',
     # print(f"Detokenized LaTeX: {t._marked_string}")
     m.update_from_tokenizer(t)
     m.unmark()
-    # print(f"Unmarked LaTeX: {m.unmarked_latex}")
+    # print(f"Unmarked LaTeX: {repr(m.unmarked_latex)}")
     p.update_from_marker(m)
     p.rebuild()
     return p.unprocessed_latex
 
 
 def test_full_translation():
-    source = r"""\documentclass{article}
-\begin{document}
-Hello World
-\end{document}
-"""
+    source = dedent(r"""\documentclass{article}
+    \begin{document}
+    Hello World
+    \end{document}
+    """)
     translated = translate(source)
-    assert translated == r"""\documentclass{article}
-\begin{document}
-Bonjour le monde
-\end{document}
-"""
+    assert translated == dedent(r"""\documentclass{article}
+    \begin{document}
+    Bonjour le monde
+    \end{document}
+    """)
 
 
 def test_translation_with_no_document_env():

@@ -291,3 +291,7 @@ class Translator:
                               source_lang=source_lang,
                               dest_lang=destination_lang)
             for chunk in chunks)
+        # For multiline strings, add a newline at the end if there is none
+        if ("\n" in self._translated_string and
+                self._translated_string[-1] != "\n"):
+            self._translated_string += "\n"
