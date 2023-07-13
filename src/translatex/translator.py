@@ -103,6 +103,8 @@ TRANSLATION_SERVICES = (GoogleTranslate(),
                         GoogleTranslateNoKey(),
                         IRMA())
 if os.environ.get("GOOGLE_API_KEY") is None:
+    log.warning("GOOGLE_API_KEY environment variable is not set "
+                "so Google Translate is not available.")
     TRANSLATION_SERVICES = TRANSLATION_SERVICES[1:]
 TRANSLATION_SERVICES_BY_NAME = {service.name: service
                                 for service in TRANSLATION_SERVICES}
