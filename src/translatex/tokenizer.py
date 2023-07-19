@@ -438,7 +438,9 @@ class Tokenizer:
         split_strings: List[str] = re.split(
             r"(^.*" + marker_regex + r".*$)", self._marked_string, 1, re.MULTILINE)
         if len(split_strings) == 1:
-            raise ValueError("No markers found, tokenization halted")
+            self._tokenized_string = self._marked_string
+            log.warning("No markers found, tokenization halted")
+            return
         header_string: str = split_strings[0]
         main_string: str = split_strings[1] + split_strings[2]
         main_string = self._tokenize_comments(main_string)
