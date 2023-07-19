@@ -59,6 +59,12 @@ def test_translation_with_no_document_env():
     assert translated == r"\section{Bonjour le monde}"
 
 
+def test_translation_without_any_latex():
+    source = "Hello World"
+    translated = translate(source)
+    assert translated == "Bonjour le monde"
+
+
 def test_main(tmp_path):
     source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
     destination_file_path = tmp_path / "helloworld_out.tex"
