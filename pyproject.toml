@@ -11,7 +11,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 dependencies = [
     "TexSoup @ git+https://github.com/alvinwan/TexSoup@c91a14a0019ff7df197e71c906bc0403eddf80dc",
     "regex",
