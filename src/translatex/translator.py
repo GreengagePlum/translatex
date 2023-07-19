@@ -52,6 +52,8 @@ class TranslationService(ABC):
     array_item_char_limit: int = int()
     array_overall_char_limit: int = int()
     url: str = str()
+    doc_url: str = str()
+    short_description = str()
     languages = Dict[str, str]
 
     @abstractmethod
@@ -73,6 +75,8 @@ class GoogleTranslate(TranslationService):
     array_item_char_limit = 0
     array_overall_char_limit = 30000
     url = 'https://translation.googleapis.com/language/translate/v2'
+    doc_url = "https://cloud.google.com/translate/docs/"
+    short_description = "Google's translation service using an API key"
     languages = {code: lang.capitalize()
                  for code, lang in googletrans.LANGUAGES.items()}
 
@@ -110,6 +114,9 @@ class IRMA(GoogleTranslate):
     name = "IRMA - M2M100"
     char_limit = 1000
     url = 'https://dlmds.math.unistra.fr/translation'
+    doc_url = "https://dlmds.math.unistra.fr/"
+    short_description = ("IRMA's translation service running the M2M100 model "
+                         "on a Quadro P6000 Nvidia GPU. Privacy is guaranteed!")
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         payload = {'text': text,
@@ -129,6 +136,9 @@ class GoogleTranslateNoKey(GoogleTranslate):
     This is not recommended, as it is against Google's TOS.
     """
     name = "Google Translate (no key)"
+    doc_url = "https://github.com/ssut/py-googletrans"
+    short_description = ("Google's translation service without an API key "
+                         "(for testing purposes only).")
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         return googletrans.Translator().translate(text, src=source_lang,
