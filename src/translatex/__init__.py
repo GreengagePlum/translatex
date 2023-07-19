@@ -9,5 +9,12 @@ still compiles perfectly and visually intact. A single, simple tool to translate
 Apart from the main use case, the marking, tokenization and text extraction can be useful in other contexts such as
 manual translation by a professional human translator or parsing.
 """
+from .preprocessor import Preprocessor
+from .marker import Marker
+from .tokenizer import Tokenizer
+from .translator import Translator
+import logging
 
-__version__ = '0.1.0'
+logging.getLogger('translatex').addHandler(logging.NullHandler())
+
+__version__ = '0.2.0'

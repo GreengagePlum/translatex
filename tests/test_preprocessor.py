@@ -47,14 +47,14 @@ def test_empty_rebuild(small_preprocessor):
         p.rebuild()
 
 
-def test_warning_rebuild(small_preprocessor, capsys):
+def test_warning_rebuild(small_preprocessor, caplog):
     """Ensure Preprocessor warns about missing or altered indicators on ``stderr``"""
     p = small_preprocessor
     p.process()
-    p.rebuild()
-    _, captured = capsys.readouterr()
-    assert len(captured) == 0
+    with caplog.at_level("ERROR"):
+        p.rebuild()
+    assert len(caplog.text) == 0
     p.processed_latex = "foo"
-    p.rebuild()
-    _, captured = capsys.readouterr()
-    assert len(captured) > 0
+    with caplog.at_level("ERROR"):
+        p.rebuild()
+    assert caplog.text

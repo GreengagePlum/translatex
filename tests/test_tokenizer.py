@@ -1,6 +1,5 @@
 """tokenizer module test suite"""
 import pytest
-import re
 
 from translatex.tokenizer import Tokenizer
 
@@ -96,14 +95,14 @@ def test_empty_detokenization(small_tokenizer):
         t.detokenize()
 
 
-def test_warning_detokenization(small_tokenizer, capsys):
+def test_warning_detokenization(small_tokenizer, caplog):
     """Ensure Tokenizer warns about missing or altered tokens on ``stderr``"""
     t = small_tokenizer
     t.tokenize()
-    t.detokenize()
-    _, captured = capsys.readouterr()
-    assert len(captured) == 0
+    with caplog.at_level("ERROR"):
+        t.detokenize()
+    assert len(caplog.text) == 0
     t.tokenized_string = "foo"
-    t.detokenize()
-    _, captured = capsys.readouterr()
-    assert len(captured) > 0
+    with caplog.at_level("ERROR"):
+        t.detokenize()
+    assert caplog.text

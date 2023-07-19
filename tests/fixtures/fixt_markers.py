@@ -1,22 +1,23 @@
 import pytest
+from textwrap import dedent
 from translatex.marker import Marker
 
 
 @pytest.fixture
 def small_marker() -> Marker:
     """Marker instance with short LaTeX string"""
-    return Marker(r"""
+    return Marker(dedent(r"""
     \begin{document}
     \textbf{\color{\text{blue}} Hello world}
     \verb+hello+
     \end{document}
-    """)
+    """))
 
 
 @pytest.fixture
 def math_marker():
     """Marker instance with LaTeX string including a pure math environment"""
-    return Marker(r"""
+    return Marker(dedent(r"""
     \begin{document}
     \[
     \Lambda\,(\mathcal{P}) \geqslant \, \; \sum_{72}^{10}
@@ -25,7 +26,7 @@ def math_marker():
     \mathrm{,}
     \]
     \end{document}
-    """)
+    """))
 
 
 @pytest.fixture

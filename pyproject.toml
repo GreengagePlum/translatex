@@ -4,22 +4,33 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "translatex"
-authors = [
-    { name = "Efe ERKEN", email = "efe.erken@math.unistra.fr" },
-]
+authors = [{ name = "Efe ERKEN", email = "efe.erken@math.unistra.fr" }]
 description = "Un logiciel pour la traduction automatique de documents scientifiques écrits dans le langage LaTeX."
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.9"
-dependencies = ["TexSoup @ git+https://github.com/alvinwan/TexSoup@c91a14a0019ff7df197e71c906bc0403eddf80dc", "regex", "googletrans==4.0.0rc1"]
+requires-python = ">=3.8"
+dependencies = [
+    "TexSoup @ git+https://github.com/alvinwan/TexSoup@c91a14a0019ff7df197e71c906bc0403eddf80dc",
+    "regex",
+    "googletrans==4.0.0rc1",
+    "requests",
+    "nltk"
+]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
-doc = ["myst-parser", "furo", "sphinx-copybutton", "sphinx-autobuild", "sphinx-prompt", "sphinx-last-updated-by-git"]
+doc = [
+    "myst-parser",
+    "furo",
+    "sphinx-copybutton",
+    "sphinx-autobuild",
+    "sphinx-prompt",
+    "sphinx-last-updated-by-git",
+]
 
 [project.license]
 text = "MIT"
