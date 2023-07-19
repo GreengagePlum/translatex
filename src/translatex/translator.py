@@ -5,13 +5,13 @@ resides.
 Abstractions for different translation services and APIs as well as methods to
 resize strings to optimize the number of API calls.
 """
+from abc import ABC, abstractmethod
 import logging
 import os
-import nltk
-from nltk.tokenize import punkt
 import re
 from typing import Dict, List
-
+import nltk
+from nltk.tokenize import punkt
 import requests
 import googletrans
 
@@ -42,7 +42,7 @@ class CustomLanguageVars(punkt.PunktLanguageVars):
 custom_tknzr = punkt.PunktSentenceTokenizer(lang_vars=CustomLanguageVars())
 
 
-class TranslationService:
+class TranslationService(ABC):
     """An abstract class that represents a translation service."""
     name: str = str()
     overall_char_limit: int = int()
@@ -54,6 +54,7 @@ class TranslationService:
     url: str = str()
     languages = Dict[str, str]
 
+    @abstractmethod
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
         Return a translated string from source language to destination
@@ -94,8 +95,8 @@ class GoogleTranslate(TranslationService):
                    'source': source_lang,
                    'target': dest_lang,
                    'format': 'text'}
-        log.debug(f"{payload=}")
-        r = requests.post(self.url, headers=headers, data=payload)
+        log.debug("payload = %s", payload)
+        r = requests.post(self.url, headers=headers, data=payload, timeout=10)
         try:
             return r.json()['data']['translations'][0]['translatedText']
         except Exception as e:
@@ -114,7 +115,7 @@ class IRMA(GoogleTranslate):
         payload = {'text': text,
                    'source_lang': source_lang,
                    'target_lang': dest_lang}
-        r = requests.post(self.url, json=payload)
+        r = requests.post(self.url, json=payload, timeout=10)
         try:
             return r.json()["translations"][0]["text"]
         except Exception as e:
@@ -163,7 +164,8 @@ class Translator:
     DEFAULT_DEST_LANG: str = "en"
     DEFAULT_SERVICE = TRANSLATION_SERVICES[1]
 
-    def __init__(self, tokenized_string: str, token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
+    def __init__(self, tokenized_string: str,
+                 token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
         """Creates a Tokenizer with default settings.
 
         Default settings are taken from the class variables.
