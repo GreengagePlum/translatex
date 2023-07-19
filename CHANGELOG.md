@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2023-07-19
+
+### Added
+
+- Handle multiple translation services
+- Improve test coverage
+- Handle latex code without any document environment
+- Use logging module
+- Expose an interface to translatex_web
+
+### Fixed
+
+- Splitting in sentences now works using nltk
+- Use a default token format compatible with Google Translate
+
 ## [0.1.0] - 2023-06-29
 
 ### Added
