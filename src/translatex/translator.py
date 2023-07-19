@@ -282,8 +282,11 @@ class Translator:
             f"({Tokenizer.token_regex(self._token_format)})",
             self._tokenized_string, 1)
         if len(tokenized_rest) == 0:
-            raise ValueError("No tokens found, translation halted")
-        self._translated_string = latex_header
+            # The case where there are no tokens: standard translation
+            tokenized_rest = self._tokenized_string
+            self._translated_string = ''
+        else:
+            self._translated_string = latex_header
         chunks = Translator.split_string_by_length(
             "".join(tokenized_rest), service.char_limit)
         self._translated_string += " ".join(
