@@ -7,7 +7,7 @@ during the said process.
 """
 import logging
 import regex as re
-from typing import Dict, TYPE_CHECKING
+from typing import Dict, List, TYPE_CHECKING
 
 from .marker import Marker
 from .data import *
