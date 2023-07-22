@@ -10,9 +10,6 @@
 - [ ] Improve `Marker`
     - [x] Add manual substitution/ignore syntax
     - [ ] Manage `displaymath` ending with a dot
-- [ ] Finish `Translator`
-    - [ ] Additional APIs
-    - [ ] Doc and test
 - [ ] Create a web interface
 - [ ] Let the user enter regex or similar extra logic
 - [ ] Make `__str__()` methods more useful
@@ -38,6 +35,9 @@
 
 ## Done
 
+- [x] Finish `Translator`
+    - [x] Additional APIs
+    - [x] Doc and test
 - [x] Fill `CHANGELOG.md`
 - [x] Add verifications on token and marker presence
 - [x] Finish CLI
