@@ -11,7 +11,7 @@ test:
   before_script:
     - pip install -e .[test]
   script:
-    - pytest --durations=0 --cov=src/translatex -sv
+    - pytest --durations=0 --cov=src/translatex -sv --runapi
     - coverage html -d public/coverage
   coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:
