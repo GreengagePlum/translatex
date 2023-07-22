@@ -1,4 +1,5 @@
 import pytest
+
 from translatex.tokenizer import Tokenizer
 
 

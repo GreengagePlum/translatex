@@ -1,6 +1,7 @@
 """preprocessor module test suite"""
-import pytest
 import re
+
+import pytest
 
 from translatex.preprocessor import Preprocessor
 
@@ -53,7 +54,7 @@ def test_warning_rebuild(small_preprocessor, caplog):
     p.process()
     with caplog.at_level("ERROR"):
         p.rebuild()
-    assert len(caplog.text) == 0
+    assert not caplog.text
     p.processed_latex = "foo"
     with caplog.at_level("ERROR"):
         p.rebuild()

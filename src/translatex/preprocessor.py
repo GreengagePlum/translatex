@@ -1,7 +1,7 @@
 """This is where all the preparations are made before anything. TransLaTeX preprocessor syntax is handled here."""
+import logging
 import re
 from typing import Dict, TYPE_CHECKING
-import logging
 
 if TYPE_CHECKING:
     from translatex.marker import Marker
@@ -129,7 +129,7 @@ class Preprocessor:
 
     def dump_store(self) -> str:
         string_transformed = [
-            str(item) + "\n" for item in self._indicator_store.items()]
+            f"{item}\n" for item in self._indicator_store.items()]
         return "".join(string_transformed)
 
     def process(self) -> None:
@@ -223,7 +223,7 @@ class Preprocessor:
             replacement_string = value
             if substitution_setting:
                 replacement_string = Preprocessor.DEFAULT_OPERATION_STAMP + "\n" + \
-                    pattern2.sub(r"\1", pattern.search(replacement_string)[1])
+                                     pattern2.sub(r"\1", pattern.search(replacement_string)[1])
             formatted_indicator = self._indicator_format.format(indicator)
             if current_string.count(formatted_indicator) == 0:
                 log.error(

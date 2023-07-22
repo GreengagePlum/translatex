@@ -172,7 +172,7 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE = TRANSLATION_SERVICES[1]
+    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES_BY_NAME["Google Translate (no key)"]
 
     def __init__(self, tokenized_string: str,
                  token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
