@@ -88,6 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme files' structure and content
 
+[0.2.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.1.0...v0.2.0
+
 [0.1.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.0.3...v0.1.0
 
 [0.0.3]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.0.2...v0.0.3
