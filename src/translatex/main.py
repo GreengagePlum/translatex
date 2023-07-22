@@ -27,6 +27,7 @@ def translatex(args: argparse.Namespace) -> None:
     """Run the translatex pipeline on a LaTeX source file."""
     base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
+    args.infile.close()
     p.process()
     log.debug("---- Preprocessor info ---- %s", p)
     if args.stop == "Preprocessor":
@@ -84,9 +85,9 @@ def translatex(args: argparse.Namespace) -> None:
     p.update_from_marker(m)
     p.rebuild(args.no_pre)
     args.outfile.write(p.unprocessed_latex)
-    args.outfile.close()
     if args.outfile != sys.stdout:
         log.info("Translated LaTeX file written to %s", args.outfile.name)
+    args.outfile.close()
 
 
 def parse_args(args) -> argparse.Namespace:
