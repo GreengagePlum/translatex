@@ -429,7 +429,6 @@ class Tokenizer:
 
         Raises:
             ValueError: If string to tokenize is empty.
-            ValueError: If string to tokenize doesn't contain any markers.
 
         """
         marker_regex = Marker.marker_regex(self._marker_format)

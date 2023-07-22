@@ -183,7 +183,6 @@ class Translator:
         Args:
             tokenized_string: The string that contains tokenized LaTeX
             token_format: The format string used for tokens
-            service_name: Name of the translation service to use
 
         """
         self._base_string: str = tokenized_string
@@ -283,9 +282,13 @@ class Translator:
 
         The Result is stored in an instance variable.
 
+        Args:
+            service: The translation service class to use
+            source_lang: The original language of the given string in ISO short form
+            destination_lang: The target language to translate to in ISO short form
+
         Raises:
             ValueError: If the source string is empty
-            ValueError: If the source string contains no tokens
 
         """
         if not self._token_format:
