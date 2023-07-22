@@ -291,7 +291,7 @@ class Translator:
             ValueError: If the source string is empty
 
         """
-        if not self._token_format:
+        if not self._tokenized_string:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(
             f"({Tokenizer.token_regex(self._token_format)})",
@@ -299,17 +299,16 @@ class Translator:
         if len(tokenized_rest) == 0:
             # The case where there are no tokens: standard translation
             tokenized_rest = self._tokenized_string
-            self._translated_string = ''
+            self._translated_string = ""
         else:
             self._translated_string = latex_header
         chunks = Translator.split_string_by_length(
             "".join(tokenized_rest), service.char_limit)
-        self._translated_string += " ".join(
+        self._translated_string += "".join(
             service.translate(chunk,
                               source_lang=source_lang,
                               dest_lang=destination_lang)
             for chunk in chunks)
-        # For multiline strings, add a newline at the end if there is none
-        if ("\n" in self._translated_string and
-                self._translated_string[-1] != "\n"):
+        # For multiline strings, add a newline at the end if it was lost during the process
+        if self._tokenized_string[-1] == "\n":
             self._translated_string += "\n"
