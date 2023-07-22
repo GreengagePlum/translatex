@@ -5,15 +5,16 @@ resides.
 Abstractions for different translation services and APIs as well as methods to
 resize strings to optimize the number of API calls.
 """
-from abc import ABC, abstractmethod
 import logging
 import os
 import re
-from typing import Dict, List
-import nltk
-from nltk.tokenize import punkt
-import requests
+from abc import ABC, abstractmethod
+from typing import Dict, List, Type
+
 import googletrans
+import nltk
+import requests
+from nltk.tokenize import punkt
 
 from .tokenizer import Tokenizer
 
@@ -84,16 +85,19 @@ class GoogleTranslate(TranslationService):
         """
         Return a translated string from source language to destination
         language.
+
+        Raises:
+            KeyError: If GOOGLE_API_KEY environment variable is not set.
+
         """
         try:
             google_api_key = os.environ['GOOGLE_API_KEY']
-        except KeyError:
-            error_message = (
-                "Please set the environment variable "
-                "GOOGLE_API_KEY to your Google API key.")
-            log.error(error_message)
-            # Return a LaTeX comment with the error message
-            return f"% {error_message}"
+        except KeyError as e:
+            log.error("GOOGLE_API_KEY environment variable is not set "
+                      "so Google Translate is not available. "
+                      "Please set the GOOGLE_API_KEY "
+                      "environment variable to your Google API key.")
+            raise
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
@@ -106,7 +110,8 @@ class GoogleTranslate(TranslationService):
         except Exception as e:
             log.error(e)
             log.error(str(r))
-            return str(r)
+            log.error(r.json())
+            return text
 
 
 class IRMA(GoogleTranslate):
@@ -127,7 +132,9 @@ class IRMA(GoogleTranslate):
             return r.json()["translations"][0]["text"]
         except Exception as e:
             log.error(e)
-            return str(r.json())
+            log.error(str(r))
+            log.error(r.json())
+            return text
 
 
 class GoogleTranslateNoKey(GoogleTranslate):
@@ -148,10 +155,6 @@ class GoogleTranslateNoKey(GoogleTranslate):
 TRANSLATION_SERVICES = (GoogleTranslate(),
                         GoogleTranslateNoKey(),
                         IRMA())
-if os.environ.get("GOOGLE_API_KEY") is None:
-    log.warning("GOOGLE_API_KEY environment variable is not set "
-                "so Google Translate is not available.")
-    TRANSLATION_SERVICES = TRANSLATION_SERVICES[1:]
 TRANSLATION_SERVICES_BY_NAME = {service.name: service
                                 for service in TRANSLATION_SERVICES}
 
