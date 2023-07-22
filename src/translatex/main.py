@@ -7,13 +7,13 @@ keeping it error free and compilable at the end, resulting in the same looking f
 """
 
 import argparse
+import logging
 import sys
 from pathlib import Path
-import logging
 
 from . import __version__
-from .preprocessor import Preprocessor
 from .marker import Marker
+from .preprocessor import Preprocessor
 from .tokenizer import Tokenizer
 from .translator import Translator, TRANSLATION_SERVICES_BY_NAME
 
@@ -54,7 +54,7 @@ def translatex(args: argparse.Namespace) -> None:
     if args.token_format:
         t.token_format = args.token_format
     t.tokenize()
-    log.debug("---- Tokenizer info ---- ")
+    log.debug("---- Tokenizer info ---- %s", t)
     if args.stop == "Tokenizer":
         args.outfile.write(t.tokenized_string)
         sys.exit()
