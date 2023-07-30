@@ -3,6 +3,14 @@
 [![pipeline status](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![coverage report](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
 
+```{toctree}
+:hidden:
+
+modules/index
+Git Repository <https://gitlab.math.unistra.fr/cassandre/translatex>
+
+```
+
 ## Description
 
 ```{eval-rst}
@@ -111,16 +119,6 @@ The following is an overview on the inner processing stages of TransLaTeX.
 - The final full stop at the end of block math environments gets put into tokens instead of being left out. These dots
   should be kept alongside the text to be translated for it to form a logical sentence giving more consistent results
   with an automatic translator.
-
-## Modules
-
-```{toctree}
-:maxdepth: 2
-:glob:
-
-modules/*
-
-```
 
 ## Python versions
 
