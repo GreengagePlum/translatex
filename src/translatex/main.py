@@ -1,4 +1,4 @@
-"""Translatex: A LaTeX translator.
+"""TransLaTeX: A LaTeX translator.
 
 The entry point to the program. The given LaTeX file is run through multiple processes such as preprocessing, marking,
 and tokenization to replace all LaTeX syntax constructs by tokens that ideally won't be modified by automatic
@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 
 
 def translatex(args: argparse.Namespace) -> None:
-    """Run the translatex pipeline on a LaTeX source file."""
+    """Run the TransLaTeX pipeline on a LaTeX source file."""
     base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
     args.infile.close()
@@ -91,7 +91,7 @@ def translatex(args: argparse.Namespace) -> None:
 
 
 def parse_args(args) -> argparse.Namespace:
-    """Argument parser for translatex."""
+    """Argument parser for TransLaTeX."""
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--version", action="version",
                         version=f"%(prog)s {__version__}",
@@ -132,7 +132,7 @@ def parse_args(args) -> argparse.Namespace:
 
 
 def main():
-    """Console script for translatex."""
+    """Console script for TransLaTeX."""
     args = parse_args(sys.argv[1:])
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
