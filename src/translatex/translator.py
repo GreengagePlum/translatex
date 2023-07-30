@@ -20,7 +20,7 @@ from .tokenizer import Tokenizer
 
 log = logging.getLogger(__name__)
 
-nltk.download('punkt')  # Download the Punkt tokenizer for sentence splitting
+nltk.download('punkt', quiet=True)  # Download the Punkt tokenizer for sentence splitting
 
 
 class CustomLanguageVars(punkt.PunktLanguageVars):
