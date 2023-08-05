@@ -460,7 +460,7 @@ class Tokenizer:
 
         Later, a simple string replace is performed for all the rest of the "normal/simple" tokens.
 
-        Write messages to ``stderr`` on encounter of any missing or altered tokens in the string to detokenize.
+        Write logs on encounter of any missing or altered tokens in the string to detokenize.
 
         Raises:
             ValueError: If string to detokenize is empty.

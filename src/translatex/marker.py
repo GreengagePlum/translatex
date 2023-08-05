@@ -363,7 +363,7 @@ class Marker:
         The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
-        Write messages to ``stderr`` on encounter of any missing or altered markers in the string to unmark.
+        Write logs on encounter of any missing or altered markers in the string to unmark.
 
         Raises:
             LookupError: If a marker is found to be missing in the processed string.
