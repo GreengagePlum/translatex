@@ -23,16 +23,16 @@ into `main branch` which only has stable and complete versions.
 
 ### Emoji legend
 
-These are the meanings of the emojis used in the git commit messages.
+These are the meanings of the emojis used in the git commit messages. See [gitmoji](https://gitmoji.dev/) also.
 
-| Emoji       | Meaning                                            |
-|:------------|:---------------------------------------------------|
-| ✨ NEW       | New file or feature                                |
-| 🔧 UPDATE   | Update of a part of the program                    |
-| 🔨 CONFIG   | Changes in config files like makefile and doxyfile |
-| ♻️ REFACTOR | Rewrite of a part of the program                   |
-| 🐛 BUGFIX   | A bug fix                                          |
-| 🔥 DELETION | Removal of a file or a feature                     |
-| 📝 DOC      | Changes in the documentation                       |
-| 🎉 EPOCH    | The beginning of the project                       |
-| 🚀 RELEASE  | A new version of the program                       |
+| Emoji              | Meaning                                            |
+|:-------------------|:---------------------------------------------------|
+| :sparkles: NEW     | New file or feature                                |
+| :wrench: UPDATE    | Update of a part of the program                    |
+| :hammer: CONFIG    | Changes in config files like makefile and doxyfile |
+| :recycle: REFACTOR | Rewrite of a part of the program                   |
+| :bug: BUGFIX       | A bug fix                                          |
+| :fire: DELETION    | Removal of a file or a feature                     |
+| :memo: DOC         | Changes in the documentation                       |
+| :tada: EPOCH       | The beginning of the project                       |
+| :rocket: RELEASE   | A new version of the program                       |
