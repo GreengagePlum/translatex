@@ -2,6 +2,10 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
+import os
+import subprocess
+
+from sphinx.errors import DocumentError
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -76,9 +80,33 @@ html_theme_options = {
     ],
 }
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# -- MyST configuration ------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#auto-generated-header-anchors
+myst_heading_anchors = 3
 
-html_theme = 'furo'
-html_logo = '../../images/logo_small.png'
-html_favicon = '../../images/logo_favicon.png'
+# -- Manually generated content ----------------------------------------------
+# https://www.sphinx-doc.org/en/master/extdev/appapi.html#events
+
+manually_generated_path = "{doc_source_dir}/manually_generated_content/"
+
+
+def cli_synopsis_generator(app):
+    """Sphinx event handler that generates the cli-synopsis.md's content before html doc generation."""
+    if app.builder.name == "html":
+        with open(f"{manually_generated_path}/cli-synopsis.txt", "w") as f:
+            try:
+                subprocess.run(["translatex", "-h"], stdout=f, stderr=subprocess.DEVNULL, check=True)
+            except (OSError, subprocess.CalledProcessError) as e:
+                if isinstance(e, OSError):
+                    sphinx_error_message = "`translatex` executable wasn't found."
+                else:
+                    sphinx_error_message = "`translatex -h` exited with a non zero status."
+                sphinx_error_message += " Manual content generation failed."
+                raise DocumentError(sphinx_error_message) from e
+
+
+def setup(app):
+    global manually_generated_path
+    manually_generated_path = manually_generated_path.format(doc_source_dir=app.srcdir)
+    os.makedirs(manually_generated_path, exist_ok=True)
+    app.connect("builder-inited", cli_synopsis_generator)

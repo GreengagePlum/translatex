@@ -7,6 +7,7 @@
 :hidden:
 
 modules/index
+cli-synopsis
 Git Repository <https://gitlab.math.unistra.fr/cassandre/translatex>
 
 ```
@@ -189,7 +190,7 @@ official instructions and your system.
 #### Build and serve the documentation locally
 
 ```bash
-sphinx-autobuild docs/source/ docs/_build/html --watch src/
+sphinx-autobuild docs/source/ docs/_build/html --watch src/ --ignore "**/docs/source/manually_generated_content/*"
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
