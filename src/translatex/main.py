@@ -34,9 +34,9 @@ def translatex(args: argparse.Namespace) -> None:
         args.outfile.write(p.processed_latex)
         sys.exit()
     if args.debug:
-        with open(f"{base_file}_processed{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_processed{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(p.processed_latex)
-        with open(f"{base_file}_indicator_store{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_indicator_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(p.dump_store())
     m = Marker.from_preprocessor(p)
     if args.marker_format:
@@ -47,9 +47,9 @@ def translatex(args: argparse.Namespace) -> None:
         args.outfile.write(m.marked_latex)
         sys.exit()
     if args.debug:
-        with open(f"{base_file}_marked{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_marked{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(m.marked_latex)
-        with open(f"{base_file}_marker_store{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_marker_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(m.dump_store())
     t = Tokenizer.from_marker(m)
     if args.token_format:
@@ -60,9 +60,9 @@ def translatex(args: argparse.Namespace) -> None:
         args.outfile.write(t.tokenized_string)
         sys.exit()
     if args.debug:
-        with open(f"{base_file}_tokenized{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_tokenized{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(t.tokenized_string)
-        with open(f"{base_file}_token_store{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+        with open(f"{base_file}_token_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
     if not args.dry_run:
@@ -73,7 +73,7 @@ def translatex(args: argparse.Namespace) -> None:
             args.outfile.write(a.translated_string)
             sys.exit()
         if args.debug:
-            with open(f"{base_file}_translated{DEFAULT_INTER_FILE_EXT}", "w+") as f:
+            with open(f"{base_file}_translated{DEFAULT_INTER_FILE_EXT}", "w") as f:
                 f.write(a.translated_string)
         t.update_from_translator(a)
     else:
@@ -127,7 +127,7 @@ def parse_args(args) -> argparse.Namespace:
     parser.add_argument('infile', nargs='?',
                         type=argparse.FileType('r'), default=sys.stdin)
     parser.add_argument('outfile', nargs='?',
-                        type=argparse.FileType('w+'), default=sys.stdout)
+                        type=argparse.FileType('w'), default=sys.stdout)
     return parser.parse_args(args)
 
 
