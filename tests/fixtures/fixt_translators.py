@@ -1,8 +1,8 @@
 import pytest
 
-from translatex.translator import Translator, TRANSLATION_SERVICES_BY_NAME
+from translatex.translator import Translator, TRANSLATION_SERVICES
 
-TEST_SERVICE = TRANSLATION_SERVICES_BY_NAME["Google Translate"]
+TEST_SERVICE = TRANSLATION_SERVICES["Google Translate"]
 
 
 @pytest.fixture

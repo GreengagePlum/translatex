@@ -20,7 +20,8 @@ from .tokenizer import Tokenizer
 
 log = logging.getLogger(__name__)
 
-nltk.download('punkt', quiet=True)  # Download the Punkt tokenizer for sentence splitting
+# Download the Punkt tokenizer for sentence splitting
+nltk.download('punkt', quiet=True)
 
 
 class CustomLanguageVars(punkt.PunktLanguageVars):
@@ -152,11 +153,10 @@ class GoogleTranslateNoKey(GoogleTranslate):
                                                   dest=dest_lang).text
 
 
-TRANSLATION_SERVICES = (GoogleTranslate(),
-                        GoogleTranslateNoKey(),
-                        IRMA())
-TRANSLATION_SERVICES_BY_NAME = {service.name: service
-                                for service in TRANSLATION_SERVICES}
+TRANSLATION_SERVICES = {service.name: service
+                        for service in (GoogleTranslate(),
+                                        GoogleTranslateNoKey(),
+                                        IRMA())}
 
 
 class Translator:
@@ -175,7 +175,8 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES_BY_NAME["Google Translate (no key)"]
+    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES[
+        "Google Translate (no key)"]
 
     def __init__(self, tokenized_string: str,
                  token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:

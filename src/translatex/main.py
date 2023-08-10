@@ -15,7 +15,7 @@ from . import __version__
 from .marker import Marker
 from .preprocessor import Preprocessor
 from .tokenizer import Tokenizer
-from .translator import Translator, TRANSLATION_SERVICES_BY_NAME
+from .translator import Translator, TRANSLATION_SERVICES
 
 DEFAULT_INTER_FILE_PRE: str = "_"
 DEFAULT_INTER_FILE_EXT: str = ".txt"
@@ -66,7 +66,7 @@ def translatex(args: argparse.Namespace) -> None:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
     if not args.dry_run:
-        service = TRANSLATION_SERVICES_BY_NAME[args.service]
+        service = TRANSLATION_SERVICES[args.service]
         a.translate(service=service, source_lang=args.src_lang,
                     destination_lang=args.dest_lang)
         if args.stop == "Translator":
@@ -121,7 +121,7 @@ def parse_args(args) -> argparse.Namespace:
                         default=Translator.DEFAULT_DEST_LANG,
                         help="Output's language")
     parser.add_argument("--service",
-                        choices=list(TRANSLATION_SERVICES_BY_NAME.keys()),
+                        choices=list(TRANSLATION_SERVICES.keys()),
                         default=Translator.DEFAULT_SERVICE.name, type=str,
                         help="Translation service to use")
     parser.add_argument('infile', nargs='?',
