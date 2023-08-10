@@ -111,23 +111,27 @@ def parse_args(args) -> argparse.Namespace:
     parser.add_argument("--no-pre", action="store_false",
                         help="Don't do manual substitution during preprocessing stage")
     parser.add_argument("-mf", "--marker-format",
-                        help="Marker format to use during marking stage")
+                        default=Marker.DEFAULT_MARKER_FORMAT,
+                        help="Marker format to use during marking stage (default: %(default)s)")
     parser.add_argument("-tf", "--token-format",
-                        help="Token format to use during tokenization stage")
+                        default=Tokenizer.DEFAULT_TOKEN_FORMAT,
+                        help="Token format to use during tokenization stage (default: %(default)s)")
     parser.add_argument("-sl", "--src-lang",
                         default=Translator.DEFAULT_SOURCE_LANG,
-                        help="Input's language")
+                        help="Input's language (default: %(default)s)")
     parser.add_argument("-dl", "--dest-lang",
                         default=Translator.DEFAULT_DEST_LANG,
-                        help="Output's language")
+                        help="Output's language (default: %(default)s)")
     parser.add_argument("--service",
                         choices=list(TRANSLATION_SERVICES_BY_NAME.keys()),
                         default=Translator.DEFAULT_SERVICE.name, type=str,
-                        help="Translation service to use")
+                        help="Translation service to use (default: %(default)s)")
     parser.add_argument('infile', nargs='?',
-                        type=argparse.FileType('r'), default=sys.stdin)
+                        type=argparse.FileType('r'), default=sys.stdin,
+                        help="File to read LaTeX from")
     parser.add_argument('outfile', nargs='?',
-                        type=argparse.FileType('w'), default=sys.stdout)
+                        type=argparse.FileType('w'), default=sys.stdout,
+                        help="File to output the processed LaTeX (can be non existant)")
     return parser.parse_args(args)
 
 
