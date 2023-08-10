@@ -18,7 +18,7 @@ from nltk.tokenize import punkt
 
 from .tokenizer import Tokenizer
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.translator")
 
 nltk.download('punkt', quiet=True)  # Download the Punkt tokenizer for sentence splitting
 

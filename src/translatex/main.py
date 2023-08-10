@@ -20,7 +20,7 @@ from .translator import Translator, TRANSLATION_SERVICES_BY_NAME
 DEFAULT_INTER_FILE_PRE: str = "_"
 DEFAULT_INTER_FILE_EXT: str = ".txt"
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.main")
 
 
 def translatex(args: argparse.Namespace) -> None:
@@ -29,7 +29,7 @@ def translatex(args: argparse.Namespace) -> None:
     p = Preprocessor(args.infile.read())
     args.infile.close()
     p.process()
-    log.debug("---- Preprocessor info ---- %s", p)
+    log.info("---- Preprocessor info ---- %s", p)
     if args.stop == "Preprocessor":
         args.outfile.write(p.processed_latex)
         sys.exit()
@@ -42,7 +42,7 @@ def translatex(args: argparse.Namespace) -> None:
     if args.marker_format:
         m.marker_format = args.marker_format
     m.mark()
-    log.debug("---- Marker info ---- %s", m)
+    log.info("---- Marker info ---- %s", m)
     if args.stop == "Marker":
         args.outfile.write(m.marked_latex)
         sys.exit()
@@ -55,7 +55,7 @@ def translatex(args: argparse.Namespace) -> None:
     if args.token_format:
         t.token_format = args.token_format
     t.tokenize()
-    log.debug("---- Tokenizer info ---- %s", t)
+    log.info("---- Tokenizer info ---- %s", t)
     if args.stop == "Tokenizer":
         args.outfile.write(t.tokenized_string)
         sys.exit()
@@ -78,7 +78,7 @@ def translatex(args: argparse.Namespace) -> None:
         t.update_from_translator(a)
     else:
         t.tokenized_string = a.tokenized_string
-    log.debug("---- Translator info ---- %s", a)
+    log.info("---- Translator info ---- %s", a)
     t.detokenize()
     m.update_from_tokenizer(t)
     m.unmark()
@@ -97,9 +97,9 @@ def parse_args(args) -> argparse.Namespace:
                         version=f"%(prog)s {__version__}",
                         help="Version number")
     parser.add_argument("-d", "--debug", action="store_true",
-                        help="Debug option to generate intermediary files")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="Print additional info on <stderr>")
+                        help="Generate intermediary files and output all logs")
+    parser.add_argument("-v", "--verbose", action="count",
+                        default=0, help="Output information logs to see details on what's going on")
     mutually_exclusive_group = parser.add_mutually_exclusive_group()
     mutually_exclusive_group.add_argument(
         "--dry-run", action="store_true",
@@ -132,12 +132,38 @@ def parse_args(args) -> argparse.Namespace:
 
 
 def main():
-    """Console script for TransLaTeX."""
+    """Console script for TransLaTeX.
+
+    Logging is set as follows in case TransLaTeX is used as a program by invoking this main script. Otherwise,
+    if TransLaTeX is imported as a module, logging stays quiet by the help of a NullHandler just like a library needs
+    to do.
+
+    If the debug option is set, the root logger is configured to DEBUG level (this option also causes the generation of
+    intermediary files later). This is the ultimate logging option.
+
+    Otherwise, if verbose level 1 is set, only TransLaTeX's logger is configured meaning only
+    this program's logs are output and none of the external imported modules'.
+
+    Lastly, if verbose level 2 is set, similarly to the debug option, the root logger is configured but to INFO level
+    meaning both TransLaTeX's and the imported modules' logs are output (to note: no intermediary files in this case).
+
+    In short the levels of information in the logs increase as follows according to the given options: ``-v``,
+    ``-vv``, ``-d``.
+    """
     args = parse_args(sys.argv[1:])
-    if args.verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
+    console_small = logging.StreamHandler()
+    console_small.setFormatter(logging.Formatter("%(name)s: %(levelname)s %(message)s"))
+    console_full = logging.StreamHandler()
+    console_full.setFormatter(
+        logging.Formatter(fmt="< %(asctime)-26s | %(name)-24s | %(levelname)-8s >\n%(message)s\n",
+                          datefmt="%Y-%m-%d %H:%M:%S %z"))
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG, handlers=[console_full])
+    elif args.verbose == 1:
+        log.setLevel(logging.INFO)
+        log.addHandler(console_small)
+    elif args.verbose == 2:
+        logging.basicConfig(level=logging.INFO, handlers=[console_full])
     translatex(args)
 
 

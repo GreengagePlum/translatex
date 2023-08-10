@@ -6,7 +6,7 @@ from typing import Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from translatex.marker import Marker
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.preprocessor")
 
 
 class Preprocessor:

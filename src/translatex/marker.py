@@ -21,7 +21,7 @@ from .preprocessor import Preprocessor
 if TYPE_CHECKING:
     from .tokenizer import Tokenizer
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.marker")
 
 
 class Marker:

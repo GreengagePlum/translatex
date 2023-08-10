@@ -16,7 +16,7 @@ from .marker import Marker
 if TYPE_CHECKING:
     from .translator import Translator
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.tokenizer")
 
 
 class Tokenizer:
