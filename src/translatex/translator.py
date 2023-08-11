@@ -9,7 +9,7 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Type
+from typing import Dict, List, Type, TextIO
 
 import googletrans
 import nltk
@@ -115,29 +115,6 @@ class GoogleTranslate(TranslationService):
             return text
 
 
-class IRMA(GoogleTranslate):
-    """Translate using Unistra IRMA DLMDS."""
-    name = "IRMA - M2M100"
-    char_limit = 1000
-    url = 'https://dlmds.math.unistra.fr/translation'
-    doc_url = "https://dlmds.math.unistra.fr/"
-    short_description = ("IRMA's translation service running the M2M100 model "
-                         "on a Quadro P6000 Nvidia GPU. Privacy is guaranteed!")
-
-    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        payload = {'text': text,
-                   'source_lang': source_lang,
-                   'target_lang': dest_lang}
-        r = requests.post(self.url, json=payload, timeout=10)
-        try:
-            return r.json()["translations"][0]["text"]
-        except Exception as e:
-            log.error(e)
-            log.error(str(r))
-            log.error(r.json())
-            return text
-
-
 class GoogleTranslateNoKey(GoogleTranslate):
     """Use googletrans without an API key.
 
@@ -155,8 +132,7 @@ class GoogleTranslateNoKey(GoogleTranslate):
 
 TRANSLATION_SERVICES = {service.name: service
                         for service in (GoogleTranslate(),
-                                        GoogleTranslateNoKey(),
-                                        IRMA())}
+                                        GoogleTranslateNoKey())}
 
 
 class Translator:
@@ -313,6 +289,27 @@ class Translator:
                               source_lang=source_lang,
                               dest_lang=destination_lang)
             for chunk in chunks)
-        # For multiline strings, add a newline at the end if it was lost during the process
+        # For multiline strings, add a newline at the end if it was lost
+        # during the process
         if self._tokenized_string[-1] == "\n":
             self._translated_string += "\n"
+
+
+def add_custom_translation_services(fp: TextIO) -> Type[TranslationService]:
+    """
+    Add to TRANSLATION_SERVICES the subclasses of TranslationService that are
+    defined in the file
+
+    Args:
+        fp: Input file object.
+    """
+    namespace = {}
+    exec(compile(fp.read(), fp.name, 'exec'), namespace)
+    for obj in namespace.values():
+        # Add the class instances that are :
+        #   - defined only in the file and not in the current module namespace
+        #   - subclasses of TranslationService
+        if (type(obj) is type(TranslationService) and
+                obj.__name__ not in globals() and
+                issubclass(obj, TranslationService)):
+            TRANSLATION_SERVICES[obj.name] = obj()

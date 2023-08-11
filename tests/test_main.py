@@ -1,4 +1,5 @@
-import pathlib
+import filecmp
+from pathlib import Path
 from textwrap import dedent
 
 import pytest
@@ -10,7 +11,7 @@ from translatex.preprocessor import Preprocessor
 from translatex.tokenizer import Tokenizer
 from translatex.translator import Translator
 
-TEXFILES_DIR_PATH = pathlib.Path(__file__).parent.resolve() / "texfiles"
+TEXFILES_DIR_PATH = Path(__file__).parent.resolve() / "texfiles"
 
 
 def translate(source: str, source_lang_code: str = 'en',
@@ -86,3 +87,16 @@ def test_main(tmp_path):
 Bonjour le monde
 \end{document}
 """
+
+
+def test_custom_api(tmp_path, request):
+    source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
+    destination_file_path = tmp_path / "helloworld_out.tex"
+    args = parse_args(['-sl', 'en', '-dl', 'fr', '--custom_api',
+                       (request.path.parent / "custom.py").as_posix(),
+                       '--service', 'Do not translate',
+                       source_file_path.as_posix(),
+                       destination_file_path.as_posix()])
+    translatex(args)
+    # Check that the original and translated versions are identical
+    assert filecmp.cmp(source_file_path, destination_file_path)
