@@ -11,9 +11,24 @@ test:
   before_script:
     - pip install -e .[test]
   script:
-    - pytest --durations=0 --cov=src/translatex -sv
+    - pytest --durations=0 --cov=src/translatex -sv --runapi
     - coverage html -d public/coverage
   coverage: '/TOTAL.*\s+(\d+\%)/'
+  artifacts:
+    paths:
+      - public
+  tags:
+    - docker
+
+doc:
+  stage: test
+  before_script:
+    - apt -y -qq update && apt -y -qq install graphviz
+    - pip install -e .[doc]
+  script:
+    - sphinx-build -b html docs/source/ public/
+  except:
+    - main
   artifacts:
     paths:
       - public

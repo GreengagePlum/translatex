@@ -101,7 +101,7 @@ def test_warning_detokenization(small_tokenizer, caplog):
     t.tokenize()
     with caplog.at_level("ERROR"):
         t.detokenize()
-    assert len(caplog.text) == 0
+    assert not caplog.text
     t.tokenized_string = "foo"
     with caplog.at_level("ERROR"):
         t.detokenize()

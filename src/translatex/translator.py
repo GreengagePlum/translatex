@@ -5,21 +5,22 @@ resides.
 Abstractions for different translation services and APIs as well as methods to
 resize strings to optimize the number of API calls.
 """
-from abc import ABC, abstractmethod
 import logging
 import os
 import re
-from typing import Dict, List
-import nltk
-from nltk.tokenize import punkt
-import requests
+from abc import ABC, abstractmethod
+from typing import Dict, List, Type
+
 import googletrans
+import nltk
+import requests
+from nltk.tokenize import punkt
 
 from .tokenizer import Tokenizer
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.translator")
 
-nltk.download('punkt')  # Download the Punkt tokenizer for sentence splitting
+nltk.download('punkt', quiet=True)  # Download the Punkt tokenizer for sentence splitting
 
 
 class CustomLanguageVars(punkt.PunktLanguageVars):
@@ -84,16 +85,19 @@ class GoogleTranslate(TranslationService):
         """
         Return a translated string from source language to destination
         language.
+
+        Raises:
+            KeyError: If GOOGLE_API_KEY environment variable is not set.
+
         """
         try:
             google_api_key = os.environ['GOOGLE_API_KEY']
-        except KeyError:
-            error_message = (
-                "Please set the environment variable "
-                "GOOGLE_API_KEY to your Google API key.")
-            log.error(error_message)
-            # Return a LaTeX comment with the error message
-            return f"% {error_message}"
+        except KeyError as e:
+            log.error("GOOGLE_API_KEY environment variable is not set "
+                      "so Google Translate is not available. "
+                      "Please set the GOOGLE_API_KEY "
+                      "environment variable to your Google API key.")
+            raise
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
@@ -106,7 +110,8 @@ class GoogleTranslate(TranslationService):
         except Exception as e:
             log.error(e)
             log.error(str(r))
-            return str(r)
+            log.error(r.json())
+            return text
 
 
 class IRMA(GoogleTranslate):
@@ -127,7 +132,9 @@ class IRMA(GoogleTranslate):
             return r.json()["translations"][0]["text"]
         except Exception as e:
             log.error(e)
-            return str(r.json())
+            log.error(str(r))
+            log.error(r.json())
+            return text
 
 
 class GoogleTranslateNoKey(GoogleTranslate):
@@ -148,10 +155,6 @@ class GoogleTranslateNoKey(GoogleTranslate):
 TRANSLATION_SERVICES = (GoogleTranslate(),
                         GoogleTranslateNoKey(),
                         IRMA())
-if os.environ.get("GOOGLE_API_KEY") is None:
-    log.warning("GOOGLE_API_KEY environment variable is not set "
-                "so Google Translate is not available.")
-    TRANSLATION_SERVICES = TRANSLATION_SERVICES[1:]
 TRANSLATION_SERVICES_BY_NAME = {service.name: service
                                 for service in TRANSLATION_SERVICES}
 
@@ -172,7 +175,7 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE = TRANSLATION_SERVICES[1]
+    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES_BY_NAME["Google Translate (no key)"]
 
     def __init__(self, tokenized_string: str,
                  token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
@@ -183,7 +186,6 @@ class Translator:
         Args:
             tokenized_string: The string that contains tokenized LaTeX
             token_format: The format string used for tokens
-            service_name: Name of the translation service to use
 
         """
         self._base_string: str = tokenized_string
@@ -283,12 +285,16 @@ class Translator:
 
         The Result is stored in an instance variable.
 
+        Args:
+            service: The translation service class to use
+            source_lang: The original language of the given string in ISO short form
+            destination_lang: The target language to translate to in ISO short form
+
         Raises:
             ValueError: If the source string is empty
-            ValueError: If the source string contains no tokens
 
         """
-        if not self._token_format:
+        if not self._tokenized_string:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(
             f"({Tokenizer.token_regex(self._token_format)})",
@@ -296,17 +302,16 @@ class Translator:
         if len(tokenized_rest) == 0:
             # The case where there are no tokens: standard translation
             tokenized_rest = self._tokenized_string
-            self._translated_string = ''
+            self._translated_string = ""
         else:
             self._translated_string = latex_header
         chunks = Translator.split_string_by_length(
             "".join(tokenized_rest), service.char_limit)
-        self._translated_string += " ".join(
+        self._translated_string += "".join(
             service.translate(chunk,
                               source_lang=source_lang,
                               dest_lang=destination_lang)
             for chunk in chunks)
-        # For multiline strings, add a newline at the end if there is none
-        if ("\n" in self._translated_string and
-                self._translated_string[-1] != "\n"):
+        # For multiline strings, add a newline at the end if it was lost during the process
+        if self._tokenized_string[-1] == "\n" and self._translated_string[-1] != "\n":
             self._translated_string += "\n"

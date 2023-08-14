@@ -1,6 +1,9 @@
 """translator module test suite"""
-from conftest import TEST_SERVICE
 from textwrap import dedent
+
+import pytest
+
+from conftest import TEST_SERVICE
 
 
 def test_split_string_by_length(small_trans):
@@ -24,6 +27,7 @@ def test_split_string_by_length(small_trans):
                       "On multiple\nlines."]
 
 
+@pytest.mark.api
 def test_translate_small(small_trans):
     small_trans.translate(service=TEST_SERVICE)
     assert small_trans.translated_string == dedent("""
@@ -34,6 +38,7 @@ def test_translate_small(small_trans):
     """)
 
 
+@pytest.mark.api
 def test_translate_math(math_trans):
     math_trans.translate(service=TEST_SERVICE)
     assert math_trans.translated_string == dedent("""

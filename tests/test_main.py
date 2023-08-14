@@ -1,11 +1,14 @@
 import pathlib
-from conftest import TEST_SERVICE
 from textwrap import dedent
-from translatex.translator import Translator
-from translatex.tokenizer import Tokenizer
+
+import pytest
+
+from conftest import TEST_SERVICE
+from translatex.main import parse_args, translatex
 from translatex.marker import Marker
 from translatex.preprocessor import Preprocessor
-from translatex.main import parse_args, translatex
+from translatex.tokenizer import Tokenizer
+from translatex.translator import Translator
 
 TEXFILES_DIR_PATH = pathlib.Path(__file__).parent.resolve() / "texfiles"
 
@@ -39,6 +42,7 @@ def translate(source: str, source_lang_code: str = 'en',
     return p.unprocessed_latex
 
 
+@pytest.mark.api
 def test_full_translation():
     source = dedent(r"""\documentclass{article}
     \begin{document}
@@ -53,18 +57,21 @@ def test_full_translation():
     """)
 
 
+@pytest.mark.api
 def test_translation_with_no_document_env():
     source = r"\section{Hello World}"
     translated = translate(source)
     assert translated == r"\section{Bonjour le monde}"
 
 
+@pytest.mark.api
 def test_translation_without_any_latex():
     source = "Hello World"
     translated = translate(source)
     assert translated == "Bonjour le monde"
 
 
+@pytest.mark.api
 def test_main(tmp_path):
     source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
     destination_file_path = tmp_path / "helloworld_out.tex"

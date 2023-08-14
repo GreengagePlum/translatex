@@ -8,9 +8,9 @@ This module makes heavy use of the TexSoup module to have a LaTeX parse tree and
 structures that need to be tokenized later are marked recursively so that the tokenization pass can be simpler and
 compatible with many more types of structures.
 """
+import logging
 import re
 from typing import Dict, Optional, TYPE_CHECKING
-import logging
 
 from TexSoup import TexSoup
 from TexSoup.data import *
@@ -21,7 +21,7 @@ from .preprocessor import Preprocessor
 if TYPE_CHECKING:
     from .tokenizer import Tokenizer
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.marker")
 
 
 class Marker:
@@ -145,7 +145,7 @@ class Marker:
 
     def dump_store(self) -> str:
         string_transformed = [
-            str(item) + "\n" for item in self._marker_store.items()]
+            f"{item}\n" for item in self._marker_store.items()]
         return "".join(string_transformed)
 
     def _marker_regex(self) -> str:
@@ -363,7 +363,7 @@ class Marker:
         The dictionary is iterated through and each marker is replaced with its associated LaTeX string. At the end, the
         unmarked string is stored in an instance variable.
 
-        Write messages to ``stderr`` on encounter of any missing or altered markers in the string to unmark.
+        Write logs on encounter of any missing or altered markers in the string to unmark.
 
         Raises:
             LookupError: If a marker is found to be missing in the processed string.
@@ -377,8 +377,7 @@ class Marker:
             formatted_marker = self._marker_format.format(marker)
             if current_string.count(formatted_marker) == 0:
                 log.error(
-                    "Found missing or altered MARKER: %s --> during stage MARKER",
-                    formatted_marker)
+                    f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER")
             else:
                 current_string = current_string.replace(
                     formatted_marker, value)

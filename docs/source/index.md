@@ -3,6 +3,15 @@
 [![pipeline status](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![coverage report](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
 
+```{toctree}
+:hidden:
+
+modules/index
+cli-synopsis
+Git Repository <https://gitlab.math.unistra.fr/cassandre/translatex>
+
+```
+
 ## Description
 
 ```{eval-rst}
@@ -67,7 +76,7 @@ The following is an overview on the inner processing stages of TransLaTeX.
 - Straight forward design, easy to tinker with the program's source code to customize its behavior
 - Easy to install and run with simple instructions and CLI
 - Debug option to have a peek at inner workings after the operation
-- The core program apart from the API call is idempotent and preserves the original text from a LaTeX stand point after
+- The core program apart from the API call is idempotent and preserves the original text from a LaTeX standpoint after
   any manipulation
 - Correct resulting LaTeX, which compiles and has working references
 
@@ -112,16 +121,6 @@ The following is an overview on the inner processing stages of TransLaTeX.
   should be kept alongside the text to be translated for it to form a logical sentence giving more consistent results
   with an automatic translator.
 
-## Modules
-
-```{toctree}
-:maxdepth: 2
-:glob:
-
-modules/*
-
-```
-
 ## Python versions
 
 CPython is the Python implementation used and below are the most used versions during development.
@@ -132,28 +131,19 @@ Python 3.10.11
 
 ## Installation
 
-(shell_disclaimer)=
-
-```{eval-rst}
-.. note::
-
-    Pay attention to using ``bash`` to execute any of the commands with a square bracket (``[]``) syntax since ``zsh``
-    has issues parsing these commands and produces errors. Or, alternatively you can wrap the arguments inside double
-    quotes.
-
-```
-
 ### Install python package
 
 #### Using pip
 
-Your ssh key must be present on <https://gitlab.math.unistra.fr/-/profile/keys>.
+*For use as an end user, the final product*
 
 ```bash
 pip install git+https://gitlab.math.unistra.fr/cassandre/translatex.git
 ```
 
 #### Using pip in a virtual environment
+
+*For use as a developer, a dev environment*
 
 From project root directory:
 
@@ -170,10 +160,10 @@ code and have the changes take effect immediately.
 
 ### Run the unitary tests
 
-#### Install the development dependencies[*](shell_disclaimer)
+#### Install the development dependencies
 
 ```bash
-pip install -e .[test]
+pip install -e ".[test]"
 ```
 
 #### Run the tests
@@ -188,10 +178,10 @@ See [.gitlab-ci.yml](https://gitlab.math.unistra.fr/cassandre/translatex/blob/ma
 
 ### Build the documentation
 
-#### Install the documentation dependencies[*](shell_disclaimer)
+#### Install the documentation dependencies
 
 ```bash
-pip install -e .[doc]
+pip install -e ".[doc]"
 ```
 
 You also need [`graphviz`](https://graphviz.org/) for diagram generation. Install it according to its
@@ -200,17 +190,17 @@ official instructions and your system.
 #### Build and serve the documentation locally
 
 ```bash
-sphinx-autobuild docs/source/ docs/_build/html --watch src/
+sphinx-autobuild docs/source/ docs/_build/html --watch src/ --ignore "**/docs/source/manually_generated_content/*"
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
 
 ## Usage
 
-TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments specifying
-the paths to the input and output files. It also writes warnings about missing or altered indicators (generally due to
-the automatic translation) and extra information (when verbose) to `stderr`. Don't forget to redirect these via
-`2> /dev/null` or equivalent if you only want the LaTeX output.
+TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments
+specifying the paths to the input and output files. It also writes warnings about missing or altered indicators
+(generally due to the automatic translation) and extra information (when verbose) to `stderr`. Don't forget to redirect
+these via `2> /dev/null` or equivalent if you only want the LaTeX output.
 
 To be continued...
 
