@@ -102,7 +102,7 @@ def parse_args(args) -> argparse.Namespace:
                         default=0, help="Output information logs to see details on what's going on")
     mutually_exclusive_group = parser.add_mutually_exclusive_group()
     mutually_exclusive_group.add_argument(
-        "--dry-run", action="store_true",
+        "-n", "--dry-run", action="store_true",
         help="Don't translate (no API call), just run the chain of operations")
     mutually_exclusive_group.add_argument(
         "-s", "--stop",
