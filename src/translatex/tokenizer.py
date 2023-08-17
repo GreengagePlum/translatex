@@ -16,7 +16,7 @@ from .marker import Marker
 if TYPE_CHECKING:
     from .translator import Translator
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.tokenizer")
 
 
 class Tokenizer:
@@ -213,6 +213,7 @@ class Tokenizer:
         """Tokenizes all special case structures listed in the data module.
 
         .. note::
+
             Not all special cases are processed so far.
 
         """
@@ -245,7 +246,7 @@ class Tokenizer:
         """
         marker_regex = Marker.marker_regex(self._marker_format)
         pattern = re.compile(
-            r"(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
+            r"(?<!\\)(?:\\\\)*(\\\[|\\\(|\$|\$\$)(?:" + marker_regex + r"\s*)*(\\\]|\\\)|\$|\$\$)?")
         current_string = process_string
         all_replaced = False
         while not all_replaced:
@@ -256,7 +257,7 @@ class Tokenizer:
                 current_string, _ = pattern.subn(next_token, current_string, 1)
             else:
                 all_replaced = True
-        pattern = re.compile(r"(?:" + marker_regex + r")*(\\\]|\\\)|\$|\$\$)")
+        pattern = re.compile(r"(?:" + marker_regex + r")*(?<!\\)(?:\\\\)*(\\\]|\\\)|\$|\$\$)")
         all_replaced = False
         while not all_replaced:
             match = pattern.search(current_string)
@@ -460,7 +461,7 @@ class Tokenizer:
 
         Later, a simple string replace is performed for all the rest of the "normal/simple" tokens.
 
-        Write messages to ``stderr`` on encounter of any missing or altered tokens in the string to detokenize.
+        Write logs on encounter of any missing or altered tokens in the string to detokenize.
 
         Raises:
             ValueError: If string to detokenize is empty.

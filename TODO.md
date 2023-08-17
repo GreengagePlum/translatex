@@ -29,12 +29,12 @@
 ## Miscellaneous
 
 - [ ] Add `CONTRIBUTING.md`
-- [ ] Finish Sphinx main page
-    - [ ] Document interface and features for the end user
 - [ ] Add `argcomplete` for shell option completions
 
 ## Done
 
+- [x] Finish Sphinx main page
+    - [x] Document interface and features for the end user
 - [x] Finish `Translator`
     - [x] Additional APIs
     - [x] Doc and test

@@ -6,7 +6,7 @@ from typing import Dict, TYPE_CHECKING
 if TYPE_CHECKING:
     from translatex.marker import Marker
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.preprocessor")
 
 
 class Preprocessor:
@@ -206,7 +206,7 @@ class Preprocessor:
 
         The resulting string is stored in an instance variable for unprocessed LaTeX.
 
-        Write messages to ``stderr`` on encounter of any missing or altered indicators in the string to rebuild from.
+        Write logs on encounter of any missing or altered indicators in the string to rebuild from.
 
         Raises:
             ValueError: If string to rebuild from is empty.

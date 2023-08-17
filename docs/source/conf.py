@@ -2,6 +2,10 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
+import os
+import subprocess
+
+from sphinx.errors import DocumentError
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -41,6 +45,12 @@ autodoc_default_options = {
 
 graphviz_output_format = "svg"
 
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'furo'
+html_logo = '../../images/logo_small.png'
+html_favicon = '../../images/logo_favicon.png'
 html_theme_options = {
     "source_edit_link": "https://gitlab.math.unistra.fr/cassandre/translatex/edit/main/docs/source/{filename}",
     "footer_icons": [
@@ -50,11 +60,11 @@ html_theme_options = {
             "html": """
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 256 256" height="1em"
                     width="1em" xmlns="http://www.w3.org/2000/svg">
-                    
+
                     <path d="M220.23,110.84,128,176,35.77,110.84,53.5,43A3.93,3.93,0,0,1,61,42.62L80.65,
                     96h94.7L195,42.62a3.93,3.93,0,0,1,7.53.38Z" opacity="0.2">
                     </path>
-                    
+
                     <path d="M230.15,117.1,210.25,41a11.94,11.94,0,0,0-22.79-1.11L169.78,88H86.22L68.54,39.87A11.94,
                     11.94,0,0,0,45.75,41L25.85,117.1a57.19,57.19,0,0,0,22,61l73.27,51.76a11.91,11.91,0,0,0,13.74,
                     0l73.27-51.76A57.19,57.19,0,0,0,230.15,117.1ZM58,57.5,73.13,98.76A8,8,0,0,0,80.64,104h94.72a8,8,0,
@@ -62,7 +72,7 @@ html_theme_options = {
                     165A41.06,41.06,0,0,1,40.68,124.11Zm87.32,91-20.73-14.65L128,185.8l20.73,14.64ZM198.91,165l-36.32,
                     25.66L141.87,176l73.45-51.9A41.06,41.06,0,0,1,198.91,165Z">
                     </path>
-                    
+
                     </svg>
             """,
             "class": "",
@@ -70,9 +80,33 @@ html_theme_options = {
     ],
 }
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+# -- MyST configuration ------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html#auto-generated-header-anchors
+myst_heading_anchors = 3
 
-html_theme = 'furo'
-html_logo = '../../images/logo_small.png'
-html_favicon = '../../images/logo_favicon.png'
+# -- Manually generated content ----------------------------------------------
+# https://www.sphinx-doc.org/en/master/extdev/appapi.html#events
+
+manually_generated_path = "{doc_source_dir}/manually_generated_content/"
+
+
+def cli_synopsis_generator(app):
+    """Sphinx event handler that generates the cli-synopsis.md's content before html doc generation."""
+    if app.builder.name == "html":
+        with open(f"{manually_generated_path}/cli-synopsis.txt", "w") as f:
+            try:
+                subprocess.run(["translatex", "-h"], stdout=f, stderr=subprocess.DEVNULL, check=True)
+            except (OSError, subprocess.CalledProcessError) as e:
+                if isinstance(e, OSError):
+                    sphinx_error_message = "`translatex` executable wasn't found."
+                else:
+                    sphinx_error_message = "`translatex -h` exited with a non zero status."
+                sphinx_error_message += " Manual content generation failed."
+                raise DocumentError(sphinx_error_message) from e
+
+
+def setup(app):
+    global manually_generated_path
+    manually_generated_path = manually_generated_path.format(doc_source_dir=app.srcdir)
+    os.makedirs(manually_generated_path, exist_ok=True)
+    app.connect("builder-inited", cli_synopsis_generator)

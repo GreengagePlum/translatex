@@ -18,7 +18,7 @@ from nltk.tokenize import punkt
 
 from .tokenizer import Tokenizer
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.translator")
 
 # Download the Punkt tokenizer for sentence splitting
 nltk.download('punkt', quiet=True)
@@ -291,7 +291,8 @@ class Translator:
             for chunk in chunks)
         # For multiline strings, add a newline at the end if it was lost
         # during the process
-        if self._tokenized_string[-1] == "\n":
+        if (self._tokenized_string[-1] == "\n" and
+                self._translated_string[-1] != "\n"):
             self._translated_string += "\n"
 
 
