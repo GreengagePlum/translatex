@@ -98,7 +98,7 @@ class GoogleTranslate(TranslationService):
                       "so Google Translate is not available. "
                       "Please set the GOOGLE_API_KEY "
                       "environment variable to your Google API key.")
-            raise
+            raise e
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
@@ -221,7 +221,7 @@ class Translator:
         is kept intact and accessible if need be.
 
         If the base changes, almost everything is reset and readied for the
-        new base so that everything is in sync
+        new base so that everything is in sync.
         """
         return self._base_string
 
@@ -263,7 +263,7 @@ class Translator:
         The Result is stored in an instance variable.
 
         Args:
-            service: The translation service class to use
+            service: The translation service instance to use
             source_lang: The original language of the given string in ISO short form
             destination_lang: The target language to translate to in ISO short form
 
@@ -295,10 +295,10 @@ class Translator:
             self._translated_string += "\n"
 
 
-def add_custom_translation_services(fp: TextIO) -> Type[TranslationService]:
+def add_custom_translation_services(fp: TextIO):
     """
     Add to TRANSLATION_SERVICES the subclasses of TranslationService that are
-    defined in the file
+    defined in the custom file fp.
 
     Args:
         fp: Input file object.
