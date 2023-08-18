@@ -9,7 +9,7 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Type
+from typing import Dict, List, Type, TextIO
 
 import googletrans
 import nltk
@@ -20,7 +20,8 @@ from .tokenizer import Tokenizer
 
 log = logging.getLogger("translatex.translator")
 
-nltk.download('punkt', quiet=True)  # Download the Punkt tokenizer for sentence splitting
+# Download the Punkt tokenizer for sentence splitting
+nltk.download('punkt', quiet=True)
 
 
 class CustomLanguageVars(punkt.PunktLanguageVars):
@@ -97,7 +98,7 @@ class GoogleTranslate(TranslationService):
                       "so Google Translate is not available. "
                       "Please set the GOOGLE_API_KEY "
                       "environment variable to your Google API key.")
-            raise
+            raise e
         headers = {'X-goog-api-key': google_api_key}
         payload = {'q': text,
                    'source': source_lang,
@@ -107,29 +108,6 @@ class GoogleTranslate(TranslationService):
         r = requests.post(self.url, headers=headers, data=payload, timeout=10)
         try:
             return r.json()['data']['translations'][0]['translatedText']
-        except Exception as e:
-            log.error(e)
-            log.error(str(r))
-            log.error(r.json())
-            return text
-
-
-class IRMA(GoogleTranslate):
-    """Translate using Unistra IRMA DLMDS."""
-    name = "IRMA - M2M100"
-    char_limit = 1000
-    url = 'https://dlmds.math.unistra.fr/translation'
-    doc_url = "https://dlmds.math.unistra.fr/"
-    short_description = ("IRMA's translation service running the M2M100 model "
-                         "on a Quadro P6000 Nvidia GPU. Privacy is guaranteed!")
-
-    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        payload = {'text': text,
-                   'source_lang': source_lang,
-                   'target_lang': dest_lang}
-        r = requests.post(self.url, json=payload, timeout=10)
-        try:
-            return r.json()["translations"][0]["text"]
         except Exception as e:
             log.error(e)
             log.error(str(r))
@@ -152,11 +130,9 @@ class GoogleTranslateNoKey(GoogleTranslate):
                                                   dest=dest_lang).text
 
 
-TRANSLATION_SERVICES = (GoogleTranslate(),
-                        GoogleTranslateNoKey(),
-                        IRMA())
-TRANSLATION_SERVICES_BY_NAME = {service.name: service
-                                for service in TRANSLATION_SERVICES}
+TRANSLATION_SERVICES = {service.name: service
+                        for service in (GoogleTranslate(),
+                                        GoogleTranslateNoKey())}
 
 
 class Translator:
@@ -175,7 +151,8 @@ class Translator:
     """
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES_BY_NAME["Google Translate (no key)"]
+    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES[
+        "Google Translate (no key)"]
 
     def __init__(self, tokenized_string: str,
                  token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
@@ -244,7 +221,7 @@ class Translator:
         is kept intact and accessible if need be.
 
         If the base changes, almost everything is reset and readied for the
-        new base so that everything is in sync
+        new base so that everything is in sync.
         """
         return self._base_string
 
@@ -286,7 +263,7 @@ class Translator:
         The Result is stored in an instance variable.
 
         Args:
-            service: The translation service class to use
+            service: The translation service instance to use
             source_lang: The original language of the given string in ISO short form
             destination_lang: The target language to translate to in ISO short form
 
@@ -312,6 +289,28 @@ class Translator:
                               source_lang=source_lang,
                               dest_lang=destination_lang)
             for chunk in chunks)
-        # For multiline strings, add a newline at the end if it was lost during the process
-        if self._tokenized_string[-1] == "\n" and self._translated_string[-1] != "\n":
+        # For multiline strings, add a newline at the end if it was lost
+        # during the process
+        if (self._tokenized_string[-1] == "\n" and
+                self._translated_string[-1] != "\n"):
             self._translated_string += "\n"
+
+
+def add_custom_translation_services(fp: TextIO):
+    """
+    Add to TRANSLATION_SERVICES the subclasses of TranslationService that are
+    defined in the custom file fp.
+
+    Args:
+        fp: Input file object.
+    """
+    namespace = {}
+    exec(compile(fp.read(), fp.name, 'exec'), namespace)
+    for obj in namespace.values():
+        # Add the class instances that are :
+        #   - defined only in the file and not in the current module namespace
+        #   - subclasses of TranslationService
+        if (type(obj) is type(TranslationService) and
+                obj.__name__ not in globals() and
+                issubclass(obj, TranslationService)):
+            TRANSLATION_SERVICES[obj.name] = obj()

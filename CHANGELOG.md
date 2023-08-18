@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI synopsis page to docs
 - `livehtml` target to Sphinx Makefile that launches `sphinx-autobuild`
 - New CI/CD job to test doc generation
+- Any custom translation service can be added to the CLI
+- tranlatex can be run as a module
 
 ### Changed
 
@@ -25,10 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unicode emojis to plain text emojis in READMEs
 - Unnecessary read-write file accesses to write-only in main
 - Logging behaviour is restored to initial intended functionality respecting CLI option distinction (`-v` and `-d`)
+- Fix Sphinx version to solve a Furo extension bug
 
 ### Removed
 
 - Erroneous example LaTeX file
+- `IRMA - M2M100` translation service (now a custom service)
 
 ### Fixed
 

@@ -202,17 +202,16 @@ Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` d
 
 ### Basic use
 
-TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments
-specifying the paths to the input and output files. It also writes warnings about missing or altered indicators
-(generally due to the automatic translation) and extra information when verbose or debug options are specified as
-logs to `stderr`. Don't
-forget to
-redirect these via `2> /dev/null` or equivalent if you only want the LaTeX output. This behaviour is useful if you
-want to integrate TransLaTeX into scripts, batch execute it, automate its execution or simply use a pipe (`|`) syntax.
-
 ```{note}
 See the [](cli-synopsis.md) for an overview of the possible options for TransLaTeX on the command line.
 ```
+
+TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments
+specifying the paths to the input and output files. It also writes warnings about missing or altered indicators
+(generally due to the automatic translation) and extra information when verbose or debug options are specified as
+logs to `stderr`. Don't forget to redirect these via `2> /dev/null` or equivalent if you only want the LaTeX output.
+This behaviour is useful if you want to integrate TransLaTeX into scripts, batch execute it, automate its execution
+or simply use a pipe (`|`) syntax.
 
 For the most basic invocation of TransLaTeX, you need the source and destination language short names and an internet
 connection. An example is as follows:
@@ -520,6 +519,24 @@ your file process correctly:
   entering in additional regex by the end user hasn't been implemented yet, anything you add here will only be
   skipped on all stages leaving these commands and all their arguments and options intact before sending out for
   translation (they could thus get altered by the translator resulting in a broken LaTeX file).
+
+### Custom translation service
+
+You can provide your own translation service by creating a python file containing one or several custom translation
+service classes that derive from {class}`~translatex.translator.TranslationService` or one of its children and
+implement the {meth}`~translatex.translator.TranslationService.translate` method.
+
+Suppose that a `custom.py` file contains the following code:
+
+```{eval-rst}
+.. literalinclude:: ../../tests/custom.py
+```
+
+Then, you can use it with the `--custom_api` option together with the `--service` option:
+
+```bash
+translatex --custom_api custom.py --service "Do not translate" input.tex output.tex
+```
 
 ## Indices and tables
 

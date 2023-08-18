@@ -15,7 +15,8 @@ from . import __version__
 from .marker import Marker
 from .preprocessor import Preprocessor
 from .tokenizer import Tokenizer
-from .translator import Translator, TRANSLATION_SERVICES_BY_NAME
+from .translator import (Translator, TRANSLATION_SERVICES,
+                         add_custom_translation_services)
 
 DEFAULT_INTER_FILE_PRE: str = "_"
 DEFAULT_INTER_FILE_EXT: str = ".txt"
@@ -25,6 +26,8 @@ log = logging.getLogger("translatex.main")
 
 def translatex(args: argparse.Namespace) -> None:
     """Run the TransLaTeX pipeline on a LaTeX source file."""
+    if args.custom_api:
+        add_custom_translation_services(args.custom_api)
     base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
     args.infile.close()
@@ -66,8 +69,8 @@ def translatex(args: argparse.Namespace) -> None:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
     if not args.dry_run:
-        service = TRANSLATION_SERVICES_BY_NAME[args.service]
-        a.translate(service=service, source_lang=args.src_lang,
+        a.translate(service=TRANSLATION_SERVICES[args.service],
+                    source_lang=args.src_lang,
                     destination_lang=args.dest_lang)
         if args.stop == "Translator":
             args.outfile.write(a.translated_string)
@@ -92,7 +95,9 @@ def translatex(args: argparse.Namespace) -> None:
 
 def parse_args(args) -> argparse.Namespace:
     """Argument parser for TransLaTeX."""
-    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser = argparse.ArgumentParser(
+        prog="translatex",
+        description=__doc__, allow_abbrev=False)
     parser.add_argument("--version", action="version",
                         version=f"%(prog)s {__version__}",
                         help="Version number")
@@ -122,10 +127,14 @@ def parse_args(args) -> argparse.Namespace:
     parser.add_argument("-dl", "--dest-lang",
                         default=Translator.DEFAULT_DEST_LANG,
                         help="Output's language (default: %(default)s)")
-    parser.add_argument("--service",
-                        choices=list(TRANSLATION_SERVICES_BY_NAME.keys()),
-                        default=Translator.DEFAULT_SERVICE.name, type=str,
-                        help="Translation service to use (default: %(default)s)")
+    parser.add_argument(
+        "-ca", "--custom_api", type=argparse.FileType('r'),
+        help="Python file that provides a custom translation service class")
+    service_choices = tuple(TRANSLATION_SERVICES.keys()) + ('Custom service...',)
+    parser.add_argument(
+        "--service",
+        default=Translator.DEFAULT_SERVICE.name, type=str,
+        help=f"Translation service to use {service_choices} (default: %(default)s)")
     parser.add_argument('infile', nargs='?',
                         type=argparse.FileType('r'), default=sys.stdin,
                         help="File to read LaTeX from")
