@@ -24,7 +24,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
 doc = [
-    "Sphinx < 7.2.0",
+    "Sphinx >= 7.2.2",
     "myst-parser",
     "furo",
     "sphinx-copybutton",
