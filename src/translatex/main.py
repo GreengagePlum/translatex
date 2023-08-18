@@ -16,6 +16,7 @@ from .marker import Marker
 from .preprocessor import Preprocessor
 from .tokenizer import Tokenizer
 from .translator import (Translator, TRANSLATION_SERVICE_CLASSES,
+                         ApiKeyError,
                          add_custom_translation_services)
 
 DEFAULT_INTER_FILE_PRE: str = "_"
@@ -74,7 +75,12 @@ def translatex(args: argparse.Namespace) -> None:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
     if not args.dry_run:
-        a.translate(service=TRANSLATION_SERVICE_CLASSES[args.service](),
+        try:
+            service = TRANSLATION_SERVICE_CLASSES[args.service]()
+        except ApiKeyError as e:
+            log.error(e.message)
+            sys.exit(1)
+        a.translate(service=service,
                     source_lang=args.src_lang,
                     destination_lang=args.dest_lang)
         if args.stop == "Translator":

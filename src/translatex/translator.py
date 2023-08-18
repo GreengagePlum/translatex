@@ -49,6 +49,27 @@ class CustomLanguageVars(punkt.PunktLanguageVars):
 custom_tknzr = punkt.PunktSentenceTokenizer(lang_vars=CustomLanguageVars())
 
 
+class ApiKeyError(Exception):
+    """
+    Raised when an API key is missing.
+
+    Attributes:
+        service_name: The name of the service that is missing an API key.
+        env_variable_name: The name of the environment variable that is missing.
+    """
+
+    def __init__(self, service_name: str, env_variable_name: str) -> None:
+        self.service_name = service_name
+        self.message = f"""\
+{env_variable_name} environment variable is not set so {self.service_name} is \
+not available.
+Please set the {env_variable_name} environment variable to your \
+{self.service_name} API key.
+"""
+
+        super().__init__(self.message)
+
+
 class TranslationService(ABC):
     """An abstract class that represents a translation service."""
     name: str = str()
@@ -91,11 +112,7 @@ class GoogleTranslate(TranslationService):
         try:
             self.google_api_key = os.environ['GOOGLE_API_KEY']
         except KeyError:
-            log.error("GOOGLE_API_KEY environment variable is not set "
-                      "so Google Translate is not available. "
-                      "Please set the GOOGLE_API_KEY "
-                      "environment variable to your Google API key.")
-            sys.exit(1)
+            raise ApiKeyError(self.name, 'GOOGLE_API_KEY')
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
@@ -133,6 +150,10 @@ class GoogleTranslateNoKey(GoogleTranslate):
     short_description = ("Google's translation service without an API key "
                          "(for testing purposes only).")
 
+    def __init__(self):
+        """Do not try to load API key."""
+        pass
+
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         return googletrans.Translator().translate(text, src=source_lang,
                                                   dest=dest_lang).text
@@ -169,11 +190,7 @@ class DeepL(TranslationService):
         try:
             deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
         except KeyError:
-            log.error("DEEPL_AUTH_KEY environment variable is not set "
-                      "so DeepL is not available. "
-                      "Please set the DEEPL_AUTH_KEY "
-                      "environment variable to your DeepL API key.")
-            sys.exit(1)
+            raise ApiKeyError(self.name, 'DEEPL_AUTH_KEY')
 
         self.translator = deepl.Translator(deepl_auth_key)
         language_list = self.translator.get_source_languages()
