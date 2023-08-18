@@ -400,7 +400,7 @@ class Tokenizer:
         translator.
         """
         current_string = process_string
-        pattern = re.compile(r"(?:\\\S|\\)")
+        pattern = re.compile(r"(?:\\\S|\\)(?!\w)+")
         all_replaced = False
         while not all_replaced:
             match = re.search(pattern, current_string)

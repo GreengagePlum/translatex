@@ -102,8 +102,7 @@ def parse_args(args) -> argparse.Namespace:
     """Argument parser for TransLaTeX."""
     parser = argparse.ArgumentParser(
         prog="translatex",
-        description=__doc__, allow_abbrev=False,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        description=__doc__, allow_abbrev=False)
     parser.add_argument("--version", action="version",
                         version=f"%(prog)s {__version__}",
                         help="Version number")
@@ -132,7 +131,7 @@ def parse_args(args) -> argparse.Namespace:
                         help="Input's language (default: %(default)s)")
     parser.add_argument("-dl", "--dest-lang",
                         default=Translator.DEFAULT_DEST_LANG,
-                        help="Output's language")
+                        help="Output's language (default: %(default)s)")
     parser.add_argument(
         "-ca", "--custom_api", type=argparse.FileType('r'),
         help="python file that provides a custom translation service class")
@@ -141,7 +140,7 @@ def parse_args(args) -> argparse.Namespace:
     parser.add_argument(
         "--service",
         default=Translator.DEFAULT_SERVICE.name, type=str,
-        help=f"Translation service to use {service_choices}")
+        help=f"Translation service to use {service_choices} (default: %(default)s)")
     parser.add_argument('infile', nargs='?',
                         type=argparse.FileType('r'), default=sys.stdin,
                         help="File to read LaTeX from")
