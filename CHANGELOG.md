@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New CI/CD job to test doc generation
 - Any custom translation service can be added to the CLI
 - tranlatex can be run as a module
+- DeepL translation service
 
 ### Changed
 

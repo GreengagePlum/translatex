@@ -9,7 +9,8 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Type, TextIO
+import sys
+from typing import Any, Dict, List, TextIO
 
 import googletrans
 import nltk
@@ -19,6 +20,10 @@ from nltk.tokenize import punkt
 from .tokenizer import Tokenizer
 
 log = logging.getLogger("translatex.translator")
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(
+    logging.Formatter("%(name)s: %(levelname)s %(message)s"))
+log.addHandler(console_handler)
 
 # Download the Punkt tokenizer for sentence splitting
 nltk.download('punkt', quiet=True)
@@ -82,6 +87,16 @@ class GoogleTranslate(TranslationService):
     languages = {code: lang.capitalize()
                  for code, lang in googletrans.LANGUAGES.items()}
 
+    def __init__(self):
+        try:
+            self.google_api_key = os.environ['GOOGLE_API_KEY']
+        except KeyError:
+            log.error("GOOGLE_API_KEY environment variable is not set "
+                      "so Google Translate is not available. "
+                      "Please set the GOOGLE_API_KEY "
+                      "environment variable to your Google API key.")
+            sys.exit(1)
+
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
         Return a translated string from source language to destination
@@ -91,15 +106,8 @@ class GoogleTranslate(TranslationService):
             KeyError: If GOOGLE_API_KEY environment variable is not set.
 
         """
-        try:
-            google_api_key = os.environ['GOOGLE_API_KEY']
-        except KeyError as e:
-            log.error("GOOGLE_API_KEY environment variable is not set "
-                      "so Google Translate is not available. "
-                      "Please set the GOOGLE_API_KEY "
-                      "environment variable to your Google API key.")
-            raise e
-        headers = {'X-goog-api-key': google_api_key}
+
+        headers = {'X-goog-api-key': self.google_api_key}
         payload = {'q': text,
                    'source': source_lang,
                    'target': dest_lang,
@@ -130,9 +138,73 @@ class GoogleTranslateNoKey(GoogleTranslate):
                                                   dest=dest_lang).text
 
 
-TRANSLATION_SERVICES = {service.name: service
-                        for service in (GoogleTranslate(),
-                                        GoogleTranslateNoKey())}
+class DeepL(TranslationService):
+    """Translate using DeepL API."""
+    name: str = "DeepL"
+    overall_char_limit = 500000  # TODO: Find the real limit
+    char_limit = 5000  # TODO: Find the real limit
+    array_support = True
+    array_item_limit = 1024  # TODO: Find the real limit
+    array_item_char_limit = 0  # TODO: Find the real limit
+    array_overall_char_limit = 30000  # TODO: Find the real limit
+    doc_url = "https://www.deepl.com/docs-api"
+    short_description = "DeepL translation service using an API key"
+
+    def __init__(self):
+        """
+        Initialize the DeepL translator.
+
+        Raises:
+            ImportError: If the DeepL API library is not installed.
+            KeyError: If DEEPL_AUTH_KEY environment variable is not set.
+        """
+        try:
+            import deepl
+        except ModuleNotFoundError:
+            log.error("DeepL is not available. "
+                      "Please install the DeepL API library "
+                      "with `pip install deepl`.")
+            sys.exit(1)
+
+        try:
+            deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
+        except KeyError:
+            log.error("DEEPL_AUTH_KEY environment variable is not set "
+                      "so DeepL is not available. "
+                      "Please set the DEEPL_AUTH_KEY "
+                      "environment variable to your DeepL API key.")
+            sys.exit(1)
+
+        self.translator = deepl.Translator(deepl_auth_key)
+        language_list = self.translator.get_source_languages()
+        self.languages = {language.code: language.name
+                          for language in language_list}
+
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+        """
+        Return a translated string from source language to destination
+        language.
+        """
+        # "EN" is deprecated with DeepL, use "EN-GB" instead
+        if source_lang == 'en':
+            log.warning(
+                "DeepL does not support 'en' as a source language, "
+                "using 'EN-GB' instead")
+            source_lang = 'EN-GB'
+        if dest_lang == 'en':
+            log.warning(
+                "DeepL does not support 'en' as a destination language, "
+                "using 'EN-GB' instead")
+            dest_lang = 'EN-GB'
+        result = self.translator.translate_text(text, source_lang=source_lang,
+                                                target_lang=dest_lang)
+        return result.text
+
+
+TRANSLATION_SERVICE_CLASSES = {cls.name: cls
+                               for cls in (GoogleTranslate,
+                                           GoogleTranslateNoKey,
+                                           DeepL)}
 
 
 class Translator:
@@ -149,10 +221,10 @@ class Translator:
     variable. You can change the source string and languages and launch another
     translation.
     """
+    DEFAULT_SERVICE: TranslationService = TRANSLATION_SERVICE_CLASSES[
+        "Google Translate (no key)"]()
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
-    DEFAULT_SERVICE: Type[TranslationService] = TRANSLATION_SERVICES[
-        "Google Translate (no key)"]
 
     def __init__(self, tokenized_string: str,
                  token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
@@ -253,7 +325,7 @@ class Translator:
         return chunks
 
     def translate(self,
-                  service=DEFAULT_SERVICE,
+                  service: TranslationService = DEFAULT_SERVICE,
                   source_lang: str = DEFAULT_SOURCE_LANG,
                   destination_lang: str = DEFAULT_DEST_LANG) -> None:
         """
@@ -298,19 +370,19 @@ class Translator:
 
 def add_custom_translation_services(fp: TextIO):
     """
-    Add to TRANSLATION_SERVICES the subclasses of TranslationService that are
-    defined in the custom file fp.
+    Add to TRANSLATION_SERVICE_CLASSES the subclasses of TranslationService
+    that are defined in the custom file fp.
 
     Args:
         fp: Input file object.
     """
-    namespace = {}
+    namespace: Dict[str, Any] = {}
     exec(compile(fp.read(), fp.name, 'exec'), namespace)
     for obj in namespace.values():
-        # Add the class instances that are :
+        # Add the classes that are :
         #   - defined only in the file and not in the current module namespace
         #   - subclasses of TranslationService
         if (type(obj) is type(TranslationService) and
                 obj.__name__ not in globals() and
                 issubclass(obj, TranslationService)):
-            TRANSLATION_SERVICES[obj.name] = obj()
+            TRANSLATION_SERVICE_CLASSES[obj.name] = obj

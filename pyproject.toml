@@ -32,6 +32,7 @@ doc = [
     "sphinx-prompt",
     "sphinx-last-updated-by-git",
 ]
+deepl = ["deepl"]
 
 [project.license]
 text = "MIT"
