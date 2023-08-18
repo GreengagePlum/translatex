@@ -133,9 +133,8 @@ def parse_args(args) -> argparse.Namespace:
     service_choices = tuple(TRANSLATION_SERVICES.keys()) + ('Custom service...',)
     parser.add_argument(
         "--service",
-        choices=service_choices,
         default=Translator.DEFAULT_SERVICE.name, type=str,
-        help="Translation service to use (default: %(default)s)")
+        help=f"Translation service to use {service_choices} (default: %(default)s)")
     parser.add_argument('infile', nargs='?',
                         type=argparse.FileType('r'), default=sys.stdin,
                         help="File to read LaTeX from")
