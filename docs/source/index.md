@@ -202,44 +202,8 @@ Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` d
 
 ### Basic use
 
-The command line interface help is pretty self explanatory:
-
-```
-translatex -h
-usage: translatex [-h] [--version] [-d] [-v] [--dry-run | -s {Preprocessor,Marker,Tokenizer,Translator}] [--no-pre]
-                  [-mf MARKER_FORMAT] [-tf TOKEN_FORMAT] [-sl SRC_LANG] [-dl DEST_LANG] [-ca CUSTOM_API] [--service SERVICE]
-                  [infile] [outfile]
-
-TransLaTeX: A LaTeX translator. The entry point to the program. The given LaTeX file is run through multiple processes such as
-preprocessing, marking, and tokenization to replace all LaTeX syntax constructs by tokens that ideally won't be modified by automatic
-translators. That, for the purpose of translating LaTeX source code automatically to any specified language while keeping it error
-free and compilable at the end, resulting in the same looking file.
-
-positional arguments:
-  infile
-  outfile
-
-options:
-  -h, --help            show this help message and exit
-  --version             Version number
-  -d, --debug           Debug option to generate intermediary files (default: False)
-  -v, --verbose         Print additional info on <stderr> (default: False)
-  --dry-run             Don't translate (no API call), just run the chain of operations (default: False)
-  -s {Preprocessor,Marker,Tokenizer,Translator}, --stop {Preprocessor,Marker,Tokenizer,Translator}
-                        Stop at the end of the specified stage and write its result to output (default: None)
-  --no-pre              Don't do manual substitution during preprocessing stage (default: True)
-  -mf MARKER_FORMAT, --marker-format MARKER_FORMAT
-                        Marker format to use during marking stage (default: None)
-  -tf TOKEN_FORMAT, --token-format TOKEN_FORMAT
-                        Token format to use during tokenization stage (default: None)
-  -sl SRC_LANG, --src-lang SRC_LANG
-                        Input's language (default: fr)
-  -dl DEST_LANG, --dest-lang DEST_LANG
-                        Output's language (default: en)
-  -ca CUSTOM_API, --custom_api CUSTOM_API
-                        python file that provides a custom translation service class (default: None)
-  --service SERVICE     Translation service to use ('Google Translate', 'Google Translate (no key)', 'Custom service...') (default:
-                        Google Translate (no key))
+```{note}
+See the [](cli-synopsis.md) for an overview of the possible options for TransLaTeX on the command line.
 ```
 
 TransLaTeX reads from `stdin` and writes to `stdout` by default, but you can also pass in positional arguments
@@ -248,10 +212,6 @@ specifying the paths to the input and output files. It also writes warnings abou
 logs to `stderr`. Don't forget to redirect these via `2> /dev/null` or equivalent if you only want the LaTeX output.
 This behaviour is useful if you want to integrate TransLaTeX into scripts, batch execute it, automate its execution
 or simply use a pipe (`|`) syntax.
-
-```{note}
-See the [](cli-synopsis.md) for an overview of the possible options for TransLaTeX on the command line.
-```
 
 For the most basic invocation of TransLaTeX, you need the source and destination language short names and an internet
 connection. An example is as follows:
@@ -562,7 +522,9 @@ your file process correctly:
 
 ### Custom translation service
 
-You can provide your own translation service by creating a python file containing a custom translation service class that derives from {class}`~translatex.translator.TranslationService` or one of its children and implements the {meth}`~translatex.translator.TranslationService.translate` method.
+You can provide your own translation service by creating a python file containing one or several custom translation
+service classes that derive from {class}`~translatex.translator.TranslationService` or one of its children and
+implement the {meth}`~translatex.translator.TranslationService.translate` method.
 
 Suppose that a `custom.py` file contains the following code:
 

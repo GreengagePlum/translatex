@@ -30,7 +30,7 @@ doc = [
     "sphinx-copybutton",
     "sphinx-autobuild",
     "sphinx-prompt",
-    "sphinx-last-updated-by-git",
+    "sphinx-last-updated-by-git"
 ]
 deepl = ["deepl"]
 

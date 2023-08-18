@@ -29,7 +29,8 @@ extensions = [
     'sphinx.ext.graphviz',
     'sphinx_copybutton',
     'sphinx-prompt',
-    'sphinx_last_updated_by_git'
+    'sphinx_last_updated_by_git',
+    'sphinxcontrib.programoutput'
 ]
 
 templates_path = ['_templates']
