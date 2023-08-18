@@ -528,14 +528,18 @@ implement the {meth}`~translatex.translator.TranslationService.translate` method
 
 Suppose that a `custom.py` file contains the following code:
 
-```{eval-rst}
-.. literalinclude:: ../../tests/custom.py
+```{literalinclude} ../../tests/custom.py
 ```
 
 Then, you can use it with the `--custom_api` option together with the `--service` option:
 
 ```bash
 translatex --custom_api custom.py --service "Do not translate" input.tex output.tex
+```
+
+Here is another example with a custom translation service that uses the TextSynth API:
+
+```{literalinclude} examples/textsynth.py
 ```
 
 ## Indices and tables
