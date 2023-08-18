@@ -28,6 +28,11 @@ def translatex(args: argparse.Namespace) -> None:
     """Run the TransLaTeX pipeline on a LaTeX source file."""
     if args.custom_api:
         add_custom_translation_services(args.custom_api)
+    if args.service not in TRANSLATION_SERVICE_CLASSES:
+        log.error("The given service is not available. "
+                  "Please choose one of the following: %s",
+                  ", ".join(TRANSLATION_SERVICE_CLASSES.keys()))
+        sys.exit(1)
     base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
     args.infile.close()
@@ -179,6 +184,8 @@ def main():
         log.addHandler(console_small)
     elif args.verbose == 2:
         logging.basicConfig(level=logging.INFO, handlers=[console_full])
+    else:
+        logging.basicConfig(level=logging.WARNING, handlers=[console_small])
     translatex(args)
 
 
