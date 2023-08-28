@@ -16,6 +16,7 @@ dependencies = [
     "TexSoup @ git+https://github.com/alvinwan/TexSoup@c91a14a0019ff7df197e71c906bc0403eddf80dc",
     "regex",
     "googletrans==4.0.0rc1",
+    "deepl",
     "requests",
     "nltk"
 ]
@@ -32,7 +33,6 @@ doc = [
     "sphinx-prompt",
     "sphinx-last-updated-by-git"
 ]
-deepl = ["deepl"]
 
 [project.license]
 text = "MIT"

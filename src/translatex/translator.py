@@ -8,10 +8,11 @@ resize strings to optimize the number of API calls.
 import logging
 import os
 import re
-from abc import ABC, abstractmethod
 import sys
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, TextIO
 
+import deepl
 import googletrans
 import nltk
 import requests
@@ -162,19 +163,7 @@ class DeepL(TranslationService):
     def __init__(self):
         """
         Initialize the DeepL translator.
-
-        Raises:
-            ImportError: If the DeepL API library is not installed.
-            KeyError: If DEEPL_AUTH_KEY environment variable is not set.
         """
-        try:
-            import deepl
-        except ModuleNotFoundError:
-            log.error("DeepL is not available. "
-                      "Please install the DeepL API library "
-                      "with `pip install deepl`.")
-            sys.exit(1)
-
         try:
             deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
         except KeyError:
