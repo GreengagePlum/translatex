@@ -123,15 +123,24 @@ class GoogleTranslate(TranslationService):
             return text
 
 
-class GoogleTranslateNoKey(GoogleTranslate):
+class GoogleTranslateNoKey(TranslationService):
     """Use googletrans without an API key.
 
     This is not recommended, as it is against Google's TOS.
     """
     name = "Google Translate (no key)"
+    overall_char_limit = 500000
+    char_limit = 5000
+    array_support = True
+    array_item_limit = 1024
+    array_item_char_limit = 0
+    array_overall_char_limit = 30000
+    url = ""
     doc_url = "https://github.com/ssut/py-googletrans"
     short_description = ("Google's translation service without an API key "
                          "(for testing purposes only).")
+    languages = {code: lang.capitalize()
+                 for code, lang in googletrans.LANGUAGES.items()}
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         return googletrans.Translator().translate(text, src=source_lang,
