@@ -159,7 +159,6 @@ class GoogleTranslateNoKey(TranslationService):
 class DeepL(TranslationService):
     """Translate using DeepL API."""
     name: str = "DeepL"
-    overall_char_limit = 500000  # TODO: Find the real limit
     char_limit = 1024
     array_support = True
     array_item_limit = 50
