@@ -134,9 +134,8 @@ def parse_args(args) -> argparse.Namespace:
                         help="Output's language (default: %(default)s)")
     parser.add_argument(
         "-ca", "--custom_api", type=argparse.FileType('r'),
-        help="python file that provides a custom translation service class")
-    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()
-                            ) + ('Custom service...',)
+        help="Python file that provides a custom translation service class")
+    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()) + ('Custom service...',)
     parser.add_argument(
         "--service",
         default=Translator.DEFAULT_SERVICE.name, type=str,
