@@ -21,10 +21,6 @@ from nltk.tokenize import punkt
 from .tokenizer import Tokenizer
 
 log = logging.getLogger("translatex.translator")
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(name)s: %(levelname)s %(message)s"))
-log.addHandler(console_handler)
 
 # Download the Punkt tokenizer for sentence splitting
 nltk.download('punkt', quiet=True)
