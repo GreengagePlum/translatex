@@ -54,7 +54,6 @@ def test_translate_math(math_trans, service_class):
 
 
 def test_add_custom_translation_services(tmp_path):
-
     s = """\
 from translatex.translator import TranslationService, GoogleTranslate
 
@@ -64,7 +63,7 @@ class TestService(TranslationService):
     def translate(self, text):
         return "Always yes"
 
-class TestService2(GoogleTranslate):
+class TestService2(TranslationService):
     name = "Test service 2"
 
     def translate(self, text):

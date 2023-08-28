@@ -30,7 +30,7 @@ def translate(source: str, source_lang_code: str = 'en',
     t.tokenize()
     # print(f"Tokenized LaTeX: {t._tokenized_string}")
     a = Translator.from_tokenizer(t)
-    a.translate(TEST_SERVICE, source_lang_code, destination_lang_code)
+    a.translate(TEST_SERVICE(), source_lang_code, destination_lang_code)
     # print(f"Translated LaTeX: {a.translated_string}")
     t.update_from_translator(a)
     t.detokenize()
