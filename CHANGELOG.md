@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Any custom translation service can be added to the CLI
 - tranlatex can be run as a module
 - DeepL translation service
+- add an `ApiKeyError` exception
+- Create a release from a tag in CI/CD
+
 
 ### Changed
 
