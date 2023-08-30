@@ -51,7 +51,7 @@ pages:
     - docker
 
 release_job:
-  stage: release
+  stage: deploy
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   tags:
     - docker
