@@ -80,6 +80,9 @@ def translatex(args: argparse.Namespace) -> None:
         except ApiKeyError as e:
             log.error(e.message)
             sys.exit(1)
+        except ModuleNotFoundError as e:
+            log.error(e.msg)
+            sys.exit(1)
         a.translate(service=service,
                     source_lang=args.src_lang,
                     destination_lang=args.dest_lang)

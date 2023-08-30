@@ -9,7 +9,6 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-import sys
 from typing import Any, Dict, List, TextIO
 
 import googletrans
@@ -83,6 +82,8 @@ class TranslationService(ABC):
     doc_url: str = str()
     short_description = str()
     languages = Dict[str, str]
+    default_source_lang: str = "fr"
+    default_dest_lang: str = "en"
 
     @abstractmethod
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -93,26 +94,49 @@ class TranslationService(ABC):
         return text
 
 
-class GoogleTranslate(TranslationService):
-    """Translate using Google API."""
-    name = "Google Translate"
+class GoogleTranslateNoKey(TranslationService):
+    """Use googletrans without an API key.
+
+    This is not recommended, as it is against Google's TOS.
+    """
+    name = "Google Translate (no key)"
     overall_char_limit = 500000
     char_limit = 5000
     array_support = True
     array_item_limit = 1024
     array_item_char_limit = 0
     array_overall_char_limit = 30000
-    url = 'https://translation.googleapis.com/language/translate/v2'
-    doc_url = "https://cloud.google.com/translate/docs/"
-    short_description = "Google's translation service using an API key"
+    doc_url = "https://github.com/ssut/py-googletrans"
+    short_description = ("Google's translation service without an API key "
+                         "(for testing purposes only).")
     languages = {code: lang.capitalize()
                  for code, lang in googletrans.LANGUAGES.items()}
 
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+        return googletrans.Translator().translate(text, src=source_lang,
+                                                  dest=dest_lang).text
+
+
+class APIKeyTranslationService(TranslationService, ABC):
+    """An abstract class that represents a translation service that requires
+    an API key."""
+    api_key_env_variable_name: str = str()
+
     def __init__(self):
         try:
-            self.google_api_key = os.environ['GOOGLE_API_KEY']
-        except KeyError:
-            raise ApiKeyError(self.name, 'GOOGLE_API_KEY')
+            self.api_key = os.environ[self.api_key_env_variable_name]
+        except KeyError as exc:
+            raise ApiKeyError(self.name,
+                              self.api_key_env_variable_name) from exc
+
+
+class GoogleTranslate(GoogleTranslateNoKey, APIKeyTranslationService):
+    """Translate using Google API."""
+    name = "Google Translate"
+    url = 'https://translation.googleapis.com/language/translate/v2'
+    doc_url = "https://cloud.google.com/translate/docs/"
+    short_description = "Google's translation service using an API key"
+    api_key_env_variable_name = 'GOOGLE_API_KEY'
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
@@ -123,8 +147,7 @@ class GoogleTranslate(TranslationService):
             KeyError: If GOOGLE_API_KEY environment variable is not set.
 
         """
-
-        headers = {'X-goog-api-key': self.google_api_key}
+        headers = {'X-goog-api-key': self.api_key}
         payload = {'q': text,
                    'source': source_lang,
                    'target': dest_lang,
@@ -140,26 +163,7 @@ class GoogleTranslate(TranslationService):
             return text
 
 
-class GoogleTranslateNoKey(GoogleTranslate):
-    """Use googletrans without an API key.
-
-    This is not recommended, as it is against Google's TOS.
-    """
-    name = "Google Translate (no key)"
-    doc_url = "https://github.com/ssut/py-googletrans"
-    short_description = ("Google's translation service without an API key "
-                         "(for testing purposes only).")
-
-    def __init__(self):
-        """Do not try to load API key."""
-        pass
-
-    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        return googletrans.Translator().translate(text, src=source_lang,
-                                                  dest=dest_lang).text
-
-
-class DeepL(TranslationService):
+class DeepL(APIKeyTranslationService):
     """Translate using DeepL API."""
     name: str = "DeepL"
     overall_char_limit = 500000  # TODO: Find the real limit
@@ -170,6 +174,9 @@ class DeepL(TranslationService):
     array_overall_char_limit = 30000  # TODO: Find the real limit
     doc_url = "https://www.deepl.com/docs-api"
     short_description = "DeepL translation service using an API key"
+    api_key_env_variable_name = 'DEEPL_AUTH_KEY'
+    default_source_lang: str = "FR"
+    default_dest_lang: str = "EN-GB"
 
     def __init__(self):
         """
@@ -179,20 +186,17 @@ class DeepL(TranslationService):
             ImportError: If the DeepL API library is not installed.
             KeyError: If DEEPL_AUTH_KEY environment variable is not set.
         """
+        super().__init__()
+
         try:
             import deepl
-        except ModuleNotFoundError:
-            log.error("DeepL is not available. "
-                      "Please install the DeepL API library "
-                      "with `pip install deepl`.")
-            sys.exit(1)
+        except ModuleNotFoundError as e:
+            message = ("DeepL is not available. "
+                       "Please install the DeepL API library "
+                       "with `pip install deepl`.")
+            raise ModuleNotFoundError(message) from e
 
-        try:
-            deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
-        except KeyError:
-            raise ApiKeyError(self.name, 'DEEPL_AUTH_KEY')
-
-        self.translator = deepl.Translator(deepl_auth_key)
+        self.translator = deepl.Translator(self.api_key)
         language_list = self.translator.get_source_languages()
         self.languages = {language.code: language.name
                           for language in language_list}
