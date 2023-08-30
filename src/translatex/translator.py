@@ -8,10 +8,11 @@ resize strings to optimize the number of API calls.
 import logging
 import os
 import re
-from abc import ABC, abstractmethod
 import sys
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, TextIO
 
+import deepl
 import googletrans
 import nltk
 import requests
@@ -20,10 +21,6 @@ from nltk.tokenize import punkt
 from .tokenizer import Tokenizer
 
 log = logging.getLogger("translatex.translator")
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(name)s: %(levelname)s %(message)s"))
-log.addHandler(console_handler)
 
 # Download the Punkt tokenizer for sentence splitting
 nltk.download('punkt', quiet=True)
@@ -71,7 +68,23 @@ Please set the {env_variable_name} environment variable to your \
 
 
 class TranslationService(ABC):
-    """An abstract class that represents a translation service."""
+    """An abstract class that represents a translation service.
+
+    Attributes:
+        name: Human friendly name for the service.
+        overall_char_limit: The overall quota a user has on a service.
+        char_limit: The maximum number of characters for the text body for a single API call (no array).
+        array_support: If an API supports using arrays of strings in the call body.
+        array_item_limit: How large an array of strings can be in terms of number of strings.
+        array_item_char_limit: Maximum number of characters an array item can hold.
+        array_overall_char_limit: Maximum number of characters an array can hold including all its items.
+        url: The url to send requests to, the API endpoint.
+        doc_url: Where to find the docs for the service.
+        short_description: Short explanation for the service.
+        languages: The languages supported by the service. Associates shortened ISO versions of languages to their
+            official long versions.
+
+   """
     name: str = str()
     overall_char_limit: int = int()
     char_limit: int = int()
@@ -118,10 +131,6 @@ class GoogleTranslate(TranslationService):
         """
         Return a translated string from source language to destination
         language.
-
-        Raises:
-            KeyError: If GOOGLE_API_KEY environment variable is not set.
-
         """
 
         headers = {'X-goog-api-key': self.google_api_key}
@@ -140,15 +149,24 @@ class GoogleTranslate(TranslationService):
             return text
 
 
-class GoogleTranslateNoKey(GoogleTranslate):
+class GoogleTranslateNoKey(TranslationService):
     """Use googletrans without an API key.
 
     This is not recommended, as it is against Google's TOS.
     """
     name = "Google Translate (no key)"
+    overall_char_limit = 500000
+    char_limit = 5000
+    array_support = True
+    array_item_limit = 1024
+    array_item_char_limit = 0
+    array_overall_char_limit = 30000
+    url = ""
     doc_url = "https://github.com/ssut/py-googletrans"
     short_description = ("Google's translation service without an API key "
                          "(for testing purposes only).")
+    languages = {code: lang.capitalize()
+                 for code, lang in googletrans.LANGUAGES.items()}
 
     def __init__(self):
         """Do not try to load API key."""
@@ -162,37 +180,27 @@ class GoogleTranslateNoKey(GoogleTranslate):
 class DeepL(TranslationService):
     """Translate using DeepL API."""
     name: str = "DeepL"
-    overall_char_limit = 500000  # TODO: Find the real limit
-    char_limit = 5000  # TODO: Find the real limit
+    char_limit = 1024
     array_support = True
-    array_item_limit = 1024  # TODO: Find the real limit
-    array_item_char_limit = 0  # TODO: Find the real limit
-    array_overall_char_limit = 30000  # TODO: Find the real limit
+    array_item_limit = 50
+    array_item_char_limit = 1024
+    array_overall_char_limit = 1024
     doc_url = "https://www.deepl.com/docs-api"
     short_description = "DeepL translation service using an API key"
 
     def __init__(self):
         """
         Initialize the DeepL translator.
-
-        Raises:
-            ImportError: If the DeepL API library is not installed.
-            KeyError: If DEEPL_AUTH_KEY environment variable is not set.
         """
-        try:
-            import deepl
-        except ModuleNotFoundError:
-            log.error("DeepL is not available. "
-                      "Please install the DeepL API library "
-                      "with `pip install deepl`.")
-            sys.exit(1)
-
         try:
             deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
         except KeyError:
             raise ApiKeyError(self.name, 'DEEPL_AUTH_KEY')
 
         self.translator = deepl.Translator(deepl_auth_key)
+        char_usage = self.translator.get_usage().character
+        if char_usage.valid:
+            self.overall_char_limit = char_usage.limit - char_usage.count
         language_list = self.translator.get_source_languages()
         self.languages = {language.code: language.name
                           for language in language_list}

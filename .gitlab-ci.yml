@@ -9,7 +9,7 @@ before_script:
 test:
   stage: test
   before_script:
-    - pip install -e .[test,deepl]
+    - pip install -e .[test]
   script:
     - pytest --durations=0 --cov=src/translatex -sv --runapi
     - coverage html -d public/coverage

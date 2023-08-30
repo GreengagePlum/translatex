@@ -1,11 +1,12 @@
 import logging
 import os
-import requests
 import sys
+
+import requests
 
 from translatex.translator import TranslationService
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("translatex.custom_api")
 
 
 class TextSynth(TranslationService):
@@ -37,4 +38,6 @@ class TextSynth(TranslationService):
             return r.json()["translations"][0]["text"]
         except Exception as e:
             log.error(e)
-            return str(r.json())
+            log.error(str(r))
+            log.error(r.json())
+            return text

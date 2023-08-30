@@ -140,9 +140,8 @@ def parse_args(args) -> argparse.Namespace:
                         help="Output's language (default: %(default)s)")
     parser.add_argument(
         "-ca", "--custom_api", type=argparse.FileType('r'),
-        help="python file that provides a custom translation service class")
-    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()
-                            ) + ('Custom service...',)
+        help="Python file that provides a custom translation service class")
+    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()) + ('Custom service...',)
     parser.add_argument(
         "--service",
         default=Translator.DEFAULT_SERVICE.name, type=str,
@@ -160,17 +159,22 @@ def main():
     """Console script for TransLaTeX.
 
     Logging is set as follows in case TransLaTeX is used as a program by invoking this main script. Otherwise,
-    if TransLaTeX is imported as a module, logging stays quiet by the help of a NullHandler just like a library needs
-    to do.
+    if TransLaTeX is imported as a module, logging stays quiet by the help of a ``NullHandler`` just like a library
+    needs to do.
 
-    If the debug option is set, the root logger is configured to DEBUG level (this option also causes the generation of
+    If the debug option is set, the root logger is configured to ``DEBUG`` level (this option also causes the generation of
     intermediary files later). This is the ultimate logging option.
 
-    Otherwise, if verbose level 1 is set, only TransLaTeX's logger is configured meaning only
+    Else if verbose level 1 is set, only TransLaTeX's logger is configured meaning only
     this program's logs are output and none of the external imported modules'.
 
-    Lastly, if verbose level 2 is set, similarly to the debug option, the root logger is configured but to INFO level
+    Else if verbose level 2 is set, similarly to the debug option, the root logger is configured but to ``INFO`` level
     meaning both TransLaTeX's and the imported modules' logs are output (to note: no intermediary files in this case).
+
+    Lastly, if none of these options are set, the root logger is configured to ``WARNING`` level. This helps to display
+    any errors and issues that arise during execution. Don't forget to redirect these logs on ``stderr`` via
+    ``2> /dev/null`` or equivalent if you only want the LaTeX output when you're using ``stdout`` as the output
+    destination.
 
     In short the levels of information in the logs increase as follows according to the given options: ``-v``,
     ``-vv``, ``-d``.
@@ -185,8 +189,9 @@ def main():
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, handlers=[console_full])
     elif args.verbose == 1:
-        log.setLevel(logging.INFO)
-        log.addHandler(console_small)
+        package_logger = logging.getLogger("translatex")
+        package_logger.setLevel(logging.INFO)
+        package_logger.addHandler(console_small)
     elif args.verbose == 2:
         logging.basicConfig(level=logging.INFO, handlers=[console_full])
     else:
