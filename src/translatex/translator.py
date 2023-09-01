@@ -207,18 +207,15 @@ class DeepL(TranslationService):
         language.
         """
         # "EN" is deprecated with DeepL, use "EN-GB" instead
-        if source_lang == 'en':
-            log.warning(
-                "DeepL does not support 'en' as a source language, "
-                "using 'EN-GB' instead")
-            source_lang = 'EN-GB'
         if dest_lang == 'en':
             log.warning(
                 "DeepL does not support 'en' as a destination language, "
                 "using 'EN-GB' instead")
             dest_lang = 'EN-GB'
-        result = self.translator.translate_text(text, source_lang=source_lang,
-                                                target_lang=dest_lang)
+        # Language shortcodes for DeepL are in uppercase,
+        # so we convert them in case they are lowercase
+        result = self.translator.translate_text(text, source_lang=source_lang.upper(),
+                                                target_lang=dest_lang.upper())
         return result.text
 
 
