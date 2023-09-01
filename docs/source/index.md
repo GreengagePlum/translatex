@@ -213,6 +213,10 @@ logs to `stderr`. Don't forget to redirect these via `2> /dev/null` or equivalen
 This behaviour is useful if you want to integrate TransLaTeX into scripts, batch execute it, automate its execution
 or simply use a pipe (`|`) syntax.
 
+```{note}
+You can find various small LaTeX files under the [`translatex/examples/`](https://gitlab.math.unistra.fr/cassandre/translatex/-/tree/main/examples) directory in the source code that serve as examples that you can use to experiment with the program.
+```
+
 For the most basic invocation of TransLaTeX, you need the source and destination language short names and an internet
 connection. An example is as follows:
 
@@ -523,19 +527,23 @@ your file process correctly:
 ### Custom translation service
 
 You can provide your own translation service by creating a python file containing one or several custom translation
-service classes that derive from {class}`~translatex.translator.TranslationService` or one of its children and
+service classes that derive from {class}`~translatex.translator.TranslationService` and
 implement the {meth}`~translatex.translator.TranslationService.translate` method.
 
 Suppose that a `custom.py` file contains the following code:
 
-```{eval-rst}
-.. literalinclude:: ../../tests/custom.py
+```{literalinclude} ../../tests/custom.py
 ```
 
 Then, you can use it with the `--custom_api` option together with the `--service` option:
 
 ```bash
 translatex --custom_api custom.py --service "Do not translate" input.tex output.tex
+```
+
+Here is another example with a custom translation service that uses the TextSynth API:
+
+```{literalinclude} examples/textsynth.py
 ```
 
 ## Indices and tables

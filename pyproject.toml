@@ -16,6 +16,7 @@ dependencies = [
     "TexSoup @ git+https://github.com/alvinwan/TexSoup@c91a14a0019ff7df197e71c906bc0403eddf80dc",
     "regex",
     "googletrans==4.0.0rc1",
+    "deepl",
     "requests",
     "nltk"
 ]
@@ -24,13 +25,13 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
 doc = [
-    "Sphinx < 7.2.0",
+    "Sphinx >= 7.2.2",
     "myst-parser",
     "furo",
     "sphinx-copybutton",
     "sphinx-autobuild",
     "sphinx-prompt",
-    "sphinx-last-updated-by-git",
+    "sphinx-last-updated-by-git"
 ]
 
 [project.license]

@@ -1,8 +1,10 @@
 import pytest
 
-from translatex.translator import Translator, TRANSLATION_SERVICES
+from translatex.translator import Translator, TRANSLATION_SERVICE_CLASSES
 
-TEST_SERVICE = TRANSLATION_SERVICES["Google Translate"]
+TEST_SERVICE = TRANSLATION_SERVICE_CLASSES["Google Translate"]
+TEST_SERVICE_CLASSES = [TRANSLATION_SERVICE_CLASSES["Google Translate"],
+                        TRANSLATION_SERVICE_CLASSES["DeepL"]]
 
 
 @pytest.fixture
