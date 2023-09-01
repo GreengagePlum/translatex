@@ -38,7 +38,7 @@ def test_translate_small(small_trans, service_class):
                           destination_lang="fr")
     assert small_trans.translated_string == dedent("""
     [0-4]
-    [0-3]{[0-1] Bonjour le monde}
+    [0-3]{[0-1] La couleur bleue}
     [0-2]
     [0-5]
     """)

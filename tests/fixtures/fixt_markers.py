@@ -1,5 +1,7 @@
-import pytest
 from textwrap import dedent
+
+import pytest
+
 from translatex.marker import Marker
 
 
@@ -8,7 +10,7 @@ def small_marker() -> Marker:
     """Marker instance with short LaTeX string"""
     return Marker(dedent(r"""
     \begin{document}
-    \textbf{\color{\text{blue}} Hello world}
+    \textbf{\color{\text{blue}} The color blue}
     \verb+hello+
     \end{document}
     """))

@@ -65,7 +65,7 @@ def test_mark_node_name1(small_marker):
     """Ensure Marker marks LaTeX commands correctly"""
     m = small_marker
     m.mark()
-    pattern = r"\\//(\d+)//{.*Hello.*}"
+    pattern = r"\\//(\d+)//{.*The color blue.*}"
     res = re.search(pattern, m.marked_latex)
     assert res
     assert int(res.group(1)) in m._marker_store.keys()
