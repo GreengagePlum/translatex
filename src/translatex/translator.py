@@ -8,7 +8,6 @@ resize strings to optimize the number of API calls.
 import logging
 import os
 import re
-import sys
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, TextIO
 
@@ -57,10 +56,11 @@ class ApiKeyError(Exception):
 
     def __init__(self, service_name: str, env_variable_name: str) -> None:
         self.service_name = service_name
+        self.env_variable_name = env_variable_name
         self.message = f"""\
-{env_variable_name} environment variable is not set so {self.service_name} is \
+{self.env_variable_name} environment variable is not set so {self.service_name} is \
 not available.
-Please set the {env_variable_name} environment variable to your \
+Please set the {self.env_variable_name} environment variable to your \
 {self.service_name} API key.
 """
 
@@ -167,10 +167,6 @@ class GoogleTranslateNoKey(TranslationService):
                          "(for testing purposes only).")
     languages = {code: lang.capitalize()
                  for code, lang in googletrans.LANGUAGES.items()}
-
-    def __init__(self):
-        """Do not try to load API key."""
-        pass
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         return googletrans.Translator().translate(text, src=source_lang,
