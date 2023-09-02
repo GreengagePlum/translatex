@@ -18,4 +18,4 @@ from .translator import Translator
 
 logging.getLogger("translatex").addHandler(logging.NullHandler())
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
