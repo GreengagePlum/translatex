@@ -23,16 +23,17 @@ qui n'a que des versions stables et complètes.
 
 ### Légende emoji
 
-La signification des emojis utilisé dans les descriptions des commits git.
+La signification des emojis utilisé dans les descriptions des commits git. À voir
+aussi : [gitmoji](https://gitmoji.dev/).
 
-| Emoji       | Signification                                                         |
-|:------------|:----------------------------------------------------------------------|
-| ✨ NEW       | Nouveau fichier ou fonctionnalité                                     |
-| 🔧 UPDATE   | Mise à jour d'une partie de programme                                 |
-| 🔨 CONFIG   | Manipulation des fichiers de configuration comme makefile ou doxyfile |
-| ♻️ REFACTOR | Réécriture d'une partie du programme                                  |
-| 🐛 BUGFIX   | Une correction de bogue                                               |
-| 🔥 DELETION | Suppression d'un fichier ou d'une fonctionnalité                      |
-| 📝 DOC      | Manipulation de la documentation                                      |
-| 🎉 EPOCH    | Le début du projet                                                    |
-| 🚀 RELEASE  | Une nouvelle version du programme                                     |
+| Emoji              | Signification                                                         |
+|:-------------------|:----------------------------------------------------------------------|
+| :sparkles: NEW     | Nouveau fichier ou fonctionnalité                                     |
+| :wrench: UPDATE    | Mise à jour d'une partie de programme                                 |
+| :hammer: CONFIG    | Manipulation des fichiers de configuration comme makefile ou doxyfile |
+| :recycle: REFACTOR | Réécriture d'une partie du programme                                  |
+| :bug: BUGFIX       | Une correction de bogue                                               |
+| :fire: DELETION    | Suppression d'un fichier ou d'une fonctionnalité                      |
+| :memo: DOC         | Manipulation de la documentation                                      |
+| :tada: EPOCH       | Le début du projet                                                    |
+| :rocket: RELEASE   | Une nouvelle version du programme                                     |

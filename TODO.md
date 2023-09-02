@@ -10,9 +10,6 @@
 - [ ] Improve `Marker`
     - [x] Add manual substitution/ignore syntax
     - [ ] Manage `displaymath` ending with a dot
-- [ ] Finish `Translator`
-    - [ ] Additional APIs
-    - [ ] Doc and test
 - [ ] Create a web interface
 - [ ] Let the user enter regex or similar extra logic
 - [ ] Make `__str__()` methods more useful
@@ -32,12 +29,15 @@
 ## Miscellaneous
 
 - [ ] Add `CONTRIBUTING.md`
-- [ ] Finish Sphinx main page
-    - [ ] Document interface and features for the end user
 - [ ] Add `argcomplete` for shell option completions
 
 ## Done
 
+- [x] Finish Sphinx main page
+    - [x] Document interface and features for the end user
+- [x] Finish `Translator`
+    - [x] Additional APIs
+    - [x] Doc and test
 - [x] Fill `CHANGELOG.md`
 - [x] Add verifications on token and marker presence
 - [x] Finish CLI

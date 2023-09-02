@@ -1,13 +1,17 @@
-import pathlib
-from conftest import TEST_SERVICE
+import filecmp
+from pathlib import Path
 from textwrap import dedent
-from translatex.translator import Translator
-from translatex.tokenizer import Tokenizer
+
+import pytest
+
+from conftest import TEST_SERVICE
+from translatex.main import parse_args, translatex
 from translatex.marker import Marker
 from translatex.preprocessor import Preprocessor
-from translatex.main import parse_args, translatex
+from translatex.tokenizer import Tokenizer
+from translatex.translator import Translator
 
-TEXFILES_DIR_PATH = pathlib.Path(__file__).parent.resolve() / "texfiles"
+TEXFILES_DIR_PATH = Path(__file__).parent.resolve() / "texfiles"
 
 
 def translate(source: str, source_lang_code: str = 'en',
@@ -26,7 +30,7 @@ def translate(source: str, source_lang_code: str = 'en',
     t.tokenize()
     # print(f"Tokenized LaTeX: {t._tokenized_string}")
     a = Translator.from_tokenizer(t)
-    a.translate(TEST_SERVICE, source_lang_code, destination_lang_code)
+    a.translate(TEST_SERVICE(), source_lang_code, destination_lang_code)
     # print(f"Translated LaTeX: {a.translated_string}")
     t.update_from_translator(a)
     t.detokenize()
@@ -39,6 +43,7 @@ def translate(source: str, source_lang_code: str = 'en',
     return p.unprocessed_latex
 
 
+@pytest.mark.api
 def test_full_translation():
     source = dedent(r"""\documentclass{article}
     \begin{document}
@@ -53,18 +58,21 @@ def test_full_translation():
     """)
 
 
+@pytest.mark.api
 def test_translation_with_no_document_env():
-    source = r"\section{Hello World}"
+    source = r"\section{Red}"
     translated = translate(source)
-    assert translated == r"\section{Bonjour le monde}"
+    assert translated == r"\section{Rouge}"
 
 
+@pytest.mark.api
 def test_translation_without_any_latex():
     source = "Hello World"
     translated = translate(source)
     assert translated == "Bonjour le monde"
 
 
+@pytest.mark.api
 def test_main(tmp_path):
     source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
     destination_file_path = tmp_path / "helloworld_out.tex"
@@ -79,3 +87,16 @@ def test_main(tmp_path):
 Bonjour le monde
 \end{document}
 """
+
+
+def test_custom_api(tmp_path, request):
+    source_file_path = TEXFILES_DIR_PATH / "helloworld.tex"
+    destination_file_path = tmp_path / "helloworld_out.tex"
+    args = parse_args(['-sl', 'en', '-dl', 'fr', '--custom_api',
+                       (request.path.parent / "custom.py").as_posix(),
+                       '--service', 'Do not translate',
+                       source_file_path.as_posix(),
+                       destination_file_path.as_posix()])
+    translatex(args)
+    # Check that the original and translated versions are identical
+    assert filecmp.cmp(source_file_path, destination_file_path)

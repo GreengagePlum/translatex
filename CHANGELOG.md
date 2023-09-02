@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.3.0] - 2023-09-02
+
+### Added
+
+- 2 new example LaTeX files
+- GitLab footer icon in docs
+- CLI synopsis page to docs
+- `livehtml` target to Sphinx Makefile that launches `sphinx-autobuild`
+- New CI/CD job to test doc generation
+- Any custom translation service can be added to the CLI
+- tranlatex can be run as a module
+- DeepL translation service
+- Add an `ApiKeyError` exception
+- Create a release from a tag in CI/CD
+
+### Changed
+
+- Increase amount of information logged in case of unexpected API response
+- Select translation service by its name making it more explicit
+- Make tests that use paid API optional with a custom pytest CLI option (`--runapi`)
+- Add sub menu for modules in the doc sidebar
+- Add link to project GitLab repo in the doc sidebar
+- Unicode emojis to plain text emojis in READMEs
+- Unnecessary read-write file accesses to write-only in main
+- Logging behaviour is restored to initial intended functionality respecting CLI option distinction (`-v` and `-d`)
+- Fix Sphinx version to solve a Furo extension bug
+
+### Removed
+
+- Erroneous example LaTeX file
+- `IRMA - M2M100` translation service (now a custom service)
+
+### Fixed
+
+- Missing hyperlink in CHANGELOG.md
+- Missing debug info in log about Tokenizer
+- Close infile and outfile in main
+- Update out of sync docstrings
+- Missing new line at EOF of translated files due to translation
+- Add missing dependency of example LaTeX file
+- Commands in installation instructions
+- Tokenization of multi-argument LaTeX commands (with multiple `{}`)
+- Idempotency issue introducing whitespace between arguments of LaTeX commands where there were none
+- Wrong detection of math environments on encounter of backslash escaped characters (`\$`, `\\[`...)
+
 ## [0.2.0] - 2023-07-19
 
 ### Added
@@ -87,6 +134,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated readme files' structure and content
+
+[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.0...HEAD
+
+[0.3.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.2.0...v0.3.0
 
 [0.2.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.1.0...v0.2.0
 
