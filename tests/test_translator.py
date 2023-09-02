@@ -33,10 +33,12 @@ def test_split_string_by_length(small_trans):
 @pytest.mark.api
 @pytest.mark.parametrize("service_class", TEST_SERVICE_CLASSES)
 def test_translate_small(small_trans, service_class):
-    small_trans.translate(service=service_class())
+    small_trans.translate(service=service_class(),
+                          source_lang="en",
+                          destination_lang="fr")
     assert small_trans.translated_string == dedent("""
     [0-4]
-    [0-3]{[0-1] Hello world}
+    [0-3]{[0-1] La couleur bleue}
     [0-2]
     [0-5]
     """)
