@@ -1,15 +1,32 @@
-image: python:3.10.11-bullseye
+default:
+  image: python:3.10.11-bullseye
 
-before_script:
-  ## Install packages
-  - python -m venv .venv/
-  - source .venv/bin/activate
-  - pip install -e .
+  # Pip's cache doesn't store the python packages
+  # https://pip.pypa.io/en/stable/topics/caching/
+  #
+  # If you want to also cache the installed packages, you have to install
+  # them in a virtualenv and cache it as well.
+  cache:
+    paths:
+      - .cache/pip
+      - .venv/
+
+  before_script:
+    ## Install packages
+    - python --version ; pip --version  # For debugging
+    - python -m venv .venv/
+    - source .venv/bin/activate
+    - pip install -e .
+
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 test:
   stage: test
   before_script:
-    - pip install -e .[test]
+    - pip install -e ".[test]"
   script:
     - pytest --durations=0 --cov=src/translatex -sv --runapi
     - coverage html -d public/coverage
@@ -24,11 +41,11 @@ doc:
   stage: test
   before_script:
     - apt -y -qq update && apt -y -qq install graphviz
-    - pip install -e .[doc]
+    - pip install -e ".[doc]"
   script:
     - sphinx-build -b html docs/source/ public/
-  except:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
   artifacts:
     paths:
       - public
@@ -39,11 +56,11 @@ pages:
   stage: deploy
   before_script:
     - apt -y -qq update && apt -y -qq install graphviz
-    - pip install -e .[doc]
+    - pip install -e ".[doc]"
   script:
     - sphinx-build -b html docs/source/ public/
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   artifacts:
     paths:
       - public
