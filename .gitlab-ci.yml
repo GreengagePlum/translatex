@@ -63,8 +63,8 @@ release_job:
   script:
     - echo "running release_job for $CI_COMMIT_TAG"
     - cp CHANGELOG.md RELEASE_NOTES.md
-    - printf "\n## Commits since the last version\n" >> RELEASE_NOTES.md
-    - printf "<details><summary>Click to expand</summary>\n" >> RELEASE_NOTES.md
+    - printf "\n## Commits since the last version\n\n" >> RELEASE_NOTES.md
+    - printf "<details><summary>Click to expand</summary>\n\n" >> RELEASE_NOTES.md
     - LAST_TAGS=$(git for-each-ref --sort='-*committerdate' --count=2 --format '%(refname:short)' refs/tags)
     - git log --pretty="- [%as] %s" --no-merges --reverse $(echo $LAST_TAGS | tail -n 1)..$(echo $LAST_TAGS | head -n 1) >> RELEASE_NOTES.md
     - printf "\n</details>" >> RELEASE_NOTES.md
