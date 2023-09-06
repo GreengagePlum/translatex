@@ -11,6 +11,7 @@ import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, TextIO
 
+import deepl
 import googletrans
 import nltk
 import requests
@@ -19,10 +20,6 @@ from nltk.tokenize import punkt
 from .tokenizer import Tokenizer
 
 log = logging.getLogger("translatex.translator")
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(
-    logging.Formatter("%(name)s: %(levelname)s %(message)s"))
-log.addHandler(console_handler)
 
 # Download the Punkt tokenizer for sentence splitting
 nltk.download('punkt', quiet=True)
@@ -70,7 +67,25 @@ Please set the {env_variable_name} environment variable to your \
 
 
 class TranslationService(ABC):
-    """An abstract class that represents a translation service."""
+    """An abstract class that represents a translation service.
+
+    Attributes:
+        name: Human friendly name for the service.
+        overall_char_limit: The overall quota a user has on a service.
+        char_limit: The maximum number of characters for the text body for a single API call (no array).
+        array_support: If an API supports using arrays of strings in the call body.
+        array_item_limit: How large an array of strings can be in terms of number of strings.
+        array_item_char_limit: Maximum number of characters an array item can hold.
+        array_overall_char_limit: Maximum number of characters an array can hold including all its items.
+        url: The url to send requests to, the API endpoint.
+        doc_url: Where to find the docs for the service.
+        short_description: Short explanation for the service.
+        languages: The languages supported by the service. Associates shortened ISO versions of languages to their
+            official long versions.
+        default_source_lang: The default source language to use if none is specified.
+        default_dest_lang: The default destination language to use if none is specified.
+
+   """
     name: str = str()
     overall_char_limit: int = int()
     char_limit: int = int()
@@ -95,7 +110,8 @@ class TranslationService(ABC):
 
 
 class GoogleTranslateNoKey(TranslationService):
-    """Use googletrans without an API key.
+    """
+    Use googletrans without an API key.
 
     This is not recommended, as it is against Google's TOS.
     """
@@ -142,10 +158,6 @@ class GoogleTranslate(GoogleTranslateNoKey, APIKeyTranslationService):
         """
         Return a translated string from source language to destination
         language.
-
-        Raises:
-            KeyError: If GOOGLE_API_KEY environment variable is not set.
-
         """
         headers = {'X-goog-api-key': self.api_key}
         payload = {'q': text,
@@ -166,12 +178,11 @@ class GoogleTranslate(GoogleTranslateNoKey, APIKeyTranslationService):
 class DeepL(APIKeyTranslationService):
     """Translate using DeepL API."""
     name: str = "DeepL"
-    overall_char_limit = 500000  # TODO: Find the real limit
-    char_limit = 5000  # TODO: Find the real limit
+    char_limit = 1024
     array_support = True
-    array_item_limit = 1024  # TODO: Find the real limit
-    array_item_char_limit = 0  # TODO: Find the real limit
-    array_overall_char_limit = 30000  # TODO: Find the real limit
+    array_item_limit = 50
+    array_item_char_limit = 1024
+    array_overall_char_limit = 1024
     doc_url = "https://www.deepl.com/docs-api"
     short_description = "DeepL translation service using an API key"
     api_key_env_variable_name = 'DEEPL_AUTH_KEY'
@@ -186,16 +197,8 @@ class DeepL(APIKeyTranslationService):
             ImportError: If the DeepL API library is not installed.
             KeyError: If DEEPL_AUTH_KEY environment variable is not set.
         """
+
         super().__init__()
-
-        try:
-            import deepl
-        except ModuleNotFoundError as e:
-            message = ("DeepL is not available. "
-                       "Please install the DeepL API library "
-                       "with `pip install deepl`.")
-            raise ModuleNotFoundError(message) from e
-
         self.translator = deepl.Translator(self.api_key)
         language_list = self.translator.get_source_languages()
         self.languages = {language.code: language.name
