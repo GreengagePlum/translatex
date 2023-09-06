@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2023-09-04
+
+### Fixed
+
+- Fix GitLab CI/CD release pipeline
+
+## [0.3.0] - 2023-09-02
+
 ### Added
 
 - 2 new example LaTeX files
@@ -17,9 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Any custom translation service can be added to the CLI
 - tranlatex can be run as a module
 - DeepL translation service
-- add an `ApiKeyError` exception
+- Add an `ApiKeyError` exception
 - Create a release from a tag in CI/CD
-
 
 ### Changed
 
@@ -134,7 +141,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme files' structure and content
 
-[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.2.0...HEAD
+[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.1...HEAD
+
+[0.3.1]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.0...v0.3.1
+
+[0.3.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.2.0...v0.3.0
 
 [0.2.0]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.1.0...v0.2.0
 

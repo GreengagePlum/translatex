@@ -1,10 +1,9 @@
 import logging
 import os
-import sys
 
 import requests
 
-from translatex.translator import TranslationService
+from translatex.translator import TranslationService, ApiKeyError
 
 log = logging.getLogger("translatex.custom_api")
 
@@ -22,11 +21,7 @@ class TextSynth(TranslationService):
         try:
             self.textsynth_api_key = os.environ['TEXTSYNTH_API_KEY']
         except KeyError:
-            log.error("TEXTSYNTH_API_KEY environment variable is not set "
-                      "so TextSynth is not available. "
-                      "Please set the TEXTSYNTH_API_KEY "
-                      "environment variable to your TextSynth API key.")
-            sys.exit(1)
+            raise ApiKeyError(self.name, "TEXTSYNTH_API_KEY")
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         headers = {'Authorization': f'Bearer {self.textsynth_api_key}'}

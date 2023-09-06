@@ -56,10 +56,11 @@ class ApiKeyError(Exception):
 
     def __init__(self, service_name: str, env_variable_name: str) -> None:
         self.service_name = service_name
+        self.env_variable_name = env_variable_name
         self.message = f"""\
-{env_variable_name} environment variable is not set so {self.service_name} is \
+{self.env_variable_name} environment variable is not set so {self.service_name} is \
 not available.
-Please set the {env_variable_name} environment variable to your \
+Please set the {self.env_variable_name} environment variable to your \
 {self.service_name} API key.
 """
 
@@ -192,10 +193,6 @@ class DeepL(APIKeyTranslationService):
     def __init__(self):
         """
         Initialize the DeepL translator.
-
-        Raises:
-            ImportError: If the DeepL API library is not installed.
-            KeyError: If DEEPL_AUTH_KEY environment variable is not set.
         """
 
         super().__init__()
@@ -210,18 +207,15 @@ class DeepL(APIKeyTranslationService):
         language.
         """
         # "EN" is deprecated with DeepL, use "EN-GB" instead
-        if source_lang == 'en':
-            log.warning(
-                "DeepL does not support 'en' as a source language, "
-                "using 'EN-GB' instead")
-            source_lang = 'EN-GB'
         if dest_lang == 'en':
             log.warning(
                 "DeepL does not support 'en' as a destination language, "
                 "using 'EN-GB' instead")
             dest_lang = 'EN-GB'
-        result = self.translator.translate_text(text, source_lang=source_lang,
-                                                target_lang=dest_lang)
+        # Language shortcodes for DeepL are in uppercase,
+        # so we convert them in case they are lowercase
+        result = self.translator.translate_text(text, source_lang=source_lang.upper(),
+                                                target_lang=dest_lang.upper())
         return result.text
 
 
