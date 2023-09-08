@@ -8,18 +8,24 @@ from translatex.marker import Marker
 @pytest.fixture
 def small_marker() -> Marker:
     """Marker instance with short LaTeX string"""
-    return Marker(dedent(r"""
+    return Marker(
+        dedent(
+            r"""
     \begin{document}
     \textbf{\color{\text{blue}} The color blue}
     \verb+hello+
     \end{document}
-    """))
+    """
+        )
+    )
 
 
 @pytest.fixture
 def math_marker():
     """Marker instance with LaTeX string including a pure math environment"""
-    return Marker(dedent(r"""
+    return Marker(
+        dedent(
+            r"""
     \begin{document}
     \[
     \Lambda\,(\mathcal{P}) \geqslant \, \; \sum_{72}^{10}
@@ -28,13 +34,16 @@ def math_marker():
     \mathrm{,}
     \]
     \end{document}
-    """))
+    """
+        )
+    )
 
 
 @pytest.fixture
 def math_text_marker():
     """Marker instance with LaTeX string including a math environment with text"""
-    return Marker(r"""
+    return Marker(
+        r"""
     \begin{document}
     \[
     \Lambda\,(\mathcal{P}) \geqslant \, \; \sum_{72}^{10}
@@ -44,13 +53,15 @@ def math_text_marker():
     \text{foo bar baz}
     \]
     \end{document}
-    """)
+    """
+    )
 
 
 @pytest.fixture
 def code_marker():
     """Marker instance with LaTeX string including a literal code environment"""
-    return Marker(r"""
+    return Marker(
+        r"""
     \begin{document}
     \begin{lstlisting}[language=Python]
     import sympy as sp
@@ -62,4 +73,5 @@ def code_marker():
     print(int_f)
     \end{lstlisting}
     \end{document}
-    """)
+    """
+    )

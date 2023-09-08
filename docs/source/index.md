@@ -282,7 +282,7 @@ For example a token with the previous format could be like `=12.6=` or `[12-6]` 
 use two numbers so their format string has to contain at least two distinct pairs of curly braces.
 
 ```{note}
-See the [](#extra-options) section to find out details on how to visualize the tokens and the 
+See the [](#extra-options) section to find out details on how to visualize the tokens and the
 generation of intermediary files to have a peek at the inner workings of TransLaTeX.
 ```
 
@@ -413,7 +413,7 @@ potentially make it succeed.
   `stdout`. This can help you hunt down where a problem appears during the process.
 
 ```{note}
-Take a look at the [](modules/index.md) section for even more details on the inner workings and the 
+Take a look at the [](modules/index.md) section for even more details on the inner workings and the
 architecture of TransLaTeX.
 ```
 
