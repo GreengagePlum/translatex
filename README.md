@@ -3,6 +3,7 @@
 [![pipeline status](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![coverage report](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
 [![latest release](https://gitlab.math.unistra.fr/cassandre/translatex/-/badges/release.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/releases/permalink/latest)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![fr](https://img.shields.io/badge/lang-fr-yellow.svg)](README.fr.md)
@@ -10,7 +11,7 @@
 You'll find here the TransLaTeX project which aims to translate LaTeX source files (`.tex`) from one human language to
 another using automatic translators.
 
-See the [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details.
+See the [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details on usage and installation as well as getting a dev environment ready to start contributing.
 
 ## Git repository
 

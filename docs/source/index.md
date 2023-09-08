@@ -2,6 +2,8 @@
 
 [![pipeline status](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![coverage report](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
+[![latest release](https://gitlab.math.unistra.fr/cassandre/translatex/-/badges/release.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/releases/permalink/latest)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 ```{toctree}
 :hidden:
@@ -153,7 +155,9 @@ git clone git@gitlab.math.unistra.fr:cassandre/translatex.git
 cd translatex
 python3 -m virtualenv .venv  # create a virtual environment
 source .venv/bin/activate  # activate the virtual environment
-pip install -e .  # install the package in editable mode
+pip install -e ".[test,doc,dev]"  # install the package in editable mode with optional dependnecies
+pre-commit install  # install git hooks
+pre-commit run -a   # run git hooks once for the first time
 ```
 
 Note: in editable mode (`-e` option), the package is installed in a way that it is still possible to edit the source
