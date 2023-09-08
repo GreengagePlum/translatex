@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+"""This script extracts changes from the changelog regarding a given version number."""
+
 import argparse
 import pathlib
 import re
@@ -23,9 +25,7 @@ with changelog_path.open("r") as changelog:
     changelog_text = changelog.read()
 
 # Setup  argparse to parse command line options
-parser = argparse.ArgumentParser(
-    description="This script extracts the given version from the changelog."
-)
+parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument(
     "version_number", help="The version number to extract info about"
 )
