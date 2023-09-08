@@ -10,6 +10,7 @@ default:
     paths:
       - .cache/pip
       - .venv/
+      - $PRE_COMMIT_HOME
 
   before_script:
     ## Install packages
@@ -22,8 +23,19 @@ default:
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PRE_COMMIT_HOME: "$CI_PROJECT_DIR/.cache/pre-commit"
 
-test:
+test 1/2:
+  stage: test
+  before_script:
+    - pip install -e ".[dev]"
+  script:
+    - pre-commit run -a
+  allow_failure: true
+  tags:
+    - docker
+
+test 2/2:
   stage: test
   before_script:
     - pip install -e ".[test]"
