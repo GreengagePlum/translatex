@@ -19,12 +19,12 @@ repos:
         args:
           - "--fix=lf"
         # Exclude files with "crlf" in their names.
-        exclude: "crlf|.bat$"
+        exclude: "crlf|.bat$|.cmd$"
       - id: mixed-line-ending
-        name: "Enforce CRLF newlines on files named '*crlf*'"
+        name: "Enforce CRLF newlines on files named '*crlf*', '*.bat', '*.cmd'"
         args:
           - "--fix=crlf"
-        files: "crlf|.bat$"
+        files: "crlf|.bat$|.cmd$"
       - id: fix-byte-order-marker
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
