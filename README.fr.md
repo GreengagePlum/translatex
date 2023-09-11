@@ -1,8 +1,8 @@
 # TransLaTeX
 
-[![état du pipeline](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/commits/main)
+[![état du pipeline](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![rapport de couverture](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
-[![dernière version](https://gitlab.math.unistra.fr/cassandre/translatex/badges/release.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/releases/permalink/latest)
+[![dernière version](https://gitlab.math.unistra.fr/cassandre/translatex/-/badges/release.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/releases/permalink/latest)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
