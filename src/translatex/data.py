@@ -22,6 +22,7 @@ This list is used to determine math environments and stop recursion inside them 
 once if no text command is found inside. This helps us generate way less marks and thus subsequently, less tokens which
 potentially makes the final output less confusing for the automatic translator.
 """
+
 COMPLETELY_REMOVED_ENVS: List[str] = [
     "verbatim",
     "verbatim*",
@@ -49,6 +50,7 @@ This list contains the commands that can be used inside math environments to ent
 contents of these commands need translation so they shouldn't be removed. This list is used to stop the math
 environment processor from including these commands in its marking.
 """
+
 SPECIAL_COMMANDS: List[str] = [
     "draw",
     "fill",
@@ -58,6 +60,7 @@ SPECIAL_COMMANDS: List[str] = [
     "item",
 ]
 """These are commands that need a special regex treatment to extract their text."""
+
 COMPLETELY_REMOVED_COMMANDS: List[str] = [
     "label",
     "ref",
@@ -76,6 +79,7 @@ COMPLETELY_REMOVED_COMMANDS: List[str] = [
     "rule",
 ]
 """These are commands that need to be completely tokenized and that never have text to be translated inside."""
+
 SKIPPED_COMMANDS: List[str] = SPECIAL_COMMANDS + COMPLETELY_REMOVED_COMMANDS
 """These are the names of the known LaTeX commands to the program that require special attention.
 
