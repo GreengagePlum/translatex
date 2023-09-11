@@ -155,4 +155,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.0.2]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.0.1...v0.0.2
 
-[0.0.1]: https://gitlab.math.unistra.fr/cassandre/translatex/releases/tag/v0.0.1
+[0.0.1]: https://gitlab.math.unistra.fr/cassandre/translatex/tags/v0.0.1
