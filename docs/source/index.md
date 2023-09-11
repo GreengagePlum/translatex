@@ -163,7 +163,9 @@ pre-commit run -a   # run git hooks once for the first time
 Note: in editable mode (`-e` option), the package is installed in a way that it is still possible to edit the source
 code and have the changes take effect immediately.
 
-### Run the unitary tests
+_Also see the below sections on the unit tests and doc generation to get your dev enviornment fully ready._
+
+### Run the unit tests
 
 #### Install the development dependencies
 
@@ -197,7 +199,7 @@ official instructions and your system.
 #### Build and serve the documentation locally
 
 ```bash
-sphinx-autobuild docs/source/ docs/_build/html --watch src/ --ignore "**/docs/source/manually_generated_content/*"
+make -C docs livehtml
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
