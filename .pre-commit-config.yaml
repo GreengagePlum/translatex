@@ -4,8 +4,33 @@ repos:
     hooks:
       - id: check-yaml
       - id: check-toml
+      - id: check-xml
+      - id: check-json
+      - id: pretty-format-json
+        args:
+          - "--autofix"
+          - "--indent=2"
+          - "--no-sort-keys"
+          - "--no-ensure-ascii"
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: mixed-line-ending
+        name: "Enforce LF newlines on most files"
+        args:
+          - "--fix=lf"
+        # Exclude files with "crlf" in their names.
+        exclude: "crlf|.bat$"
+      - id: mixed-line-ending
+        name: "Enforce CRLF newlines on files named '*crlf*'"
+        args:
+          - "--fix=crlf"
+        files: "crlf|.bat$"
+      - id: fix-byte-order-marker
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-case-conflict
   - repo: https://github.com/psf/black
     rev: 23.7.0
     hooks:
@@ -24,7 +49,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest (standard-test)
-        stages: [push]
+        stages: [pre-push]
         language: system
         entry: pytest -sv
         pass_filenames: false
@@ -34,5 +59,26 @@ repos:
         stages: [manual]
         language: system
         entry: pytest -sv --runapi
+        pass_filenames: false
+        always_run: true
+      - id: pytest-ci
+        name: pytest (ci-test)
+        stages: [manual]
+        language: system
+        entry: sh -c 'pytest -sv --runapi --durations=0 --cov=src/translatex && coverage html -d public/coverage'
+        pass_filenames: false
+        always_run: true
+      - id: sphinx-build
+        name: sphinx-build (doc-test)
+        stages: [pre-push]
+        language: system
+        entry: sh -c 'STATUS=0 ; make -C docs html O="-aEW" || STATUS=$(echo $?) ; make -C docs clean ; exit $STATUS'
+        pass_filenames: false
+        always_run: true
+      - id: sphinx-build-ci
+        name: sphinx-build (doc-ci-test)
+        stages: [manual]
+        language: system
+        entry: sh -c 'STATUS=0 ; make BUILDDIR=../public/ -C docs html O="-aEW" || STATUS=$(echo $?) ; exit $STATUS'
         pass_filenames: false
         always_run: true

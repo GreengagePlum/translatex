@@ -156,7 +156,7 @@ cd translatex
 python3 -m virtualenv .venv  # create a virtual environment
 source .venv/bin/activate  # activate the virtual environment
 pip install -e ".[test,doc,dev]"  # install the package in editable mode with optional dependnecies
-pre-commit install  # install git hooks
+pre-commit install -t pre-commit -t pre-push  # install git hooks
 pre-commit run -a   # run git hooks once for the first time
 ```
 

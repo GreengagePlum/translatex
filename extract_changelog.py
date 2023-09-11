@@ -46,7 +46,7 @@ escaped_version_number = re.escape(
     else args.version_number
 )
 changelog_changes = re.search(
-    rf"^(## \[{escaped_version_number}\].*?)^## ",
+    rf"^(## \[{escaped_version_number}\].*?)^(## |\[.*?\]:)",
     changelog_text,
     re.DOTALL | re.MULTILINE,
 )
