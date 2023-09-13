@@ -56,7 +56,14 @@ changelog_hyperlink = re.search(
 
 # Print extracted info if found
 if changelog_changes and changelog_hyperlink:
-    print(changelog_changes[1] + changelog_hyperlink[0])
+    out_str = changelog_changes[1] + changelog_hyperlink[0]
+    if changelog_changes[1].count("\n") == 2:
+        out_str = (
+            changelog_changes[1]
+            + "_Nothing noteworthy..._\n\n"
+            + changelog_hyperlink[0]
+        )
+    print(out_str)
 else:
     print(
         "Couldn't find any info about the given version number, exiting...",
