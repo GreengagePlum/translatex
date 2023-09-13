@@ -38,7 +38,7 @@ test 2/3:
   stage: test
   script:
     - pip install -e ".[dev,test]"
-    - pre-commit run -a --hook-stage manual pytest-ci
+    - pre-commit run -a --verbose --hook-stage manual pytest-ci
   coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:
     paths:
