@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 """This script extracts changes from the changelog regarding a given version number."""
 
