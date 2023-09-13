@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2023-09-13
+
 ## [0.3.2] - 2023-09-13
 
 ### Added
@@ -155,7 +157,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme files' structure and content
 
-[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.2...HEAD
+[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.3...HEAD
+
+[0.3.3]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.2...v0.3.3
 
 [0.3.2]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.1...v0.3.2
 
