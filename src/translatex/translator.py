@@ -83,9 +83,6 @@ class TranslationService(ABC):
         short_description: Short explanation for the service.
         languages: The languages supported by the service. Associates shortened ISO versions of languages to their
             official long versions.
-        default_source_lang: The default source language to use if none is specified.
-        default_dest_lang: The default destination language to use if none is specified.
-
    """
     name: str = str()
     overall_char_limit: int = int()
@@ -98,8 +95,6 @@ class TranslationService(ABC):
     doc_url: str = str()
     short_description = str()
     languages = Dict[str, str]
-    default_source_lang: str = "fr"
-    default_dest_lang: str = "en"
 
     @abstractmethod
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -187,8 +182,6 @@ class DeepL(APIKeyTranslationService):
     doc_url = "https://www.deepl.com/docs-api"
     short_description = "DeepL translation service using an API key"
     api_key_env_variable_name = 'DEEPL_AUTH_KEY'
-    default_source_lang: str = "FR"
-    default_dest_lang: str = "EN-GB"
 
     def __init__(self):
         """
@@ -198,7 +191,8 @@ class DeepL(APIKeyTranslationService):
         super().__init__()
         self.translator = deepl.Translator(self.api_key)
         language_list = self.translator.get_source_languages()
-        self.languages = {language.code: language.name
+        language_list.sort(key=lambda x: x.name)
+        self.languages = {language.code.lower(): language.name
                           for language in language_list}
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -210,12 +204,13 @@ class DeepL(APIKeyTranslationService):
         if dest_lang == 'en':
             log.warning(
                 "DeepL does not support 'en' as a destination language, "
-                "using 'EN-GB' instead")
-            dest_lang = 'EN-GB'
+                "using 'en-gb' instead")
+            dest_lang = 'en-gb'
         # Language shortcodes for DeepL are in uppercase,
         # so we convert them in case they are lowercase
-        result = self.translator.translate_text(text, source_lang=source_lang.upper(),
-                                                target_lang=dest_lang.upper())
+        result = self.translator.translate_text(
+            text, source_lang=source_lang.upper(),
+            target_lang=dest_lang.upper())
         return result.text
 
 
