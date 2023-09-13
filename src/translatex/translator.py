@@ -22,7 +22,7 @@ from .tokenizer import Tokenizer
 log = logging.getLogger("translatex.translator")
 
 # Download the Punkt tokenizer for sentence splitting
-nltk.download('punkt', quiet=True)
+nltk.download("punkt", quiet=True)
 
 
 class CustomLanguageVars(punkt.PunktLanguageVars):
@@ -31,6 +31,7 @@ class CustomLanguageVars(punkt.PunktLanguageVars):
     sentence splitting preserving new lines.
     Taken from https://stackoverflow.com/a/33153483/5072688
     """
+
     _period_context_fmt = r"""
         \S*                          # some word material
         %(SentEndChars)s             # a potential sentence ending
@@ -84,7 +85,8 @@ class TranslationService(ABC):
         languages: The languages supported by the service. Associates shortened ISO versions of languages to their
             official long versions.
 
-   """
+    """
+
     name: str = str()
     overall_char_limit: int = int()
     char_limit: int = int()
@@ -108,6 +110,7 @@ class TranslationService(ABC):
 
 class GoogleTranslate(TranslationService):
     """Translate using Google API."""
+
     name = "Google Translate"
     overall_char_limit = 500000
     char_limit = 5000
@@ -115,17 +118,18 @@ class GoogleTranslate(TranslationService):
     array_item_limit = 1024
     array_item_char_limit = 0
     array_overall_char_limit = 30000
-    url = 'https://translation.googleapis.com/language/translate/v2'
+    url = "https://translation.googleapis.com/language/translate/v2"
     doc_url = "https://cloud.google.com/translate/docs/"
     short_description = "Google's translation service using an API key"
-    languages = {code: lang.capitalize()
-                 for code, lang in googletrans.LANGUAGES.items()}
+    languages = {
+        code: lang.capitalize() for code, lang in googletrans.LANGUAGES.items()
+    }
 
     def __init__(self):
         try:
-            self.google_api_key = os.environ['GOOGLE_API_KEY']
+            self.google_api_key = os.environ["GOOGLE_API_KEY"]
         except KeyError:
-            raise ApiKeyError(self.name, 'GOOGLE_API_KEY')
+            raise ApiKeyError(self.name, "GOOGLE_API_KEY")
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
@@ -133,15 +137,17 @@ class GoogleTranslate(TranslationService):
         language.
         """
 
-        headers = {'X-goog-api-key': self.google_api_key}
-        payload = {'q': text,
-                   'source': source_lang,
-                   'target': dest_lang,
-                   'format': 'text'}
+        headers = {"X-goog-api-key": self.google_api_key}
+        payload = {
+            "q": text,
+            "source": source_lang,
+            "target": dest_lang,
+            "format": "text",
+        }
         log.debug("payload = %s", payload)
         r = requests.post(self.url, headers=headers, data=payload, timeout=10)
         try:
-            return r.json()['data']['translations'][0]['translatedText']
+            return r.json()["data"]["translations"][0]["translatedText"]
         except Exception as e:
             log.error(e)
             log.error(str(r))
@@ -154,6 +160,7 @@ class GoogleTranslateNoKey(TranslationService):
 
     This is not recommended, as it is against Google's TOS.
     """
+
     name = "Google Translate (no key)"
     overall_char_limit = 500000
     char_limit = 5000
@@ -163,18 +170,25 @@ class GoogleTranslateNoKey(TranslationService):
     array_overall_char_limit = 30000
     url = ""
     doc_url = "https://github.com/ssut/py-googletrans"
-    short_description = ("Google's translation service without an API key "
-                         "(for testing purposes only).")
-    languages = {code: lang.capitalize()
-                 for code, lang in googletrans.LANGUAGES.items()}
+    short_description = (
+        "Google's translation service without an API key "
+        "(for testing purposes only)."
+    )
+    languages = {
+        code: lang.capitalize() for code, lang in googletrans.LANGUAGES.items()
+    }
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        return googletrans.Translator().translate(text, src=source_lang,
-                                                  dest=dest_lang).text
+        return (
+            googletrans.Translator()
+            .translate(text, src=source_lang, dest=dest_lang)
+            .text
+        )
 
 
 class DeepL(TranslationService):
     """Translate using DeepL API."""
+
     name: str = "DeepL"
     char_limit = 1024
     array_support = True
@@ -189,17 +203,18 @@ class DeepL(TranslationService):
         Initialize the DeepL translator.
         """
         try:
-            deepl_auth_key = os.environ['DEEPL_AUTH_KEY']
+            deepl_auth_key = os.environ["DEEPL_AUTH_KEY"]
         except KeyError:
-            raise ApiKeyError(self.name, 'DEEPL_AUTH_KEY')
+            raise ApiKeyError(self.name, "DEEPL_AUTH_KEY")
 
         self.translator = deepl.Translator(deepl_auth_key)
         char_usage = self.translator.get_usage().character
         if char_usage.valid:
             self.overall_char_limit = char_usage.limit - char_usage.count
         language_list = self.translator.get_source_languages()
-        self.languages = {language.code: language.name
-                          for language in language_list}
+        self.languages = {
+            language.code: language.name for language in language_list
+        }
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
         """
@@ -207,22 +222,25 @@ class DeepL(TranslationService):
         language.
         """
         # "EN" is deprecated with DeepL, use "EN-GB" instead
-        if dest_lang == 'en':
+        if dest_lang == "en":
             log.warning(
                 "DeepL does not support 'en' as a destination language, "
-                "using 'EN-GB' instead")
-            dest_lang = 'EN-GB'
+                "using 'EN-GB' instead"
+            )
+            dest_lang = "EN-GB"
         # Language shortcodes for DeepL are in uppercase,
         # so we convert them in case they are lowercase
-        result = self.translator.translate_text(text, source_lang=source_lang.upper(),
-                                                target_lang=dest_lang.upper())
+        result = self.translator.translate_text(
+            text,
+            source_lang=source_lang.upper(),
+            target_lang=dest_lang.upper(),
+        )
         return result.text
 
 
-TRANSLATION_SERVICE_CLASSES = {cls.name: cls
-                               for cls in (GoogleTranslate,
-                                           GoogleTranslateNoKey,
-                                           DeepL)}
+TRANSLATION_SERVICE_CLASSES = {
+    cls.name: cls for cls in (GoogleTranslate, GoogleTranslateNoKey, DeepL)
+}
 
 
 class Translator:
@@ -239,13 +257,18 @@ class Translator:
     variable. You can change the source string and languages and launch another
     translation.
     """
+
     DEFAULT_SERVICE: TranslationService = TRANSLATION_SERVICE_CLASSES[
-        "Google Translate (no key)"]()
+        "Google Translate (no key)"
+    ]()
     DEFAULT_SOURCE_LANG: str = "fr"
     DEFAULT_DEST_LANG: str = "en"
 
-    def __init__(self, tokenized_string: str,
-                 token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT) -> None:
+    def __init__(
+        self,
+        tokenized_string: str,
+        token_format: str = Tokenizer.DEFAULT_TOKEN_FORMAT,
+    ) -> None:
         """Creates a Tokenizer with default settings.
 
         Default settings are taken from the class variables.
@@ -269,8 +292,10 @@ class Translator:
         return cls(tokenizer.tokenized_string, tokenizer.token_format)
 
     def __str__(self) -> str:
-        return (f"The translator has a base string of length "
-                f"{len(self._base_string)} characters.")
+        return (
+            f"The translator has a base string of length "
+            f"{len(self._base_string)} characters."
+        )
 
     @property
     def tokenized_string(self) -> str:
@@ -342,10 +367,12 @@ class Translator:
             chunks.append(current_chunk)
         return chunks
 
-    def translate(self,
-                  service: TranslationService = DEFAULT_SERVICE,
-                  source_lang: str = DEFAULT_SOURCE_LANG,
-                  destination_lang: str = DEFAULT_DEST_LANG) -> None:
+    def translate(
+        self,
+        service: TranslationService = DEFAULT_SERVICE,
+        source_lang: str = DEFAULT_SOURCE_LANG,
+        destination_lang: str = DEFAULT_DEST_LANG,
+    ) -> None:
         """
         Translation is performed with the set source and destination
         languages and the chosen service.
@@ -365,7 +392,9 @@ class Translator:
             raise ValueError("Tokenized string is empty, nothing to translate")
         latex_header, *tokenized_rest = re.split(
             f"({Tokenizer.token_regex(self._token_format)})",
-            self._tokenized_string, 1)
+            self._tokenized_string,
+            1,
+        )
         if len(tokenized_rest) == 0:
             # The case where there are no tokens: standard translation
             tokenized_rest = self._tokenized_string
@@ -373,16 +402,20 @@ class Translator:
         else:
             self._translated_string = latex_header
         chunks = Translator.split_string_by_length(
-            "".join(tokenized_rest), service.char_limit)
+            "".join(tokenized_rest), service.char_limit
+        )
         self._translated_string += "".join(
-            service.translate(chunk,
-                              source_lang=source_lang,
-                              dest_lang=destination_lang)
-            for chunk in chunks)
+            service.translate(
+                chunk, source_lang=source_lang, dest_lang=destination_lang
+            )
+            for chunk in chunks
+        )
         # For multiline strings, add a newline at the end if it was lost
         # during the process
-        if (self._tokenized_string[-1] == "\n" and
-                self._translated_string[-1] != "\n"):
+        if (
+            self._tokenized_string[-1] == "\n"
+            and self._translated_string[-1] != "\n"
+        ):
             self._translated_string += "\n"
 
 
@@ -395,12 +428,14 @@ def add_custom_translation_services(fp: TextIO):
         fp: Input file object.
     """
     namespace: Dict[str, Any] = {}
-    exec(compile(fp.read(), fp.name, 'exec'), namespace)
+    exec(compile(fp.read(), fp.name, "exec"), namespace)
     for obj in namespace.values():
         # Add the classes that are :
         #   - defined only in the file and not in the current module namespace
         #   - subclasses of TranslationService
-        if (type(obj) is type(TranslationService) and
-                obj.__name__ not in globals() and
-                issubclass(obj, TranslationService)):
+        if (
+            type(obj) is type(TranslationService)
+            and obj.__name__ not in globals()
+            and issubclass(obj, TranslationService)
+        ):
             TRANSLATION_SERVICE_CLASSES[obj.name] = obj

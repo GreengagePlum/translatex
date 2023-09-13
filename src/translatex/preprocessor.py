@@ -1,7 +1,7 @@
 """This is where all the preparations are made before anything. TransLaTeX preprocessor syntax is handled here."""
 import logging
 import re
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from translatex.marker import Marker
@@ -18,6 +18,7 @@ class Preprocessor:
     In the future, the preprocessor statements can be extended further with new features to enable more fine-tuned
     control of the program's behavior by end users without them having to delve into source code.
     """
+
     DEFAULT_INITIAL_INDICATOR_INDEX: int = 0
     DEFAULT_INDICATOR_FORMAT: str = "%@=TRANSLATEX_MANUAL_REPLACEMENT_{}"
     """This indicator is used as a placeholder for manual replacement blocks, to keep track of its location."""
@@ -44,11 +45,13 @@ class Preprocessor:
         self._base_latex: str = latex
         self._unprocessed_latex: str = latex
         self._processed_latex: str = str()
-        self.indicator_count: int = Preprocessor.DEFAULT_INITIAL_INDICATOR_INDEX
+        self.indicator_count: int = (
+            Preprocessor.DEFAULT_INITIAL_INDICATOR_INDEX
+        )
         """Numbering used in the indicators. Its initial value represents -> first indicator number - 1."""
         self.indicator_format: str = Preprocessor.DEFAULT_INDICATOR_FORMAT
         self._indicator_store: Dict[int, str] = dict()
-        """The dictionary that associates to each indicator the corresponding "manual substitution block" string it 
+        """The dictionary that associates to each indicator the corresponding "manual substitution block" string it
         replaces."""
 
     def update_from_marker(self, marker: "Marker") -> None:
@@ -56,8 +59,11 @@ class Preprocessor:
         self.processed_latex = marker.unmarked_latex
 
     def __str__(self) -> str:
-        return "The indicator format is {} and indicator count is at {}.".format(self._indicator_format,
-                                                                                 self.indicator_count)
+        return (
+            "The indicator format is {} and indicator count is at {}.".format(
+                self._indicator_format, self.indicator_count
+            )
+        )
 
     def _next_indicator(self) -> str:
         self.indicator_count += 1
@@ -120,16 +126,18 @@ class Preprocessor:
 
     @indicator_format.setter
     def indicator_format(self, format_str: str) -> None:
-        pattern = r'\{\}'
+        pattern = r"\{\}"
         match = re.search(pattern, format_str)
         if not match:
             raise ValueError(
-                "No empty curly braces in the given format string")
+                "No empty curly braces in the given format string"
+            )
         self._indicator_format = format_str
 
     def dump_store(self) -> str:
         string_transformed = [
-            f"{item}\n" for item in self._indicator_store.items()]
+            f"{item}\n" for item in self._indicator_store.items()
+        ]
         return "".join(string_transformed)
 
     def process(self) -> None:
@@ -180,22 +188,31 @@ class Preprocessor:
         current_string = self._unprocessed_latex
         if not current_string:
             raise ValueError("Unprocessed string is empty, nothing to process")
-        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_BEGIN) + r"[\s\S]*" + re.escape(
-            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r"[\s\S]*" + re.escape(
-            Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END) + r".*")
+        pattern = re.compile(
+            re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_BEGIN)
+            + r"[\s\S]*"
+            + re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR)
+            + r"[\s\S]*"
+            + re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END)
+            + r".*"
+        )
         all_replaced = False
         while not all_replaced:
             match = pattern.search(current_string)
             if match:
                 self._indicator_store.update(
-                    {self.indicator_count + 1: match[0]})
+                    {self.indicator_count + 1: match[0]}
+                )
                 current_string, _ = pattern.subn(
-                    self._next_indicator(), current_string, 1)
+                    self._next_indicator(), current_string, 1
+                )
             else:
                 all_replaced = True
         self._processed_latex = current_string
 
-    def rebuild(self, substitution_setting: bool = ENABLE_SUBSTITUTION) -> None:
+    def rebuild(
+        self, substitution_setting: bool = ENABLE_SUBSTITUTION
+    ) -> None:
         """Actual substitution is performed here during the rebuild. It can be disabled with the optional parameter
         indicating this setting.
 
@@ -215,20 +232,30 @@ class Preprocessor:
         current_string = self._processed_latex
         if not current_string:
             raise ValueError("Processed string is empty, nothing to rebuild")
-        pattern = re.compile(re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR) + r".*\n([\s\S]*)\n\s*" +
-                             re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END))
+        pattern = re.compile(
+            re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_SEPERATOR)
+            + r".*\n([\s\S]*)\n\s*"
+            + re.escape(Preprocessor.DEFAULT_REPLACEMENT_BLOCK_END)
+        )
         # To filter out any line comment characters and spaces
         pattern2 = re.compile(r"^(\s*)[%\s]*", re.MULTILINE)
         for indicator, value in self._indicator_store.items():
             replacement_string = value
             if substitution_setting:
-                replacement_string = Preprocessor.DEFAULT_OPERATION_STAMP + "\n" + \
-                                     pattern2.sub(r"\1", pattern.search(replacement_string)[1])
+                replacement_string = (
+                    Preprocessor.DEFAULT_OPERATION_STAMP
+                    + "\n"
+                    + pattern2.sub(
+                        r"\1", pattern.search(replacement_string)[1]
+                    )
+                )
             formatted_indicator = self._indicator_format.format(indicator)
             if current_string.count(formatted_indicator) == 0:
                 log.error(
-                    f"Missing or altered indicator: {formatted_indicator} --> during stage PREPROCESSOR")
+                    f"Missing or altered indicator: {formatted_indicator} --> during stage PREPROCESSOR"
+                )
             else:
                 current_string = current_string.replace(
-                    formatted_indicator, replacement_string)
+                    formatted_indicator, replacement_string
+                )
         self._unprocessed_latex = current_string

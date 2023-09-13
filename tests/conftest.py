@@ -1,17 +1,22 @@
 import pytest
 from fixtures.fixt_markers import *
-from fixtures.fixt_tokenizers import *
 from fixtures.fixt_preprocessors import *
+from fixtures.fixt_tokenizers import *
 from fixtures.fixt_translators import *
 
 
 def pytest_addoption(parser):
-    parser.addoption("--runapi", action="store_true",
-                     help="Run the tests that include API calls.")
+    parser.addoption(
+        "--runapi",
+        action="store_true",
+        help="Run the tests that include API calls.",
+    )
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "api: mark test as testing the response of an API call")
+    config.addinivalue_line(
+        "markers", "api: mark test as testing the response of an API call"
+    )
 
 
 def pytest_runtest_setup(item):

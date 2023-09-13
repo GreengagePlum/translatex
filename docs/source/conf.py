@@ -11,9 +11,9 @@ from sphinx.errors import DocumentError
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from translatex import __version__
 
-project = 'TransLaTeX'
+project = "TransLaTeX"
 copyright = "2023 Efe ERKEN"
-author = 'Efe ERKEN'
+author = "Efe ERKEN"
 version = __version__
 release = __version__
 
@@ -21,26 +21,26 @@ release = __version__
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'myst_parser',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.coverage',
-    'sphinx.ext.graphviz',
-    'sphinx_copybutton',
-    'sphinx-prompt',
-    'sphinx_last_updated_by_git'
+    "myst_parser",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.coverage",
+    "sphinx.ext.graphviz",
+    "sphinx_copybutton",
+    "sphinx-prompt",
+    "sphinx_last_updated_by_git",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 autodoc_default_options = {
-    'members': True,
-    'show-inheritance': True,
-    'member-order': 'groupwise',
-    'private-members': False,
-    'special-members': '__init__'
+    "members": True,
+    "show-inheritance": True,
+    "member-order": "groupwise",
+    "private-members": False,
+    "special-members": "__init__",
 }
 
 graphviz_output_format = "svg"
@@ -48,9 +48,9 @@ graphviz_output_format = "svg"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_logo = '../../images/logo_small.png'
-html_favicon = '../../images/logo_favicon.png'
+html_theme = "furo"
+html_logo = "../../images/logo_small.png"
+html_favicon = "../../images/logo_favicon.png"
 html_theme_options = {
     "source_edit_link": "https://gitlab.math.unistra.fr/cassandre/translatex/edit/main/docs/source/{filename}",
     "footer_icons": [
@@ -95,18 +95,29 @@ def cli_synopsis_generator(app):
     if app.builder.name == "html":
         with open(f"{manually_generated_path}/cli-synopsis.txt", "w") as f:
             try:
-                subprocess.run(["translatex", "-h"], stdout=f, stderr=subprocess.DEVNULL, check=True)
+                subprocess.run(
+                    ["translatex", "-h"],
+                    stdout=f,
+                    stderr=subprocess.DEVNULL,
+                    check=True,
+                )
             except (OSError, subprocess.CalledProcessError) as e:
                 if isinstance(e, OSError):
-                    sphinx_error_message = "`translatex` executable wasn't found."
+                    sphinx_error_message = (
+                        "`translatex` executable wasn't found."
+                    )
                 else:
-                    sphinx_error_message = "`translatex -h` exited with a non zero status."
+                    sphinx_error_message = (
+                        "`translatex -h` exited with a non zero status."
+                    )
                 sphinx_error_message += " Manual content generation failed."
                 raise DocumentError(sphinx_error_message) from e
 
 
 def setup(app):
     global manually_generated_path
-    manually_generated_path = manually_generated_path.format(doc_source_dir=app.srcdir)
+    manually_generated_path = manually_generated_path.format(
+        doc_source_dir=app.srcdir
+    )
     os.makedirs(manually_generated_path, exist_ok=True)
     app.connect("builder-inited", cli_synopsis_generator)

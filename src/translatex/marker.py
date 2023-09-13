@@ -10,7 +10,7 @@ compatible with many more types of structures.
 """
 import logging
 import re
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Optional
 
 from TexSoup import TexSoup
 from TexSoup.data import *
@@ -128,24 +128,29 @@ class Marker:
 
     @staticmethod
     def marker_format_check(format_str: str) -> None:
-        pattern = r'\{\}'
+        pattern = r"\{\}"
         match = re.search(pattern, format_str)
         if not match:
             raise ValueError(
-                "No empty curly braces in the given format string")
+                "No empty curly braces in the given format string"
+            )
 
     @staticmethod
     def marker_regex(format_str: str) -> str:
         """Construct a regex corresponding to the given marker format."""
         Marker.marker_format_check(format_str)
         curly_start = format_str.find(r"{}")
-        escaped_marker_format = re.escape(
-            format_str[:curly_start]) + "{}" + re.escape(format_str[curly_start + 2:])
+        escaped_marker_format = (
+            re.escape(format_str[:curly_start])
+            + "{}"
+            + re.escape(format_str[curly_start + 2 :])
+        )
         return escaped_marker_format.format(r"(?:\d+)")
 
     def dump_store(self) -> str:
         string_transformed = [
-            f"{item}\n" for item in self._marker_store.items()]
+            f"{item}\n" for item in self._marker_store.items()
+        ]
         return "".join(string_transformed)
 
     def _marker_regex(self) -> str:
@@ -176,8 +181,12 @@ class Marker:
             node.name = self._next_marker()
             self._marker_store.update({self.marker_count: previous_name})
 
-    def _mark_node_contents(self, node: TexNode, original_expression_size: int = 0,
-                            replace_range: range = None) -> None:
+    def _mark_node_contents(
+        self,
+        node: TexNode,
+        original_expression_size: int = 0,
+        replace_range: range = None,
+    ) -> None:
         """This method marks the contents of a TexNode. It is used for LaTeX environments rather than commands.
 
         If no optional parameters are passed, all the contents get marked with a single marker. If both optional
@@ -198,38 +207,70 @@ class Marker:
         """
         if (original_expression_size != 0) ^ (replace_range is not None):
             raise ValueError(
-                "Either supply both optional parameters or none of them")
+                "Either supply both optional parameters or none of them"
+            )
         if original_expression_size == 0 and replace_range is None:
             previous_expression: list = node.expr.all
             # Sanitize previous expressions so that it no longer contains command options within []
-            args = [y.pop() for y in [
-                x.contents for x in node.args if type(x) is BracketGroup]]
+            args = [
+                y.pop()
+                for y in [
+                    x.contents for x in node.args if type(x) is BracketGroup
+                ]
+            ]
             previous_expression = [
-                x for x in previous_expression if x not in args]
+                x for x in previous_expression if x not in args
+            ]
             node.contents = [self._next_marker()]
             self._marker_store.update(
-                {self.marker_count: "".join([str(x) for x in previous_expression])})
+                {
+                    self.marker_count: "".join(
+                        [str(x) for x in previous_expression]
+                    )
+                }
+            )
         else:
             current_expression_size = len(node.expr.all)
-            adjustment_difference = original_expression_size - current_expression_size
-            adjusted_replace_range = range(replace_range.start - adjustment_difference,
-                                           replace_range.stop - adjustment_difference)
-            previous_expression: list = node.expr.all[adjusted_replace_range.start:adjusted_replace_range.stop]
+            adjustment_difference = (
+                original_expression_size - current_expression_size
+            )
+            adjusted_replace_range = range(
+                replace_range.start - adjustment_difference,
+                replace_range.stop - adjustment_difference,
+            )
+            previous_expression: list = node.expr.all[
+                adjusted_replace_range.start : adjusted_replace_range.stop
+            ]
             # Sanitize previous expressions so that it no longer contains command options within []
-            args = [y.pop() for y in [
-                x.contents for x in node.args if type(x) is BracketGroup]]
+            args = [
+                y.pop()
+                for y in [
+                    x.contents for x in node.args if type(x) is BracketGroup
+                ]
+            ]
             previous_expression = [
-                x for x in previous_expression if x not in args]
+                x for x in previous_expression if x not in args
+            ]
             new_contents = list(node.expr.all)
-            del new_contents[adjusted_replace_range.start:adjusted_replace_range.stop]
+            del new_contents[
+                adjusted_replace_range.start : adjusted_replace_range.stop
+            ]
             new_contents.insert(
-                adjusted_replace_range.start, self._next_marker())
+                adjusted_replace_range.start, self._next_marker()
+            )
             node.contents = new_contents
             self._marker_store.update(
-                {self.marker_count: "".join([str(x) for x in previous_expression])})
+                {
+                    self.marker_count: "".join(
+                        [str(x) for x in previous_expression]
+                    )
+                }
+            )
 
     @staticmethod
-    def _marking_range_finder(node: TexNode, excluded_commands: List[str]) -> List[range]:
+    def _marking_range_finder(
+        node: TexNode, excluded_commands: List[str]
+    ) -> List[range]:
         """Finds ranges to be replaced with markers in the list of expressions of a node according to the given
         exclude list.
 
@@ -254,9 +295,15 @@ class Marker:
         ranges_to_mark: List[range] = list()
         start: int = -1
         for i, expr in enumerate(node.expr.all):
-            if start == -1 and (type(expr) is not TexCmd or expr.name not in excluded_commands):
+            if start == -1 and (
+                type(expr) is not TexCmd or expr.name not in excluded_commands
+            ):
                 start = i
-            elif start != -1 and type(expr) is TexCmd and expr.name in excluded_commands:
+            elif (
+                start != -1
+                and type(expr) is TexCmd
+                and expr.name in excluded_commands
+            ):
                 ranges_to_mark.append(range(start, i))
                 start = -1
             elif len(node.expr.all) - 1 == i:
@@ -285,16 +332,21 @@ class Marker:
         """
         continue_recursion = False
         for descendant in node.descendants:
-            if type(descendant) is TexNode and descendant.name in TEXT_COMMANDS:
+            if (
+                type(descendant) is TexNode
+                and descendant.name in TEXT_COMMANDS
+            ):
                 continue_recursion = True
                 break
         if continue_recursion:
             ranges_to_mark: List[range] = self._marking_range_finder(
-                node, TEXT_COMMANDS)
+                node, TEXT_COMMANDS
+            )
             original_expression_size: int = len(node.expr.all)
             for range_to_mark in ranges_to_mark:
                 self._mark_node_contents(
-                    node, original_expression_size, range_to_mark)
+                    node, original_expression_size, range_to_mark
+                )
         else:
             self._mark_node_contents(node)
             # TODO: implement way to completely mark and replace named math environment (maybe)
@@ -377,8 +429,10 @@ class Marker:
             formatted_marker = self._marker_format.format(marker)
             if current_string.count(formatted_marker) == 0:
                 log.error(
-                    f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER")
+                    f"Found missing or altered MARKER: {formatted_marker} --> during stage MARKER"
+                )
             else:
                 current_string = current_string.replace(
-                    formatted_marker, value)
+                    formatted_marker, value
+                )
         self._unmarked_latex = current_string

@@ -27,12 +27,13 @@ test = ["pytest", "pytest-cov"]
 doc = [
     "Sphinx >= 7.2.2",
     "myst-parser",
-    "furo",
+    "furo >= 2023.09.10",
     "sphinx-copybutton",
     "sphinx-autobuild",
     "sphinx-prompt",
     "sphinx-last-updated-by-git"
 ]
+dev = ["pre-commit"]
 
 [project.license]
 text = "MIT"
@@ -60,3 +61,12 @@ namespaces = false
 
 [tool.setuptools.dynamic.version]
 attr = "translatex.__version__"
+
+[tool.black]
+line-length = 79
+target-version = ["py38", "py39", "py310"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 79
