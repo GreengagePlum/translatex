@@ -15,9 +15,12 @@ from . import __version__
 from .marker import Marker
 from .preprocessor import Preprocessor
 from .tokenizer import Tokenizer
-from .translator import (Translator, TRANSLATION_SERVICE_CLASSES,
-                         ApiKeyError,
-                         add_custom_translation_services)
+from .translator import (
+    TRANSLATION_SERVICE_CLASSES,
+    ApiKeyError,
+    Translator,
+    add_custom_translation_services,
+)
 
 DEFAULT_INTER_FILE_PRE: str = "_"
 DEFAULT_INTER_FILE_EXT: str = ".txt"
@@ -30,9 +33,11 @@ def translatex(args: argparse.Namespace) -> None:
     if args.custom_api:
         add_custom_translation_services(args.custom_api)
     if args.service not in TRANSLATION_SERVICE_CLASSES:
-        log.error("The given service is not available. "
-                  "Please choose one of the following: %s",
-                  ", ".join(TRANSLATION_SERVICE_CLASSES.keys()))
+        log.error(
+            "The given service is not available. "
+            "Please choose one of the following: %s",
+            ", ".join(TRANSLATION_SERVICE_CLASSES.keys()),
+        )
         sys.exit(1)
     base_file: str = DEFAULT_INTER_FILE_PRE + Path(args.infile.name).stem
     p = Preprocessor(args.infile.read())
@@ -45,7 +50,9 @@ def translatex(args: argparse.Namespace) -> None:
     if args.debug:
         with open(f"{base_file}_processed{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(p.processed_latex)
-        with open(f"{base_file}_indicator_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
+        with open(
+            f"{base_file}_indicator_store{DEFAULT_INTER_FILE_EXT}", "w"
+        ) as f:
             f.write(p.dump_store())
     m = Marker.from_preprocessor(p)
     if args.marker_format:
@@ -58,7 +65,9 @@ def translatex(args: argparse.Namespace) -> None:
     if args.debug:
         with open(f"{base_file}_marked{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(m.marked_latex)
-        with open(f"{base_file}_marker_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
+        with open(
+            f"{base_file}_marker_store{DEFAULT_INTER_FILE_EXT}", "w"
+        ) as f:
             f.write(m.dump_store())
     t = Tokenizer.from_marker(m)
     if args.token_format:
@@ -71,7 +80,9 @@ def translatex(args: argparse.Namespace) -> None:
     if args.debug:
         with open(f"{base_file}_tokenized{DEFAULT_INTER_FILE_EXT}", "w") as f:
             f.write(t.tokenized_string)
-        with open(f"{base_file}_token_store{DEFAULT_INTER_FILE_EXT}", "w") as f:
+        with open(
+            f"{base_file}_token_store{DEFAULT_INTER_FILE_EXT}", "w"
+        ) as f:
             f.write(t.dump_store())
     a = Translator.from_tokenizer(t)
     if not args.dry_run:
@@ -90,7 +101,9 @@ def translatex(args: argparse.Namespace) -> None:
             args.outfile.write(a.translated_string)
             sys.exit()
         if args.debug:
-            with open(f"{base_file}_translated{DEFAULT_INTER_FILE_EXT}", "w") as f:
+            with open(
+                f"{base_file}_translated{DEFAULT_INTER_FILE_EXT}", "w"
+            ) as f:
                 f.write(a.translated_string)
         t.update_from_translator(a)
     else:
@@ -110,51 +123,98 @@ def translatex(args: argparse.Namespace) -> None:
 def parse_args(args) -> argparse.Namespace:
     """Argument parser for TransLaTeX."""
     parser = argparse.ArgumentParser(
-        prog="translatex",
-        description=__doc__, allow_abbrev=False)
-    parser.add_argument("--version", action="version",
-                        version=f"%(prog)s {__version__}",
-                        help="Version number")
-    parser.add_argument("-d", "--debug", action="store_true",
-                        help="Generate intermediary files and output all logs")
-    parser.add_argument("-v", "--verbose", action="count",
-                        default=0, help="Output information logs to see details on what's going on")
+        prog="translatex", description=__doc__, allow_abbrev=False
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Version number",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Generate intermediary files and output all logs",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Output information logs to see details on what's going on",
+    )
     mutually_exclusive_group = parser.add_mutually_exclusive_group()
     mutually_exclusive_group.add_argument(
-        "-n", "--dry-run", action="store_true",
-        help="Don't translate (no API call), just run the chain of operations")
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="Don't translate (no API call), just run the chain of operations",
+    )
     mutually_exclusive_group.add_argument(
-        "-s", "--stop",
+        "-s",
+        "--stop",
         choices=["Preprocessor", "Marker", "Tokenizer", "Translator"],
-        help="Stop at the end of the specified stage and write its result to output")
-    parser.add_argument("--no-pre", action="store_false",
-                        help="Don't do manual substitution during preprocessing stage")
-    parser.add_argument("-mf", "--marker-format",
-                        default=Marker.DEFAULT_MARKER_FORMAT,
-                        help="Marker format to use during marking stage (default: %(default)s)")
-    parser.add_argument("-tf", "--token-format",
-                        default=Tokenizer.DEFAULT_TOKEN_FORMAT,
-                        help="Token format to use during tokenization stage (default: %(default)s)")
-    parser.add_argument("-sl", "--src-lang",
-                        default=Translator.DEFAULT_SOURCE_LANG,
-                        help="Input's language (default: %(default)s)")
-    parser.add_argument("-dl", "--dest-lang",
-                        default=Translator.DEFAULT_DEST_LANG,
-                        help="Output's language (default: %(default)s)")
+        help="Stop at the end of the specified stage and write its result to output",
+    )
     parser.add_argument(
-        "-ca", "--custom_api", type=argparse.FileType('r'),
-        help="Python file that provides a custom translation service class")
-    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()) + ('Custom service...',)
+        "--no-pre",
+        action="store_false",
+        help="Don't do manual substitution during preprocessing stage",
+    )
+    parser.add_argument(
+        "-mf",
+        "--marker-format",
+        default=Marker.DEFAULT_MARKER_FORMAT,
+        help="Marker format to use during marking stage (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-tf",
+        "--token-format",
+        default=Tokenizer.DEFAULT_TOKEN_FORMAT,
+        help="Token format to use during tokenization stage (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-sl",
+        "--src-lang",
+        default=Translator.DEFAULT_SOURCE_LANG,
+        help="Input's language (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-dl",
+        "--dest-lang",
+        default=Translator.DEFAULT_DEST_LANG,
+        help="Output's language (default: %(default)s)",
+    )
+    parser.add_argument(
+        "-ca",
+        "--custom_api",
+        type=argparse.FileType("r"),
+        help="Python file that provides a custom translation service class",
+    )
+    service_choices = tuple(TRANSLATION_SERVICE_CLASSES.keys()) + (
+        "Custom service...",
+    )
     parser.add_argument(
         "--service",
-        default=Translator.DEFAULT_SERVICE.name, type=str,
-        help=f"Translation service to use {service_choices} (default: %(default)s)")
-    parser.add_argument('infile', nargs='?',
-                        type=argparse.FileType('r'), default=sys.stdin,
-                        help="File to read LaTeX from")
-    parser.add_argument('outfile', nargs='?',
-                        type=argparse.FileType('w'), default=sys.stdout,
-                        help="File to output the processed LaTeX (can be non existant)")
+        default=Translator.DEFAULT_SERVICE.name,
+        type=str,
+        help=f"Translation service to use {service_choices} (default: %(default)s)",
+    )
+    parser.add_argument(
+        "infile",
+        nargs="?",
+        type=argparse.FileType("r"),
+        default=sys.stdin,
+        help="File to read LaTeX from",
+    )
+    parser.add_argument(
+        "outfile",
+        nargs="?",
+        type=argparse.FileType("w"),
+        default=sys.stdout,
+        help="File to output the processed LaTeX (can be non existant)",
+    )
     return parser.parse_args(args)
 
 
@@ -184,11 +244,16 @@ def main():
     """
     args = parse_args(sys.argv[1:])
     console_small = logging.StreamHandler()
-    console_small.setFormatter(logging.Formatter("%(name)s: %(levelname)s %(message)s"))
+    console_small.setFormatter(
+        logging.Formatter("%(name)s: %(levelname)s %(message)s")
+    )
     console_full = logging.StreamHandler()
     console_full.setFormatter(
-        logging.Formatter(fmt="< %(asctime)-26s | %(name)-24s | %(levelname)-8s >\n%(message)s\n",
-                          datefmt="%Y-%m-%d %H:%M:%S %z"))
+        logging.Formatter(
+            fmt="< %(asctime)-26s | %(name)-24s | %(levelname)-8s >\n%(message)s\n",
+            datefmt="%Y-%m-%d %H:%M:%S %z",
+        )
+    )
     if args.debug:
         logging.basicConfig(level=logging.DEBUG, handlers=[console_full])
     elif args.verbose == 1:

@@ -2,6 +2,8 @@
 
 [![pipeline status](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/pipeline.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/commits/main)
 [![coverage report](https://gitlab.math.unistra.fr/cassandre/translatex/badges/main/coverage.svg)](https://cassandre.pages.math.unistra.fr/translatex/coverage)
+[![latest release](https://gitlab.math.unistra.fr/cassandre/translatex/-/badges/release.svg)](https://gitlab.math.unistra.fr/cassandre/translatex/-/releases/permalink/latest)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 ```{toctree}
 :hidden:
@@ -153,13 +155,17 @@ git clone git@gitlab.math.unistra.fr:cassandre/translatex.git
 cd translatex
 python3 -m virtualenv .venv  # create a virtual environment
 source .venv/bin/activate  # activate the virtual environment
-pip install -e .  # install the package in editable mode
+pip install -e ".[test,doc,dev]"  # install the package in editable mode with optional dependnecies
+pre-commit install -t pre-commit -t pre-push  # install git hooks
+pre-commit run -a   # run git hooks once for the first time
 ```
 
 Note: in editable mode (`-e` option), the package is installed in a way that it is still possible to edit the source
 code and have the changes take effect immediately.
 
-### Run the unitary tests
+_Also see the below sections on the unit tests and doc generation to get your dev enviornment fully ready._
+
+### Run the unit tests
 
 #### Install the development dependencies
 
@@ -193,7 +199,7 @@ official instructions and your system.
 #### Build and serve the documentation locally
 
 ```bash
-sphinx-autobuild docs/source/ docs/_build/html --watch src/ --ignore "**/docs/source/manually_generated_content/*"
+make -C docs livehtml
 ```
 
 Go to <http://localhost:8000> and see the changes in `docs/source/` and `src/` directories take effect immediately.
@@ -282,7 +288,7 @@ For example a token with the previous format could be like `=12.6=` or `[12-6]` 
 use two numbers so their format string has to contain at least two distinct pairs of curly braces.
 
 ```{note}
-See the [](#extra-options) section to find out details on how to visualize the tokens and the 
+See the [](#extra-options) section to find out details on how to visualize the tokens and the
 generation of intermediary files to have a peek at the inner workings of TransLaTeX.
 ```
 
@@ -413,7 +419,7 @@ potentially make it succeed.
   `stdout`. This can help you hunt down where a problem appears during the process.
 
 ```{note}
-Take a look at the [](modules/index.md) section for even more details on the inner workings and the 
+Take a look at the [](modules/index.md) section for even more details on the inner workings and the
 architecture of TransLaTeX.
 ```
 
