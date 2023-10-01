@@ -94,9 +94,11 @@ def translatex(args: argparse.Namespace) -> None:
         except ModuleNotFoundError as e:
             log.error(e.msg)
             sys.exit(1)
-        a.translate(service=service,
-                    source_lang=args.src_lang,
-                    destination_lang=args.dest_lang)
+        a.translate(
+            service=service,
+            source_lang=args.src_lang,
+            destination_lang=args.dest_lang,
+        )
         if args.stop == "Translator":
             args.outfile.write(a.translated_string)
             sys.exit()

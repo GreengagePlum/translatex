@@ -37,8 +37,10 @@ def test_split_string_by_length(small_trans):
         "On multiple\nlines.",
     ]
 
-@pytest.mark.xfail(service_class=TEST_SERVICE_CLASSES[0],
-                   reason="Google API key expired")
+
+@pytest.mark.xfail(
+    service_class=TEST_SERVICE_CLASSES[0], reason="Google API key expired"
+)
 @pytest.mark.api
 @pytest.mark.parametrize("service_class", TEST_SERVICE_CLASSES)
 def test_translate_small(small_trans, service_class):
