@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.3] - 2023-09-13
+### Changed
+
+- Some refactoring of the `translator` module to comply with translatex_web
 
 ## [0.3.2] - 2023-09-13
 
