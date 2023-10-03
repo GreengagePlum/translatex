@@ -54,7 +54,7 @@ repos:
         name: pytest (ci-test)
         stages: [manual]
         language: system
-        entry: sh -c 'pytest -sv --runapi --durations=0 --cov=src/translatex && coverage html -d public/coverage'
+        entry: sh -c 'pytest -sv --runapi --durations=0 --cov=src/translatex --junitxml=report.xml && coverage html -d public/coverage'
         pass_filenames: false
         always_run: true
       - id: sphinx-build
