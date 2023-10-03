@@ -5,11 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.4] - 2023-10-03
 
 ### Changed
 
 - Some refactoring of the `translator` module to comply with translatex_web
+
+## [0.3.3] - 2023-09-13
 
 ## [0.3.2] - 2023-09-13
 
@@ -159,7 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Updated readme files' structure and content
 
-[unreleased]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.3...HEAD
+[0.3.4]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.3...v0.3.4
 
 [0.3.3]: https://gitlab.math.unistra.fr/cassandre/translatex/compare/v0.3.2...v0.3.3
 
