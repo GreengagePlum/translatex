@@ -108,55 +108,9 @@ class TranslationService(ABC):
         return text
 
 
-class GoogleTranslate(TranslationService):
-    """Translate using Google API."""
-
-    name = "Google Translate"
-    overall_char_limit = 500000
-    char_limit = 5000
-    array_support = True
-    array_item_limit = 1024
-    array_item_char_limit = 0
-    array_overall_char_limit = 30000
-    url = "https://translation.googleapis.com/language/translate/v2"
-    doc_url = "https://cloud.google.com/translate/docs/"
-    short_description = "Google's translation service using an API key"
-    languages = {
-        code: lang.capitalize() for code, lang in googletrans.LANGUAGES.items()
-    }
-
-    def __init__(self):
-        try:
-            self.google_api_key = os.environ["GOOGLE_API_KEY"]
-        except KeyError:
-            raise ApiKeyError(self.name, "GOOGLE_API_KEY")
-
-    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
-        """
-        Return a translated string from source language to destination
-        language.
-        """
-
-        headers = {"X-goog-api-key": self.google_api_key}
-        payload = {
-            "q": text,
-            "source": source_lang,
-            "target": dest_lang,
-            "format": "text",
-        }
-        log.debug("payload = %s", payload)
-        r = requests.post(self.url, headers=headers, data=payload, timeout=10)
-        try:
-            return r.json()["data"]["translations"][0]["translatedText"]
-        except Exception as e:
-            log.error(e)
-            log.error(str(r))
-            log.error(r.json())
-            return text
-
-
 class GoogleTranslateNoKey(TranslationService):
-    """Use googletrans without an API key.
+    """
+    Use googletrans without an API key.
 
     This is not recommended, as it is against Google's TOS.
     """
@@ -168,7 +122,6 @@ class GoogleTranslateNoKey(TranslationService):
     array_item_limit = 1024
     array_item_char_limit = 0
     array_overall_char_limit = 30000
-    url = ""
     doc_url = "https://github.com/ssut/py-googletrans"
     short_description = (
         "Google's translation service without an API key "
@@ -186,7 +139,54 @@ class GoogleTranslateNoKey(TranslationService):
         )
 
 
-class DeepL(TranslationService):
+class APIKeyTranslationService(TranslationService, ABC):
+    """An abstract class that represents a translation service that requires
+    an API key."""
+
+    api_key_env_variable_name: str = str()
+
+    def __init__(self):
+        try:
+            self.api_key = os.environ[self.api_key_env_variable_name]
+        except KeyError as exc:
+            raise ApiKeyError(
+                self.name, self.api_key_env_variable_name
+            ) from exc
+
+
+class GoogleTranslate(GoogleTranslateNoKey, APIKeyTranslationService):
+    """Translate using Google API."""
+
+    name = "Google Translate"
+    url = "https://translation.googleapis.com/language/translate/v2"
+    doc_url = "https://cloud.google.com/translate/docs/"
+    short_description = "Google's translation service using an API key"
+    api_key_env_variable_name = "GOOGLE_API_KEY"
+
+    def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
+        """
+        Return a translated string from source language to destination
+        language.
+        """
+        headers = {"X-goog-api-key": self.api_key}
+        payload = {
+            "q": text,
+            "source": source_lang,
+            "target": dest_lang,
+            "format": "text",
+        }
+        log.debug("payload = %s", payload)
+        r = requests.post(self.url, headers=headers, data=payload, timeout=10)
+        try:
+            return r.json()["data"]["translations"][0]["translatedText"]
+        except Exception:
+            from pprint import pformat
+
+            log.error("%s error:\n%s", self.name, pformat(r.json()))
+            return text
+
+
+class DeepL(APIKeyTranslationService):
     """Translate using DeepL API."""
 
     name: str = "DeepL"
@@ -197,23 +197,19 @@ class DeepL(TranslationService):
     array_overall_char_limit = 1024
     doc_url = "https://www.deepl.com/docs-api"
     short_description = "DeepL translation service using an API key"
+    api_key_env_variable_name = "DEEPL_AUTH_KEY"
 
     def __init__(self):
         """
         Initialize the DeepL translator.
         """
-        try:
-            deepl_auth_key = os.environ["DEEPL_AUTH_KEY"]
-        except KeyError:
-            raise ApiKeyError(self.name, "DEEPL_AUTH_KEY")
 
-        self.translator = deepl.Translator(deepl_auth_key)
-        char_usage = self.translator.get_usage().character
-        if char_usage.valid:
-            self.overall_char_limit = char_usage.limit - char_usage.count
+        super().__init__()
+        self.translator = deepl.Translator(self.api_key)
         language_list = self.translator.get_source_languages()
+        language_list.sort(key=lambda x: x.name)
         self.languages = {
-            language.code: language.name for language in language_list
+            language.code.lower(): language.name for language in language_list
         }
 
     def translate(self, text: str, source_lang: str, dest_lang: str) -> str:
@@ -225,9 +221,9 @@ class DeepL(TranslationService):
         if dest_lang == "en":
             log.warning(
                 "DeepL does not support 'en' as a destination language, "
-                "using 'EN-GB' instead"
+                "using 'en-gb' instead"
             )
-            dest_lang = "EN-GB"
+            dest_lang = "en-gb"
         # Language shortcodes for DeepL are in uppercase,
         # so we convert them in case they are lowercase
         result = self.translator.translate_text(
