@@ -155,7 +155,7 @@ git clone git@gitlab.math.unistra.fr:cassandre/translatex.git
 cd translatex
 python3 -m virtualenv .venv  # create a virtual environment
 source .venv/bin/activate  # activate the virtual environment
-pip install -e ".[test,doc,dev]"  # install the package in editable mode with optional dependnecies
+pip install -e ".[test,doc,dev]"  # install the package in editable mode with optional dependencies
 pre-commit install -t pre-commit -t pre-push  # install git hooks
 pre-commit run -a   # run git hooks once for the first time
 ```

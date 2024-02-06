@@ -11,7 +11,7 @@
 Vous trouverez ici le projet TransLaTeX qui a comme but de traduire des fichiers source LaTeX (`.tex`) d'une langue à
 une autre à l'aide des traducteurs automatiques.
 
-Voir la [documentation](https://cassandre.pages.math.unistra.fr/translatex) pour plus de détails sur l'utilisation et l'installation ainsi que comment préparer un environment de développement pour commencer à contribuer.
+Voir la [documentation](https://cassandre.pages.math.unistra.fr/translatex) complète pour plus de détails sur l'utilisation et l'installation ainsi que comment préparer un environment de développement pour commencer à contribuer.
 
 ## Dépôt Git
 

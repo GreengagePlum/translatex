@@ -11,7 +11,7 @@
 You'll find here the TransLaTeX project which aims to translate LaTeX source files (`.tex`) from one human language to
 another using automatic translators.
 
-See the [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details on usage and installation as well as getting a dev environment ready to start contributing.
+See the full [documentation](https://cassandre.pages.math.unistra.fr/translatex) for details on usage and installation as well as getting a dev environment ready to start contributing.
 
 ## Git repository
 
